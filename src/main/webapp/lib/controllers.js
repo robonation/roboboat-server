@@ -12,7 +12,7 @@ myApp.controller('Teams', function ($scope, $http, $timeout) {
       $http.get('https://127.0.0.1:9443/admin/'+course+'/team').
           success(function(data) {
               var result = $scope.getById($scope.courses, course)
-              result.teamInWater = data.replace("\"\"", "\"");
+              result.teamInWater = eval("data."+course);
       });
     };
     

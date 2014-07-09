@@ -3,6 +3,7 @@ package com.felixpageau.roboboat.mission2014.resources;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -13,6 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import jersey.repackaged.com.google.common.base.Preconditions;
+import jersey.repackaged.com.google.common.collect.ImmutableMap;
 
 import com.felixpageau.roboboat.mission2014.server.Competition;
 import com.felixpageau.roboboat.mission2014.server.RunSetup;
@@ -49,8 +51,8 @@ public class ManageCompetition {
     @Path("/{course}/team")
     @GET
     @Produces({MediaType.APPLICATION_JSON})
-    public TeamCode getTeamInWater(@PathParam("course") Course course) {
-        return competition.getTeamInWater(course);
+    public Map<Course, TeamCode> getTeamInWater(@PathParam("course") Course course) {
+        return ImmutableMap.of(course, competition.getTeamInWater(course));
     }
     
     @Path("/{course}/{teamCode}")
