@@ -1,0 +1,145 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.felixpageau.roboboat.mission2014</groupId>
+    <artifactId>mission2014</artifactId>
+    <packaging>war</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>mission2014</name>
+
+    <build>
+        <finalName>mission2014</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <inherited>true</inherited>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>org.glassfish.jersey.examples.helloworld.App</mainClass>
+                </configuration>
+                <version>1.2.1</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencyManagement>
+            <dependencies>
+                <dependency>
+                    <groupId>org.glassfish.jersey</groupId>
+                    <artifactId>jersey-bom</artifactId>
+                    <version>${jersey.version}</version>
+                    <type>pom</type>
+                    <scope>import</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-server</artifactId>
+                    <version>9.1.3.v20140225</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.glassfish.jersey.media</groupId>
+                    <artifactId>jersey-media-json-jackson</artifactId>
+                    <version>2.7</version>
+                </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+<!--         <dependency> -->
+<!--             <groupId>org.glassfish.jersey.containers</groupId> -->
+<!--             <artifactId>jersey-container-servlet-core</artifactId> -->
+<!--             use the following artifactId if you don't need servlet 2.x compatibility -->
+<!--             artifactId>jersey-container-servlet</artifactId -->
+<!--         </dependency> -->
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-jetty-http</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+         
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-jetty-servlet</artifactId>
+            <version>${jersey.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+           <groupId>com.fasterxml.jackson.jaxrs</groupId>
+           <artifactId>jackson-jaxrs-json-provider</artifactId>
+           <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+          <version>4.11</version>
+          <scope>test</scope>
+        </dependency>
+        <!-- uncomment this to get JSON support
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-moxy</artifactId>
+        </dependency>
+        -->
+        <dependency>
+          <groupId>net.sf.marineapi</groupId>
+          <artifactId>marineapi</artifactId>
+          <version>0.8.1</version>
+        </dependency>
+        <dependency>
+          <groupId>com.thetransactioncompany</groupId>
+          <artifactId>cors-filter</artifactId>
+          <version>2.1</version>
+        </dependency>
+        <dependency>
+          <groupId>com.thetransactioncompany</groupId>
+          <artifactId>java-property-utils</artifactId>
+          <version>1.9.1</version>
+        </dependency>
+        <dependency>
+          <groupId>joda-time</groupId>
+          <artifactId>joda-time</artifactId>
+          <version>2.3</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+          <version>4.3.4</version>
+        </dependency>
+        <dependency>
+          <groupId>javax.mail</groupId>
+          <artifactId>mail</artifactId>
+          <version>1.4.5</version>
+        </dependency>
+    </dependencies>
+    <properties>
+        <jersey.version>2.7</jersey.version>
+        <jackson.version>2.3.0</jackson.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+</project>
