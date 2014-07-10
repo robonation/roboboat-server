@@ -63,8 +63,14 @@ public class LightSequenceResource {
     @Consumes("application/json")
     public ReportStatus reportLightSequence(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode, LightSequence payload) throws IOException {
         RunArchiver ra = competition.getActiveRuns().get(course);
-        LightSequence correctSequence = ra.getRunSetup().getActiveLightSequence();
-        ra.addEvent(new Event(new DateTime(), String.format("Team %s report LightSequence %s %s", teamCode, payload, payload.equals(correctSequence) ? "correctly": "incorrectly")));
-        return new ReportStatus(payload.equals(correctSequence));
+        if(ra == null) {
+            System.out.println("No active run, but reported: " + String.format("Team %s report LightSequence %s %s", teamCode, payload));
+            return new ReportStatus(false);
+        }
+        else {
+            LightSequence correctSequence = ra.getRunSetup().getActiveLightSequence();
+            ra.addEvent(new Event(new DateTime(), String.format("Team %s report LightSequence %s %s", teamCode, payload, payload.equals(correctSequence) ? "correctly": "incorrectly")));
+            return new ReportStatus(payload.equals(correctSequence));
+        }
    }
 }

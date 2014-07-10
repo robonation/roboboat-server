@@ -10,11 +10,11 @@ public class NMEAUtils {
     public static String getCourseCode(Course course) {
         switch (course) {
         case courseA:
-            return "a";
+            return "A";
         case courseB:
-            return "b";
+            return "B";
         default:
-            return "c";
+            return "C";
         }
     }
     

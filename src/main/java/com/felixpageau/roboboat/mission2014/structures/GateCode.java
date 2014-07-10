@@ -17,7 +17,7 @@ public class GateCode {
         Preconditions.checkNotNull(exit);
         Preconditions.checkArgument(EXIT_REGEX.matcher(exit).matches());
         Preconditions.checkArgument(entrance >= 1 && entrance <= 3);
-        this.gateCode = String.format("(%d, %s)", entrance, exit);
+        this.gateCode = String.format("(%d,%s)", entrance, exit);
     }
     
     public static GateCode generateRandomGateCode() {

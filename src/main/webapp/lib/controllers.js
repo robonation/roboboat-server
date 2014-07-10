@@ -1,15 +1,16 @@
 var myApp = angular.module('control');
+var host = "https://192.168.1.40:9443";
 
 myApp.controller('Teams', function ($scope, $http, $timeout) {
     $scope.getTeams = function(){
-      $http.get('https://127.0.0.1:9443/admin/teams').
+      $http.get(host + '/admin/teams').
           success(function(data) {
               $scope.teams = data;
       });
     };
     
     $scope.getTeamInWater = function (course){
-      $http.get('https://127.0.0.1:9443/admin/'+course+'/team').
+      $http.get(host + '/admin/'+course+'/team').
           success(function(data) {
               var result = $scope.getById($scope.courses, course)
               result.teamInWater = eval("data."+course);
@@ -17,7 +18,7 @@ myApp.controller('Teams', function ($scope, $http, $timeout) {
     };
     
     $scope.newTeamInWater = function (course, team) {
-        $http.put('https://127.0.0.1:9443/admin/'+course+'/'+team).
+        $http.put(host + '/admin/'+course+'/'+team).
             success(function(data) {
                 $scope.getTeamInWater(course);
             }
@@ -25,7 +26,7 @@ myApp.controller('Teams', function ($scope, $http, $timeout) {
     };
     
     $scope.newRun = function (course, team) {
-        $http.post('https://127.0.0.1:9443/admin/newRun/'+course+'/'+team).
+        $http.post(host + '/admin/newRun/'+course+'/'+team).
             success(function(data) {
                 $scope.runSetup = data;
             }

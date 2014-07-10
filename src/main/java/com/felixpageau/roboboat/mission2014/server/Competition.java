@@ -1,7 +1,10 @@
 package com.felixpageau.roboboat.mission2014.server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
@@ -93,14 +96,14 @@ public class Competition {
 //        courseAPingers.add(new Pinger(BuoyColor.green, new BuoyPosition(Datum.WGS84, new Latitude(36.80280f), new Longitude(-76.19130f))));
         courseAPingers.add(new Pinger(BuoyColor.red, new BuoyPosition(Datum.WGS84, new Latitude(36.80275f), new Longitude(-76.19141f))));
         courseAPingers.add(new Pinger(BuoyColor.yellow, new BuoyPosition(Datum.WGS84, new Latitude(36.80273f), new Longitude(-76.19131f))));
-        layoutBuilder.put(Course.courseA, new CourseLayout(Course.courseA, ImmutableList.copyOf(courseAPingers), new URL("http://192.168.1.67"), new URL("http://192.168.1.5:4000")));
+        layoutBuilder.put(Course.courseA, new CourseLayout(Course.courseA, ImmutableList.copyOf(courseAPingers), new URL("http://192.168.1.7:5000"), new URL("http://192.168.1.5:4000")));
         List<Pinger> courseBPingers = new LinkedList<>();
         courseBPingers.add(new Pinger(BuoyColor.green, new BuoyPosition(Datum.WGS84, new Latitude(36.80189f), new Longitude(-76.29232f))));
         courseBPingers.add(new Pinger(BuoyColor.black, new BuoyPosition(Datum.WGS84, new Latitude(36.80174f), new Longitude(-76.19233f))));
 //        courseBPingers.add(new Pinger(BuoyColor.blue, new BuoyPosition(Datum.WGS84, new Latitude(36.80188f), new Longitude(-76.19229f))));      
         courseBPingers.add(new Pinger(BuoyColor.red, new BuoyPosition(Datum.WGS84, new Latitude(36.80194f), new Longitude(-76.19223f))));
 //        courseBPingers.add(new Pinger(BuoyColor.yellow, new BuoyPosition(Datum.WGS84, new Latitude(36.80189f), new Longitude(-76.19230f))));
-        layoutBuilder.put(Course.courseB, new CourseLayout(Course.courseB, ImmutableList.copyOf(courseBPingers), new URL("http://192.168.1.78"), new URL("http://192.168.1.6:4000")));
+        layoutBuilder.put(Course.courseB, new CourseLayout(Course.courseB, ImmutableList.copyOf(courseBPingers), new URL("http://192.168.1.8:5000"), new URL("http://192.168.1.6:4000")));
         
         layoutMap = layoutBuilder.build();
         
@@ -206,10 +209,27 @@ public class Competition {
         activeRuns.put(slot.getCourse(), newRun);
         results.put(slot, newRun);
 
-        try (Socket s = new Socket(layout.getPingerControlServer().getHost(), layout.getPingerControlServer().getPort())) {
-            //TODO
-            int pingerCode = 1; //newSetup.getActivePinger()
-            new OutputStreamWriter(s.getOutputStream()).write(NMEAUtils.formatPingerNMEAmessage(slot.getCourse(), pingerCode));
+        try (Socket s = new Socket(layout.getPingerControlServer().getHost(), layout.getPingerControlServer().getPort()); 
+                Writer w = new OutputStreamWriter(s.getOutputStream()); 
+                BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream()))) {
+            for (int i = 0; i < layout.getPingers().size(); i++) {
+                if(newSetup.getActivePinger().equals(layout.getPingers().get(i))) {
+                    String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(slot.getCourse(), i+1));
+                    w.write(pingerActivationMessage);
+                    System.out.println(pingerActivationMessage);
+                    w.flush();
+                    break;
+                }
+            }
+            System.out.println(r.readLine());
+            System.out.println(r.readLine());
+            System.out.println(r.readLine());
+            System.out.println(r.readLine());
+            System.out.println(r.readLine());
+            System.out.println(r.readLine());
+            System.out.println(r.readLine());
+            System.out.println(r.readLine());
+            System.out.println(r.readLine());
         } catch (UnknownHostException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -221,14 +241,17 @@ public class Competition {
     
     public static void main(String[] args) throws MalformedURLException {
         Competition c = new Competition();
-        for (CompetitionDay d: c.competitionDays) {
-            System.out.println(d);
-        }
-        System.out.println("\n\n");
+//        for (CompetitionDay d: c.competitionDays) {
+//            System.out.println(d);
+//        }
+//        System.out.println("\n\n");
+//        List<TimeSlot> slots = new ArrayList<>(c.schedule.keySet());
+//        Collections.sort(slots, new TimeSlotComparator());
+//        for (TimeSlot entry: slots) {
+//            System.out.println(entry);
+//        }
         List<TimeSlot> slots = new ArrayList<>(c.schedule.keySet());
-        Collections.sort(slots, new TimeSlotComparator());
-        for (TimeSlot entry: slots) {
-            System.out.println(entry);
-        }
+        
+        c.startNewRun(slots.get(0), new TeamCode("AUVSI"));
     };
 }
