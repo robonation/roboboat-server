@@ -9,6 +9,7 @@ import javax.servlet.DispatcherType;
 import javax.ws.rs.core.UriBuilder;
 
 import org.eclipse.jetty.security.HashLoginService;
+import org.eclipse.jetty.security.authentication.BasicAuthenticator;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -39,18 +40,14 @@ public class App {
         Server server = JettyHttpContainerFactory.createServer(baseUri, sslContextFactory, container, false);
         
         WebAppContext wac = new WebAppContext();
+//        HashLoginService myrealm = new HashLoginService("RoboBoat");
+//        myrealm.setConfig("src/main/resources/realm.properties");
+//        wac.getSecurityHandler().setLoginService(myrealm);
         wac.setResourceBase(new File("src/main/webapp/").getAbsolutePath());
         wac.setDescriptor(new File("src/main/webapp/WEB-INF/web.xml").getAbsolutePath());
         wac.setContextPath("/");
         wac.setParentLoaderPriority(true);
         wac.addFilter(CORSFilter.class, "/*", EnumSet.of(DispatcherType.INCLUDE,DispatcherType.REQUEST));
-        
-        
-        HashLoginService myrealm = new HashLoginService("RoboBoat");
-        myrealm.setConfig("src/main/resources/realm.properties");
-        wac.getSecurityHandler().setLoginService(myrealm);
-        
-        
         server.setHandler(wac);
 
         server.start();
