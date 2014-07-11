@@ -46,7 +46,7 @@ public class App {
         wac.addFilter(CORSFilter.class, "/*", EnumSet.of(DispatcherType.INCLUDE,DispatcherType.REQUEST));
         
         
-        HashLoginService myrealm = new HashLoginService("MyRealm");
+        HashLoginService myrealm = new HashLoginService("RoboBoat");
         myrealm.setConfig("src/main/resources/realm.properties");
         wac.getSecurityHandler().setLoginService(myrealm);
         
