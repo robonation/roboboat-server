@@ -48,11 +48,12 @@ public class LightSequenceResource {
 
         ra.addEvent(new Event(new DateTime(), String.format("%s - %s - LightSequence - activated sequence (%s)", course, teamCode, ls)));
         HttpGet httpget = new HttpGet(layout.getLightControlServer() + "/activate/" + ls.lightSequenceString());
-        CloseableHttpResponse response = httpclient.execute(httpget);
-
-        if (response.getStatusLine().getStatusCode() != 200) {
-           throw new RuntimeException("Failed : HTTP error code : " + response.getStatusLine());
+        try (CloseableHttpResponse response = httpclient.execute(httpget)) {
+            if (response.getStatusLine().getStatusCode() != 200) {
+                throw new RuntimeException("Failed : HTTP error code : " + response.getStatusLine());
+             }
         }
+
         return new ReportStatus(true);
     }
     
