@@ -54,5 +54,43 @@
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
     
-   
+    <login-config>
+      <auth-method>BASIC</auth-method>
+      <realm-name>RoboBoat</realm-name>
+    </login-config>
+    
+    <session-config>
+      <session-timeout>1400</session-timeout>
+    </session-config>
+
+    <security-role>
+      <role-name>admin</role-name>
+    </security-role>
+    
+    <security-constraint>
+      <web-resource-collection>
+        <web-resource-name>Admin</web-resource-name>
+        <url-pattern>/index.html</url-pattern>
+      </web-resource-collection>
+      <auth-constraint>
+        <role-name>admin</role-name>
+      </auth-constraint>
+    </security-constraint>
+    
+    <security-constraint>
+      <web-resource-collection>
+        <web-resource-name>Other</web-resource-name>
+        <url-pattern>/admin/*</url-pattern>
+      </web-resource-collection>
+      <auth-constraint>
+        <role-name>admin</role-name>
+      </auth-constraint>
+    </security-constraint>
+    
+    <security-constraint>
+      <web-resource-collection>
+        <web-resource-name>Other</web-resource-name>
+        <url-pattern>/*</url-pattern>
+      </web-resource-collection>
+    </security-constraint>
 </web-app>

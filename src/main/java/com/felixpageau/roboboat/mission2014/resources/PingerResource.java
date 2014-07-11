@@ -9,13 +9,17 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import jersey.repackaged.com.google.common.base.Preconditions;
+import org.joda.time.DateTime;
 
 import com.felixpageau.roboboat.mission2014.server.Competition;
+import com.felixpageau.roboboat.mission2014.server.Event;
+import com.felixpageau.roboboat.mission2014.server.Pinger;
+import com.felixpageau.roboboat.mission2014.server.RunArchiver;
 import com.felixpageau.roboboat.mission2014.structures.BeaconReport;
 import com.felixpageau.roboboat.mission2014.structures.Course;
 import com.felixpageau.roboboat.mission2014.structures.ReportStatus;
 import com.felixpageau.roboboat.mission2014.structures.TeamCode;
+import com.google.common.base.Preconditions;
 
 /**
  * Acoustic Beacon Positioning challenge
@@ -32,8 +36,10 @@ public class PingerResource {
     @Produces({MediaType.APPLICATION_JSON})
     @Consumes(MediaType.APPLICATION_JSON)
     public ReportStatus reportPinger(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode, BeaconReport payload) throws IOException {
-        System.out.println(course + " " + teamCode + " \n" + payload);
-        
-        return new ReportStatus(true);
+        RunArchiver archive = competition.getActiveRuns().get(course);
+        Pinger reportedPinger = new Pinger(payload.getBuoyColor(), payload.getBuoyPosition());
+        boolean success = reportedPinger.equals(archive.getRunSetup().getActivePinger());
+        competition.getActiveRuns().get(course).addEvent(new Event(new DateTime(), String.format("%s - %s - ObstacleAvoidance - reported pinger (%s) -> ", course, teamCode, payload, success ? "success" : "incorrect")));
+        return new ReportStatus(success);
    }
 }

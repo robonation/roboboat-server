@@ -9,8 +9,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import jersey.repackaged.com.google.common.base.Preconditions;
-
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -25,6 +23,7 @@ import com.felixpageau.roboboat.mission2014.structures.Course;
 import com.felixpageau.roboboat.mission2014.structures.LightSequence;
 import com.felixpageau.roboboat.mission2014.structures.ReportStatus;
 import com.felixpageau.roboboat.mission2014.structures.TeamCode;
+import com.google.common.base.Preconditions;
 
 /**
  * Acoustic Beacon Positioning challenge
@@ -47,7 +46,7 @@ public class LightSequenceResource {
         CourseLayout layout = competition.getCourseLayout(course);
         LightSequence ls = ra.getRunSetup().getActiveLightSequence();
 
-        ra.addEvent(new Event(new DateTime(), String.format("On course %s, team %s activated lightSequence", course, teamCode)));
+        ra.addEvent(new Event(new DateTime(), String.format("%s - %s - LightSequence - activated sequence (%s)", course, teamCode, ls)));
         HttpGet httpget = new HttpGet(layout.getLightControlServer() + "/activate/" + ls.lightSequenceString());
         CloseableHttpResponse response = httpclient.execute(httpget);
 
@@ -64,13 +63,14 @@ public class LightSequenceResource {
     public ReportStatus reportLightSequence(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode, LightSequence payload) throws IOException {
         RunArchiver ra = competition.getActiveRuns().get(course);
         if(ra == null) {
-            System.out.println("No active run, but reported: " + String.format("Team %s report LightSequence %s %s", teamCode, payload));
+            System.out.println(String.format("No active run, but reported: %s - %s - LightSequence - report sequence - sequence: %s", course, teamCode, payload));
             return new ReportStatus(false);
         }
         else {
             LightSequence correctSequence = ra.getRunSetup().getActiveLightSequence();
-            ra.addEvent(new Event(new DateTime(), String.format("Team %s report LightSequence %s %s", teamCode, payload, payload.equals(correctSequence) ? "correctly": "incorrectly")));
-            return new ReportStatus(payload.equals(correctSequence));
+            boolean success = payload.equals(correctSequence);
+            ra.addEvent(new Event(new DateTime(), String.format("%s - %s - LightSequence - reported sequence (%s) -> %s", course, teamCode, payload, (success ? "success": "incorrect"))));
+            return new ReportStatus(success);
         }
    }
 }

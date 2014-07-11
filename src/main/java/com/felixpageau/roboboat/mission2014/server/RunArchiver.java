@@ -1,38 +1,69 @@
 package com.felixpageau.roboboat.mission2014.server;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
-import jersey.repackaged.com.google.common.base.Objects;
-import jersey.repackaged.com.google.common.base.Preconditions;
-import jersey.repackaged.com.google.common.collect.ImmutableList;
+import org.joda.time.DateTime;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.eventbus.EventBus;
 
 public class RunArchiver {
-    private final Date startTime;
-    private Date endTime;
+    private final File f;
+    private final EventBus eventBus;
+    private final DateTime startTime;
+    private DateTime endTime;
     private final RunSetup runSetup;
     private final List<Event> events = new ArrayList<>();
-
-    public RunArchiver(RunSetup runSetup) {
-        this(runSetup, null, now());
+    
+    public RunArchiver(RunSetup runSetup, File f, EventBus eventBus) {
+        this(runSetup, null, new DateTime(), f, eventBus);
     }
     
     @JsonCreator
     public RunArchiver(
             @JsonProperty(value = "runSetup") RunSetup runSetup,
             @JsonProperty(value = "events") List<Event> events,
-            @JsonProperty(value = "startTime") Date startTime) {
+            @JsonProperty(value = "startTime") DateTime startTime) {
+        this(runSetup, events, startTime, new File("competition-log." + Math.random()), new EventBus());
+    }
+    
+    public RunArchiver(
+            RunSetup runSetup,
+            List<Event> events,
+            DateTime startTime,
+            File f,
+            EventBus eventBus) {
         this.runSetup = Preconditions.checkNotNull(runSetup);
         this.startTime = Preconditions.checkNotNull(startTime);
         if (events != null && !events.isEmpty()) {
             this.events.addAll(events);
         }
+        this.eventBus = Preconditions.checkNotNull(eventBus);
+        this.f = Preconditions.checkNotNull(f);
+        if (!f.exists()) {
+            try {
+                f.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    @JsonIgnore
+    public File getF() {
+        return f;
     }
     
     public RunSetup getRunSetup() {
@@ -42,27 +73,33 @@ public class RunArchiver {
     public void addEvent(Event event) {
         Preconditions.checkNotNull(event);
         this.events.add(event);
+        try (BufferedWriter bf = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f)))) {
+            bf.append(event.toString()).append("\n");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        eventBus.post(event);
+        System.out.println(event);
+        
     }
     
     public List<Event> getEvents() {
         return ImmutableList.copyOf(events);
     }
     
-    public Date getEndTime() {
+    public DateTime getEndTime() {
         return endTime;
     }
     
-    public Date getStartTime() {
+    public DateTime getStartTime() {
         return startTime;
     }
     
     public void endRun() {
-        this.endTime = now();
-        //TODO 
-    }
-    
-    private static final Date now(){
-        return new Date(Calendar.getInstance(Config.TIME_ZONE).getTime().getTime());
+        this.endTime = new DateTime();
+        addEvent(new Event(this.endTime, String.format("%s - %s - End run", runSetup.getCourse(), runSetup.getActiveTeam())));
     }
     
     @JsonIgnore

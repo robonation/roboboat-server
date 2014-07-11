@@ -6,10 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import jersey.repackaged.com.google.common.base.Objects;
-import jersey.repackaged.com.google.common.base.Preconditions;
-import jersey.repackaged.com.google.common.collect.ImmutableList;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,6 +19,9 @@ import com.felixpageau.roboboat.mission2014.structures.Latitude;
 import com.felixpageau.roboboat.mission2014.structures.LightSequence;
 import com.felixpageau.roboboat.mission2014.structures.Longitude;
 import com.felixpageau.roboboat.mission2014.structures.TeamCode;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 
 public class RunSetup {
     private final String runId;

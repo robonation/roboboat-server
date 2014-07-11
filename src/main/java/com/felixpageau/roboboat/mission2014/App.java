@@ -8,12 +8,8 @@ import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import javax.ws.rs.core.UriBuilder;
 
-import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.server.handler.ResourceHandler;
-import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.glassfish.jersey.jetty.JettyHttpContainer;
@@ -41,8 +37,6 @@ public class App {
         ResourceConfig config = createApp();
         JettyHttpContainer container = ContainerFactory.createContainer(JettyHttpContainer.class, config);
         Server server = JettyHttpContainerFactory.createServer(baseUri, sslContextFactory, container, false);
- 
-        ContextHandlerCollection contexts = new ContextHandlerCollection();
         
         WebAppContext wac = new WebAppContext();
         wac.setResourceBase(new File("src/main/webapp/").getAbsolutePath());
@@ -50,26 +44,14 @@ public class App {
         wac.setContextPath("/");
         wac.setParentLoaderPriority(true);
         wac.addFilter(CORSFilter.class, "/*", EnumSet.of(DispatcherType.INCLUDE,DispatcherType.REQUEST));
+        
+        
+        HashLoginService myrealm = new HashLoginService("MyRealm");
+        myrealm.setConfig("src/main/resources/realm.properties");
+        wac.getSecurityHandler().setLoginService(myrealm);
+        
+        
         server.setHandler(wac);
-        
-//        ContextHandler jettyContext = new ContextHandler("/");
-//        jettyContext.setContextPath("/");
-//        jettyContext.setHandler(container);
-        
-//        ContextHandler indexContext = new ContextHandler();
-//        indexContext.setContextPath("/index.html");
-//        ResourceHandler indexHandler = new ResourceHandler();
-//        indexHandler.setBaseResource(Resource.newResource(new File("src/main/webapp/").getAbsolutePath()));
-//        indexContext.setHandler(indexHandler);
-//  
-//        ContextHandler libContext = new ContextHandler();
-//        libContext.setContextPath("/lib/");
-//        ResourceHandler libHandler = new ResourceHandler();
-//        libHandler.setBaseResource(Resource.newResource(new File("src/main/webapp/lib/").getAbsolutePath()));
-//        libContext.setHandler(libHandler);
-//        
-//        contexts.setHandlers(new Handler[] { indexContext, wac, libContext });
-//        server.setHandler(contexts);
 
         server.start();
         System.out.println(config.toString());

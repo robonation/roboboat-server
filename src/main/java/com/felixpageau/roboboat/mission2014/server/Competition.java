@@ -1,6 +1,7 @@
 package com.felixpageau.roboboat.mission2014.server;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -23,11 +24,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import jersey.repackaged.com.google.common.base.Preconditions;
-import jersey.repackaged.com.google.common.collect.ImmutableList;
-import jersey.repackaged.com.google.common.collect.ImmutableMap;
-import jersey.repackaged.com.google.common.collect.Multimap;
-
 import org.joda.time.DateTime;
 
 import com.felixpageau.roboboat.mission2014.structures.BuoyColor;
@@ -38,16 +34,24 @@ import com.felixpageau.roboboat.mission2014.structures.Latitude;
 import com.felixpageau.roboboat.mission2014.structures.Longitude;
 import com.felixpageau.roboboat.mission2014.structures.TeamCode;
 import com.felixpageau.roboboat.mission2014.utils.NMEAUtils;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
+import com.google.common.eventbus.EventBus;
 
 public class Competition {
+    private static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd-hh");
     private final DateFormat dateRunIdFormat = new SimpleDateFormat("yyyyMMddHHmm");
     private final Map<Course, CourseLayout> layoutMap;
     private final Map<Course, TeamCode> teamInWater = new ConcurrentHashMap<>();
     private final List<CompetitionDay> competitionDays;
-    private final Multimap<TimeSlot, RunArchiver> results = new ArrayListMultimap();
+    private final Multimap<TimeSlot, RunArchiver> results = ArrayListMultimap.create();
     private final Map<Course, RunArchiver> activeRuns = new HashMap<>();
     private final Map<TimeSlot, TeamCode> schedule = new HashMap<>();
     private final List<TeamCode> teams = new CopyOnWriteArrayList<>();
+    private final EventBus eventBus = new EventBus();
     
     public Competition() throws MalformedURLException {
         DateTime s, e;
@@ -205,7 +209,10 @@ public class Competition {
         String runId = String.format("%s-%s-%s", slot.getCourse(), dateRunIdFormat.format(slot.getStartTime().toDate()), runCount);
         CourseLayout layout = layoutMap.get(slot.getCourse());
         RunSetup newSetup = RunSetup.generateRandomSetup(layoutMap.get(slot.getCourse()), teamCode, runId);
-        RunArchiver newRun = new RunArchiver(newSetup);
+        
+        
+        RunArchiver newRun = new RunArchiver(newSetup, new File("competition-log." + DATE_FORMAT.format(new DateTime().toDate())), eventBus);
+        newRun.addEvent(new Event(newRun.getStartTime(), String.format("%s - %s - Start run", newSetup.getCourse(), newSetup.getActiveTeam())));
         activeRuns.put(slot.getCourse(), newRun);
         results.put(slot, newRun);
 

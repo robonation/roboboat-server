@@ -1,10 +1,9 @@
 package com.felixpageau.roboboat.mission2014.structures;
 
-import jersey.repackaged.com.google.common.base.Objects;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.common.base.Objects;
 
 public class Longitude {
     private final float value;

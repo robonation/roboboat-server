@@ -1,10 +1,9 @@
 package com.felixpageau.roboboat.mission2014.structures;
 
-import jersey.repackaged.com.google.common.base.Objects;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
 
 
 public class DockingBay {
@@ -28,7 +27,7 @@ public class DockingBay {
     @JsonIgnore
     @Override
     public String toString() {
-        return Objects.toStringHelper(this).add("dockingBay", dockingBay).toString();
+        return Objects.toStringHelper(this).add("symbol", dockingBay).toString();
     }
 
     @JsonIgnore

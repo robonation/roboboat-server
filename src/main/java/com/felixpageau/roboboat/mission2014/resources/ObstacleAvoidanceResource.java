@@ -6,13 +6,16 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import jersey.repackaged.com.google.common.base.Preconditions;
+import org.joda.time.DateTime;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.felixpageau.roboboat.mission2014.server.Competition;
+import com.felixpageau.roboboat.mission2014.server.Event;
+import com.felixpageau.roboboat.mission2014.server.RunArchiver;
 import com.felixpageau.roboboat.mission2014.structures.Course;
 import com.felixpageau.roboboat.mission2014.structures.GateCode;
 import com.felixpageau.roboboat.mission2014.structures.TeamCode;
+import com.google.common.base.Preconditions;
 
 /**
  * Obstacle Avoidance challenge
@@ -28,8 +31,9 @@ public class ObstacleAvoidanceResource {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     public GateCode getGateCode(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode) throws JsonProcessingException {
-        System.out.println("Request for: " + course + " by: " + teamCode);
-        
-        return new GateCode(1, "X");
+        RunArchiver archive = competition.getActiveRuns().get(course);
+        GateCode code = archive.getRunSetup().getActiveGateCode();
+        competition.getActiveRuns().get(course).addEvent(new Event(new DateTime(), String.format("%s - %s - ObstacleAvoidance - request gatecode (%s)", course, teamCode, code)));
+        return code;
    }
 }

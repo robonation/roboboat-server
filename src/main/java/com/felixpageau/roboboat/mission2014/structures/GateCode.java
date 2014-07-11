@@ -2,11 +2,10 @@ package com.felixpageau.roboboat.mission2014.structures;
 
 import java.util.regex.Pattern;
 
-import jersey.repackaged.com.google.common.base.Objects;
-import jersey.repackaged.com.google.common.base.Preconditions;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 
 public class GateCode {
     private static final Pattern EXIT_REGEX = Pattern.compile("[X-Z]{1}");
@@ -33,7 +32,7 @@ public class GateCode {
     @JsonIgnore
     @Override
     public String toString() {
-        return Objects.toStringHelper(this).add("gateCode", gateCode).toString();
+        return Objects.toStringHelper(this).add("code", gateCode).toString();
     }
 
     @JsonIgnore

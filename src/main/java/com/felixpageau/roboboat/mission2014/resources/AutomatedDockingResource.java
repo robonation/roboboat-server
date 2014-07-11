@@ -6,14 +6,16 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import jersey.repackaged.com.google.common.base.Preconditions;
+import org.joda.time.DateTime;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.felixpageau.roboboat.mission2014.server.Competition;
+import com.felixpageau.roboboat.mission2014.server.Event;
+import com.felixpageau.roboboat.mission2014.server.RunArchiver;
 import com.felixpageau.roboboat.mission2014.structures.Course;
 import com.felixpageau.roboboat.mission2014.structures.DockingBay;
-import com.felixpageau.roboboat.mission2014.structures.Symbol;
 import com.felixpageau.roboboat.mission2014.structures.TeamCode;
+import com.google.common.base.Preconditions;
 
 /**
  * Obstacle Avoidance challenge
@@ -29,6 +31,9 @@ public class AutomatedDockingResource {
     @GET
     @Produces({MediaType.APPLICATION_JSON})
     public DockingBay getGateCode(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode) throws JsonProcessingException {
-        return new DockingBay(Symbol.cruciform);
+        RunArchiver archive = competition.getActiveRuns().get(course);
+        DockingBay bay = archive.getRunSetup().getActiveDockingBay();
+        competition.getActiveRuns().get(course).addEvent(new Event(new DateTime(), String.format("%s - %s - AutomatedDocking - request bay (%s)", course, teamCode, bay)));
+        return bay;
    }
 }

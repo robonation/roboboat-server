@@ -2,14 +2,13 @@ package com.felixpageau.roboboat.mission2014.server;
 
 import java.text.SimpleDateFormat;
 
-import jersey.repackaged.com.google.common.base.Objects;
-import jersey.repackaged.com.google.common.base.Preconditions;
-
 import org.joda.time.DateTime;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 
 public class CompetitionDay {
     private final DateTime startTime;

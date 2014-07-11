@@ -1,5 +1,6 @@
 var myApp = angular.module('control');
-var host = "https://192.168.1.40:9443";
+<!-- var host = "https://192.168.1.40:9443"; -->
+var host = "https://127.0.0.1:9443";
 
 myApp.controller('Teams', function ($scope, $http, $timeout) {
     $scope.getTeams = function(){
@@ -10,25 +11,47 @@ myApp.controller('Teams', function ($scope, $http, $timeout) {
     };
     
     $scope.getTeamInWater = function (course){
-      $http.get(host + '/admin/'+course+'/team').
+      $http.get(host + '/admin/'+course.id+'/team').
           success(function(data) {
-              var result = $scope.getById($scope.courses, course)
-              result.teamInWater = eval("data."+course);
+              var result = $scope.getById($scope.courses, course.id)
+              result.teamInWater = eval("data."+course.id);
+      });
+    };
+    
+        
+    $scope.getEvents = function (course){
+      $http.get(host + '/admin/events/'+course.id).
+          success(function(data) {
+              course.events = data;
+              course.events.forEach(function(entry) {
+                  entry.time = new Date(entry.time).toLocaleTimeString();
+              });
       });
     };
     
     $scope.newTeamInWater = function (course, team) {
-        $http.put(host + '/admin/'+course+'/'+team).
+        $http.put(host + '/admin/'+course.id+'/'+team).
             success(function(data) {
                 $scope.getTeamInWater(course);
             }
         );
     };
     
+    $scope.hideDebug = function (course) {
+        course.hideDebug = !course.hideDebug;
+        if (course.hideDebug) {
+            course.showText = 'Show';
+        } else {
+            course.showText = 'Hide';
+        }
+    };
+    
     $scope.newRun = function (course, team) {
-        $http.post(host + '/admin/newRun/'+course+'/'+team).
+        course.newRunButtonClass = 'btn-warning';
+        $http.post(host + '/admin/newRun/'+course.id+'/'+team).
             success(function(data) {
-                $scope.runSetup = data;
+                course.runSetup = data;
+                course.newRunButtonClass = 'btn-primary';
             }
         );
     };
@@ -38,6 +61,13 @@ myApp.controller('Teams', function ($scope, $http, $timeout) {
       $timeout(function() {
         callback();
         $scope.intervalFunction(callback);
+      }, 30000)
+    };
+    
+    $scope.intervalFunction = function(callback, arg){
+      $timeout(function() {
+        callback(arg);
+        $scope.intervalFunction(callback, arg);
       }, 5000)
     };
     
@@ -53,11 +83,13 @@ myApp.controller('Teams', function ($scope, $http, $timeout) {
     // Kick off the interval
     $scope.getTeams();
     $scope.intervalFunction($scope.getTeams);
-    <!--$scope.intervalFunction($scope.getTeamInWater);-->
-    
     $scope.courses =
-                [{name:'Course B', id:'courseB', teamInWater: ''},
-                 {name:'Course A', id:'courseA', teamInWater: ''}]
+                [{name:'Course B', id:'courseB', teamInWater: '', runSetup: '', events: [], hideDebug: true, showText: 'Show', newRunButtonClass: 'btn-primary'},
+                 {name:'Course A', id:'courseA', teamInWater: '', runSetup: '', events: [], hideDebug: true, showText: 'Show', newRunButtonClass: 'btn-primary'}]
+    $scope.courses.forEach(function(entry) {
+        $scope.intervalFunction($scope.getTeamInWater, entry);
+        $scope.intervalFunction($scope.getEvents, entry);
+    });    
 });
 
 /*

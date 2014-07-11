@@ -5,13 +5,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import jersey.repackaged.com.google.common.base.Objects;
-import jersey.repackaged.com.google.common.base.Objects.ToStringHelper;
-import jersey.repackaged.com.google.common.base.Preconditions;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
+import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.Preconditions;
 
 public class LightSequence {
     private LightColor[] sequence;

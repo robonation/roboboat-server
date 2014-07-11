@@ -1,27 +1,28 @@
 package com.felixpageau.roboboat.mission2014.server;
 
-import jersey.repackaged.com.google.common.base.Objects;
-import jersey.repackaged.com.google.common.base.Preconditions;
+import java.util.Date;
 
 import org.joda.time.DateTime;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 
 public class Event {
-    private final DateTime time;
+    private final Date time;
     private final String message;
     
     @JsonCreator
     public Event(
             @JsonProperty(value = "time") DateTime time, 
             @JsonProperty(value = "message") String message) {
-        this.time = Preconditions.checkNotNull(time);
+        this.time = Preconditions.checkNotNull(time).toDate();
         this.message = Preconditions.checkNotNull(message);
     }
     
-    public DateTime getTime() {
+    public Date getTime() {
         return time;
     }
     
@@ -57,7 +58,7 @@ public class Event {
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .add("time", Config.DATE_FORMATTER.get().format(time.toDate()))
+                .add("time", Config.DATE_FORMATTER.get().format(time))
                 .add("message", message).toString();
     }
 }

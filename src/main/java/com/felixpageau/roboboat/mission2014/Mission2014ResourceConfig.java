@@ -33,7 +33,7 @@ public class Mission2014ResourceConfig extends ResourceConfig {
     @Override
     public String toString() {
         System.out.println("Packages:");
-        for (Class c : getConfiguration().getClasses()) {
+        for (Class<?> c : getConfiguration().getClasses()) {
             System.out.println(c.toString());
         }
         return super.toString();

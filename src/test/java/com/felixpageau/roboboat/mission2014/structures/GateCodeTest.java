@@ -48,7 +48,7 @@ public class GateCodeTest {
     @Test
     public void testGetGateCode() throws JsonProcessingException {
         ObjectMapper om = new ObjectMapper();
-        assertEquals("{\"gateCode\":\"(1, X)\"}", om.writeValueAsString(new GateCode(1, "X")));
+        assertEquals("{\"gateCode\":\"(1,X)\"}", om.writeValueAsString(new GateCode(1, "X")));
     }
 
 }

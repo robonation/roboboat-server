@@ -3,11 +3,10 @@ package com.felixpageau.roboboat.mission2014.server;
 import java.net.URL;
 import java.util.List;
 
-import jersey.repackaged.com.google.common.base.Preconditions;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.felixpageau.roboboat.mission2014.structures.Course;
+import com.google.common.base.Preconditions;
 
 public class CourseLayout {
     private final Course course;
