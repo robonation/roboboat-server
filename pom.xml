@@ -3,14 +3,14 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.felixpageau.roboboat.mission2014</groupId>
-    <artifactId>mission2014</artifactId>
+    <groupId>com.felixpageau.roboboat.mission2015</groupId>
+    <artifactId>mission2015</artifactId>
     <packaging>war</packaging>
     <version>1.0-SNAPSHOT</version>
-    <name>mission2014</name>
+    <name>mission2015</name>
 
     <build>
-        <finalName>mission2014</finalName>
+        <finalName>mission2015</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -18,8 +18,8 @@
                 <version>2.5.1</version>
                 <inherited>true</inherited>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -29,6 +29,43 @@
                     <mainClass>org.glassfish.jersey.examples.helloworld.App</mainClass>
                 </configuration>
                 <version>1.2.1</version>
+            </plugin>
+            <plugin>
+              <artifactId>maven-war-plugin</artifactId>
+              <version>2.6</version>
+              <configuration>
+                <archiveClasses>true</archiveClasses>
+                <packagingExcludes>WEB-INF/classes/**</packagingExcludes>
+              </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.wvengen</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+                <version>2.0.10</version>
+                <executions>
+                   <execution>
+                       <phase>package</phase>
+                       <goals><goal>proguard</goal></goals>
+                   </execution>
+                </executions>
+                <configuration>
+                    <obfuscate>true</obfuscate>
+                    <includeDependency>false</includeDependency> 
+                    <options>
+                      <option>-injars target/${project.artifactId}.war</option>
+                      <option>-keep public class com.felixpageau.roboboat.mission2015.App { public static void main(java.lang.String[]); }</option>
+                      <option>-keepnames class ** { *; }</option>
+                      <option>-dontwarn javax.servlet.**</option>
+                      <option>-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod</option>
+                      <option>-outjars target/${project.artifactId}-obfuscated.war</option>
+                      <option>-ignorewarnings</option>
+                    </options>
+                    <outputDirectory>${project.build.directory}</outputDirectory> 
+                    <libs>
+                        <lib>${java.home}/lib/rt.jar</lib>
+                        <lib>${java.home}/lib/jce.jar</lib>
+                    </libs>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -66,13 +103,18 @@
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-jetty-http</artifactId>
-            <version>${jersey.version}</version>
+            <!-- <version>${jersey.version}</version>  -->
         </dependency>
          
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-jetty-servlet</artifactId>
-            <version>${jersey.version}</version>
+            <!-- <version>${jersey.version}</version> -->
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+            <!-- <version>${jersey.version}</version> -->
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -146,10 +188,25 @@
           <artifactId>jsr305</artifactId>
           <version>2.0.3</version>
         </dependency>
+        <dependency>
+	  <groupId>net.sf.marineapi</groupId>
+          <artifactId>marineapi</artifactId>
+          <version>0.9.0-SNAPSHOT</version>
+	</dependency>
     </dependencies>
     <properties>
         <jersey.version>2.7</jersey.version>
         <jackson.version>2.3.0</jackson.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <repositories>
+      <repository>
+        <id>oss-sonatype</id>
+        <name>oss-sonatype</name>
+        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+      </repository>
+    </repositories>
 </project>

@@ -1,6 +1,7 @@
 var myApp = angular.module('control');
-<!-- var host = "https://192.168.1.40:9443"; -->
 var host = "https://127.0.0.1:9443";
+<!-- var host = "https://192.168.1.40:9443"; -->
+<!-- var host = "https://192.168.1.68:9443"; -->
 
 myApp.controller('Teams', function ($scope, $http, $timeout) {
     $scope.getTeams = function(){
@@ -23,8 +24,11 @@ myApp.controller('Teams', function ($scope, $http, $timeout) {
       $http.get(host + '/admin/events/'+course.id).
           success(function(data) {
               course.events = data;
-              course.events.forEach(function(entry) {
-                  entry.time = new Date(entry.time).toLocaleTimeString();
+              course.events.forEach(function(run) {
+                  run.start = new Date(run.start).toLocaleTimeString();
+                  run.events.forEach(function(entry) {
+                      entry.time = new Date(entry.time).toLocaleTimeString();
+                  });
               });
       });
     };
@@ -52,6 +56,15 @@ myApp.controller('Teams', function ($scope, $http, $timeout) {
             success(function(data) {
                 course.runSetup = data;
                 course.newRunButtonClass = 'btn-primary';
+            }
+        );
+    };
+    
+    $scope.endRun = function (course, team) {
+        course.endRunButtonClass = 'btn-warning';
+        $http.post(host + '/admin/endRun/'+course.id+'/'+team).
+            success(function(data) {
+                course.endRunButtonClass = 'btn-primary';
             }
         );
     };
@@ -84,8 +97,8 @@ myApp.controller('Teams', function ($scope, $http, $timeout) {
     $scope.getTeams();
     $scope.intervalFunction($scope.getTeams);
     $scope.courses =
-                [{name:'Course B', id:'courseB', teamInWater: '', runSetup: '', events: [], hideDebug: true, showText: 'Show', newRunButtonClass: 'btn-primary'},
-                 {name:'Course A', id:'courseA', teamInWater: '', runSetup: '', events: [], hideDebug: true, showText: 'Show', newRunButtonClass: 'btn-primary'}]
+                [{name:'Course B', id:'courseB', teamInWater: '', runSetup: '', events: [], expandedEvents: {}, hideDebug: true, showText: 'Show', newRunButtonClass: 'btn-primary', endRunButtonClass: 'btn-primary'},
+                 {name:'Course A', id:'courseA', teamInWater: '', runSetup: '', events: [], expandedEvents: {}, hideDebug: true, showText: 'Show', newRunButtonClass: 'btn-primary', endRunButtonClass: 'btn-primary'}]
     $scope.courses.forEach(function(entry) {
         $scope.intervalFunction($scope.getTeamInWater, entry);
         $scope.intervalFunction($scope.getEvents, entry);

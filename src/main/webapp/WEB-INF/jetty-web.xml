@@ -12,4 +12,8 @@
       </New>
     </Set>
   </Get>
+  
+<!--   <Set name="contextPath">/</Set> -->
+<!--   <Set name="resourceBase"><Get name="absolutePath"><New class="java.io.File"><Arg>src/main/webapp/</Arg></New></Get></Set> -->
+<!--   <Set name="descriptior"><Get name="absolutePath"><New class="java.io.File"><Arg>src/main/webapp/WEB-INF/web.xml</Arg></New></Get></Set> -->
 </Configure>
