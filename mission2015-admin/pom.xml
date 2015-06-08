@@ -2,22 +2,19 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-
+  <parent>
+    <groupId>com.felixpageau.roboboat</groupId>
+    <artifactId>roboboat_server</artifactId>
+    <version>1.0</version>
+  </parent>
   <groupId>com.felixpageau.roboboat</groupId>
-  <artifactId>roboboat_server</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>mission2015-admin</artifactId>
+  <packaging>jar</packaging>
   <version>1.0</version>
-  <name>Competition Server for RoboBoat 2015</name>
-
-  <modules>
-    <module>mission2015</module>
-    <module>mission2015-admin</module>
-    <module>mission2015-war</module>
-    <module>mission2015-admin-war</module>
-  </modules>
+  <name>Admin version of the competition server for RoboBoat 2015</name>
 
   <build>
-    <finalName>mission2015</finalName>
+    <finalName>mission2015-admin</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -27,6 +24,14 @@
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <archiveClasses>true</archiveClasses>
+          <packagingExcludes>WEB-INF/classes/**</packagingExcludes>
         </configuration>
       </plugin>
     </plugins>
@@ -132,6 +137,11 @@
       <groupId>net.sf.marineapi</groupId>
       <artifactId>marineapi</artifactId>
       <version>0.9.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+      <groupId>com.felixpageau.roboboat</groupId>
+      <artifactId>mission2015</artifactId>
+      <version>1.0</version>
     </dependency>
   </dependencies>
   <properties>

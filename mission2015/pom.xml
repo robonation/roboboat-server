@@ -2,19 +2,16 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-
+  <parent>
+    <groupId>com.felixpageau.roboboat</groupId>
+    <artifactId>roboboat_server</artifactId>
+    <version>1.0</version>
+  </parent>
   <groupId>com.felixpageau.roboboat</groupId>
-  <artifactId>roboboat_server</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>mission2015</artifactId>
+  <packaging>jar</packaging>
   <version>1.0</version>
-  <name>Competition Server for RoboBoat 2015</name>
-
-  <modules>
-    <module>mission2015</module>
-    <module>mission2015-admin</module>
-    <module>mission2015-war</module>
-    <module>mission2015-admin-war</module>
-  </modules>
+  <name>Base version of the competition server for RoboBoat 2015</name>
 
   <build>
     <finalName>mission2015</finalName>
@@ -29,6 +26,36 @@
           <target>1.8</target>
         </configuration>
       </plugin>
+      <!-- <plugin> -->
+      <!-- <groupId>com.github.wvengen</groupId> -->
+      <!-- <artifactId>proguard-maven-plugin</artifactId> -->
+      <!-- <version>2.0.10</version> -->
+      <!-- <executions> -->
+      <!-- <execution> -->
+      <!-- <phase>package</phase> -->
+      <!-- <goals><goal>proguard</goal></goals> -->
+      <!-- </execution> -->
+      <!-- </executions> -->
+      <!-- <configuration> -->
+      <!-- <obfuscate>true</obfuscate> -->
+      <!-- <includeDependency>false</includeDependency> -->
+      <!-- <options> -->
+      <!-- <option>-injars target/${project.artifactId}.war</option> -->
+      <!-- <option>-keep public class com.felixpageau.roboboat.mission2015.App 
+        { public static void main(java.lang.String[]); }</option> -->
+      <!-- <option>-keepnames class ** { *; }</option> -->
+      <!-- <option>-dontwarn javax.servlet.**</option> -->
+      <!-- <option>-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod</option> -->
+      <!-- <option>-outjars target/${project.artifactId}-obfuscated.war</option> -->
+      <!-- <option>-ignorewarnings</option> -->
+      <!-- </options> -->
+      <!-- <outputDirectory>${project.build.directory}</outputDirectory> -->
+      <!-- <libs> -->
+      <!-- <lib>${java.home}/lib/rt.jar</lib> -->
+      <!-- <lib>${java.home}/lib/jce.jar</lib> -->
+      <!-- </libs> -->
+      <!-- </configuration> -->
+      <!-- </plugin> -->
     </plugins>
   </build>
 
@@ -94,11 +121,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>net.sf.marineapi</groupId>
-      <artifactId>marineapi</artifactId>
-      <version>0.8.1</version>
-    </dependency>
-    <dependency>
       <groupId>com.thetransactioncompany</groupId>
       <artifactId>cors-filter</artifactId>
       <version>2.1</version>
@@ -129,9 +151,9 @@
       <version>2.0.3</version>
     </dependency>
     <dependency>
-      <groupId>net.sf.marineapi</groupId>
-      <artifactId>marineapi</artifactId>
-      <version>0.9.0-SNAPSHOT</version>
+      <groupId>com.felixpageau.roboboat</groupId>
+      <artifactId>mission2015</artifactId>
+      <version>1.0</version>
     </dependency>
   </dependencies>
   <properties>

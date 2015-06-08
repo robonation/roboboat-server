@@ -2,22 +2,19 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
-
+  <parent>
+    <groupId>com.felixpageau.roboboat</groupId>
+    <artifactId>roboboat_server</artifactId>
+    <version>1.0</version>
+  </parent>
   <groupId>com.felixpageau.roboboat</groupId>
-  <artifactId>roboboat_server</artifactId>
-  <packaging>pom</packaging>
+  <artifactId>mission2015-war</artifactId>
+  <packaging>war</packaging>
   <version>1.0</version>
-  <name>Competition Server for RoboBoat 2015</name>
-
-  <modules>
-    <module>mission2015</module>
-    <module>mission2015-admin</module>
-    <module>mission2015-war</module>
-    <module>mission2015-admin-war</module>
-  </modules>
+  <name>Base war for the competition server for RoboBoat 2015</name>
 
   <build>
-    <finalName>mission2015</finalName>
+    <finalName>mission2015-war</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -27,6 +24,16 @@
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
+          <webXml>src\webapp\WEB-INF\web.xml</webXml>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <webXml>src\webapp\WEB-INF\web.xml</webXml>
+          <archiveClasses>true</archiveClasses>
+          <packagingExcludes>WEB-INF/classes/**</packagingExcludes>
         </configuration>
       </plugin>
     </plugins>
@@ -94,11 +101,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>net.sf.marineapi</groupId>
-      <artifactId>marineapi</artifactId>
-      <version>0.8.1</version>
-    </dependency>
-    <dependency>
       <groupId>com.thetransactioncompany</groupId>
       <artifactId>cors-filter</artifactId>
       <version>2.1</version>
@@ -109,29 +111,9 @@
       <version>1.9.1</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.3.4</version>
-    </dependency>
-    <dependency>
-      <groupId>javax.mail</groupId>
-      <artifactId>mail</artifactId>
-      <version>1.4.5</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>17.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>2.0.3</version>
-    </dependency>
-    <dependency>
-      <groupId>net.sf.marineapi</groupId>
-      <artifactId>marineapi</artifactId>
-      <version>0.9.0-SNAPSHOT</version>
+      <groupId>com.felixpageau.roboboat</groupId>
+      <artifactId>mission2015</artifactId>
+      <version>1.0</version>
     </dependency>
   </dependencies>
   <properties>
