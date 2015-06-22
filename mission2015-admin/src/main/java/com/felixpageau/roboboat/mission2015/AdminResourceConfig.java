@@ -11,6 +11,8 @@ import java.util.Map;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.internal.scanning.PackageNamesScanner;
 
+import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
+import com.felixpageau.roboboat.mission2015.nmea.SentenceRegistry;
 import com.felixpageau.roboboat.mission2015.resources.AdminResource;
 import com.felixpageau.roboboat.mission2015.resources.AutomatedDockingResource;
 import com.felixpageau.roboboat.mission2015.resources.InteropResource;
@@ -25,6 +27,7 @@ import com.felixpageau.roboboat.mission2015.server.Pinger;
 import com.felixpageau.roboboat.mission2015.server.impl.CompetitionManagerImpl;
 import com.felixpageau.roboboat.mission2015.structures.BuoyColor;
 import com.felixpageau.roboboat.mission2015.structures.Course;
+import com.felixpageau.roboboat.mission2015.structures.TeamCode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -33,37 +36,44 @@ import com.google.common.collect.ImmutableMap;
  * marshalling/unmarshalling
  */
 public class AdminResourceConfig extends CompetitionResourceConfig {
-  private static final List<CompetitionDay> COMPETITION_DAYS = ImmutableList.<CompetitionDay> of(
-      new CompetitionDay(LocalDateTime.of(2015, 7, 7, 8, 0), LocalDateTime.of(2015, 7, 7, 18, 0)), // Tu
+  private static final List<CompetitionDay> COMPETITION_DAYS = ImmutableList.<CompetitionDay> of(new CompetitionDay(LocalDateTime.of(2015, 7, 7, 8, 0),
+      LocalDateTime.of(2015, 7, 7, 18, 0)), // Tu
       new CompetitionDay(LocalDateTime.of(2015, 7, 8, 8, 0), LocalDateTime.of(2015, 7, 8, 18, 0)), // We
       new CompetitionDay(LocalDateTime.of(2015, 7, 9, 8, 0), LocalDateTime.of(2015, 7, 9, 18, 0)), // Th
       new CompetitionDay(LocalDateTime.of(2015, 7, 10, 8, 0), LocalDateTime.of(2015, 7, 10, 18, 0)), // Fr
       new CompetitionDay(LocalDateTime.of(2015, 7, 11, 8, 0), LocalDateTime.of(2015, 7, 11, 18, 0)), // Sa
       new CompetitionDay(LocalDateTime.of(2015, 7, 12, 8, 0), LocalDateTime.of(2015, 7, 12, 18, 0)) // Su
-    );
-    private static final List<Pinger> courseAPingers = ImmutableList.of(new Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new Pinger(BuoyColor.red), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.green));
-    private static final List<Pinger> courseBPingers = ImmutableList.of(new Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new Pinger(BuoyColor.red), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.green));
-    private static final List<Pinger> openTestPingers = ImmutableList.of(new Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new Pinger(BuoyColor.red), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.green));
-    private static final Map<Course, CourseLayout> COURSE_LAYOUT_MAP;
+      );
+  private static final List<TeamCode> TEAMS = ImmutableList.of(new TeamCode("AUVSI"), new TeamCode("cedar"), new TeamCode("dipo"), new TeamCode("ERAU"),
+      new TeamCode("FAU"), new TeamCode("GIT"), new TeamCode("NCKU"), new TeamCode("ODU"), new TeamCode("UCF"), new TeamCode("UF"), new TeamCode("UTA"),
+      new TeamCode("UM"), new TeamCode("URI"), new TeamCode("VU"));
+  private static final List<Pinger> courseAPingers = ImmutableList.of(new Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new Pinger(BuoyColor.red),
+      new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.green));
+  private static final List<Pinger> courseBPingers = ImmutableList.of(new Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new Pinger(BuoyColor.red),
+      new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.green));
+  private static final List<Pinger> openTestPingers = ImmutableList.of(new Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new Pinger(BuoyColor.red),
+      new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.green));
+  private static final Map<Course, CourseLayout> COURSE_LAYOUT_MAP;
+  private final NMEAServer nmeaServer;
 
-    static {
-      try {
-        COURSE_LAYOUT_MAP = ImmutableMap.of(
-            Course.courseA, new CourseLayout(Course.courseA, courseAPingers, new URL("http://192.168.1.7:5000"), new URL("http://192.168.1.5:4000")),
-            Course.courseB, new CourseLayout(Course.courseB, courseBPingers, new URL("http://192.168.1.8:5000"), new URL("http://192.168.1.6:4000")),
-            Course.openTest, new CourseLayout(Course.openTest, openTestPingers, new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:4000")));
-      } catch (MalformedURLException e) {
-        e.printStackTrace();
-        throw new RuntimeException(e);
-      }
+  static {
+    try {
+      COURSE_LAYOUT_MAP = ImmutableMap.of(Course.courseA, new CourseLayout(Course.courseA, courseAPingers, new URL("http://192.168.1.7:5000"), new URL(
+          "http://192.168.1.5:4000")), Course.courseB, new CourseLayout(Course.courseB, courseBPingers, new URL("http://192.168.1.8:5000"), new URL(
+          "http://192.168.1.6:4000")), Course.openTest, new CourseLayout(Course.openTest, openTestPingers, new URL("http://127.0.0.1:5000"), new URL(
+          "http://127.0.0.1:4000")));
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+      throw new RuntimeException(e);
     }
-  
-  public AdminResourceConfig() throws MalformedURLException, URISyntaxException {
-    this(new CompetitionManagerImpl(new Competition(COMPETITION_DAYS, COURSE_LAYOUT_MAP)));
   }
 
-  public AdminResourceConfig(CompetitionManager competitionManager) throws MalformedURLException {
-    super(competitionManager, JacksonObjectMapperProvider.class, MultiPartFeature.class);
+  public AdminResourceConfig() throws MalformedURLException, URISyntaxException {
+    this(new CompetitionManagerImpl(new Competition(COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, true)));
+  }
+
+  public AdminResourceConfig(CompetitionManager competitionManager) throws MalformedURLException, URISyntaxException {
+    super(competitionManager, JacksonFeatures.class, JacksonObjectMapperProvider.class, MultiPartFeature.class);
     this.registerFinder(new PackageNamesScanner(new String[] { "com.felixpageau.roboboat.mission2015.resources", "com.fasterxml.jackson.jaxrs.base" }, false));
     this.register(new AutomatedDockingResource(competitionManager));
     this.register(new InteropResource(competitionManager));
@@ -71,6 +81,19 @@ public class AdminResourceConfig extends CompetitionResourceConfig {
     this.register(new ObstacleAvoidanceResource(competitionManager));
     this.register(new PingerResource(competitionManager));
     this.register(new AdminResource(competitionManager));
+
+    this.nmeaServer = new NMEAServer(competitionManager, 9999, createNMEASentenceRegistry(), true);
+    this.nmeaServer.start();
+  }
+
+  @Override
+  public SentenceRegistry createNMEASentenceRegistry() {
+    return SentenceRegistryFactory.create2015NMEASentenceRegistry();
+  }
+
+  @Override
+  public NMEAServer getNMEAServer() {
+    return nmeaServer;
   }
 
   @Override

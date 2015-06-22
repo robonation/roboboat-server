@@ -14,6 +14,7 @@ import com.felixpageau.roboboat.mission2015.structures.BeaconReport;
 import com.felixpageau.roboboat.mission2015.structures.Course;
 import com.felixpageau.roboboat.mission2015.structures.DockingSequence;
 import com.felixpageau.roboboat.mission2015.structures.GateCode;
+import com.felixpageau.roboboat.mission2015.structures.HeartbeatReport;
 import com.felixpageau.roboboat.mission2015.structures.InteropReport;
 import com.felixpageau.roboboat.mission2015.structures.ReportStatus;
 import com.felixpageau.roboboat.mission2015.structures.TeamCode;
@@ -46,13 +47,13 @@ public interface CompetitionManager {
   List<String> listInteropImages(Course course, TeamCode teamCode);
 
   @Nonnull
-  Optional<byte[]> getInteropImage(String filename);
+  Optional<byte[]> getInteropImage(Course course, TeamCode teamCode, String filename);
 
   @Nonnull
   UploadStatus uploadInteropImage(Course course, TeamCode teamCode, byte[] content);
 
   @Nonnull
-  ReportStatus reportHeartbeat(Course course, TeamCode teamCode);
+  ReportStatus reportHeartbeat(Course course, TeamCode teamCode, HeartbeatReport report);
 
   @Nonnull
   Competition getCompetition();

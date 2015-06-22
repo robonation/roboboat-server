@@ -33,6 +33,7 @@ import com.felixpageau.roboboat.mission2015.structures.BeaconReport;
 import com.felixpageau.roboboat.mission2015.structures.Course;
 import com.felixpageau.roboboat.mission2015.structures.DockingSequence;
 import com.felixpageau.roboboat.mission2015.structures.GateCode;
+import com.felixpageau.roboboat.mission2015.structures.HeartbeatReport;
 import com.felixpageau.roboboat.mission2015.structures.InteropReport;
 import com.felixpageau.roboboat.mission2015.structures.ReportStatus;
 import com.felixpageau.roboboat.mission2015.structures.TeamCode;
@@ -101,7 +102,7 @@ public class CompetitionManagerImpl implements CompetitionManager {
   }
 
   @Override
-  public ReportStatus reportHeartbeat(Course course, TeamCode teamCode) {
+  public ReportStatus reportHeartbeat(Course course, TeamCode teamCode, HeartbeatReport report) {
     // TODO Handle this
     return new ReportStatus(true);
   }
@@ -149,9 +150,9 @@ public class CompetitionManagerImpl implements CompetitionManager {
   }
 
   @Override
-  public Optional<byte[]> getInteropImage(String filename) {
-    Event e = new Event(String.format("? - ? - Interop - requested image %s", filename));
-    competition.getActiveRuns().get(Course.courseA).addEvent(e);
+  public Optional<byte[]> getInteropImage(Course course, TeamCode teamCode, String filename) {
+    Event e = new Event(String.format("%s - %s - Interop - requested image %s", course, teamCode, filename));
+    competition.getActiveRuns().get(course).addEvent(e);
     return Optional.ofNullable(fileCache.getIfPresent(filename));
   }
 

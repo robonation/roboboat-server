@@ -60,7 +60,7 @@ public class NMEASentence {
           registry.listDefinitions().stream().map(def -> def.getTalkerId() + def.getSentenceId()).collect(Collectors.joining(", ")), nmea));
     }
     validateFields(definition, nmea);
-    String[] values = nmea.substring(nmea.indexOf(Sentence.FIELD_DELIMITER) + 1, Checksum.index(nmea)).split(String.valueOf(FIELD_DELIMITER), -1);
+    String[] values = nmea.substring(nmea.indexOf(Sentence.FIELD_DELIMITER) + 1, findChecksum(nmea)).split(String.valueOf(FIELD_DELIMITER), -1);
     return new NMEASentence(sentenceId, talkerId, definition, ImmutableList.copyOf(values));
   }
 
@@ -89,7 +89,7 @@ public class NMEASentence {
     Preconditions.checkNotNull(def, "The provided SentenceDefinition cannot be null");
     Preconditions.checkNotNull(def, "The provided nmea string cannot be null");
     try {
-      String[] values = nmea.substring(nmea.indexOf(Sentence.FIELD_DELIMITER) + 1, Checksum.index(nmea)).split(String.valueOf(FIELD_DELIMITER), -1);
+      String[] values = nmea.substring(nmea.indexOf(Sentence.FIELD_DELIMITER) + 1, findChecksum(nmea)).split(String.valueOf(FIELD_DELIMITER), -1);
       List<Field> fields = def.getFields();
       Preconditions.checkArgument(fields.size() == values.length,
           String.format("%s should have %d fields but %d were received", def.getDescription(), fields.size(), values.length));
@@ -101,7 +101,8 @@ public class NMEASentence {
       }
       return true;
     } catch (IllegalArgumentException e) {
-      throw new IllegalArgumentException(e.getMessage() + String.format("\t Your message was: '%s' but a valid one would look like: '%s'", nmea, def.getExample()), e.getCause());
+      throw new IllegalArgumentException(e.getMessage()
+          + String.format("\t Your message was: '%s' but a valid one would look like: '%s'", nmea, def.getExample()), e.getCause());
     }
   }
 
@@ -162,5 +163,20 @@ public class NMEASentence {
       throw new IllegalArgumentException("Sentence is too long");
     }
     return sentence;
+  }
+
+  /**
+   * Find the index of the checksum separator or returns -1
+   * 
+   * @param nmea
+   *          the sentence in which to look for a checksum
+   * @return index of the checksum or -1
+   */
+  public static int findChecksum(String nmea) {
+    Preconditions.checkNotNull(nmea, "The provided nmea sentence cannot be null");
+    if (nmea.contains(Character.toString(Sentence.CHECKSUM_DELIMITER))) {
+      return nmea.indexOf(Sentence.CHECKSUM_DELIMITER);
+    }
+    return -1;
   }
 }

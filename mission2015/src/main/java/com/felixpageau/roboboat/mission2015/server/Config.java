@@ -8,7 +8,13 @@ public class Config {
   public static final ThreadLocal<DateTimeFormatter> DATE_FORMATTER = new ThreadLocal<DateTimeFormatter>() {
     @Override
     protected DateTimeFormatter initialValue() {
-      return DateTimeFormatter.ofPattern("yyyy.MM.dd-HH:mm:ssz");
+      return DateTimeFormatter.ofPattern("yyyy.MM.dd-HH:mm:ss");
+    }
+  };
+  public static final ThreadLocal<DateTimeFormatter> NMEA_DATE_FORMATTER = new ThreadLocal<DateTimeFormatter>() {
+    @Override
+    protected DateTimeFormatter initialValue() {
+      return DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
     }
   };
   public static final AtomicInteger TIME_SLOT_DURATION_MIN = new AtomicInteger(30);

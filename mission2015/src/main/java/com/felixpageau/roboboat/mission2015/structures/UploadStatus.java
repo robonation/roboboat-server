@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class UploadStatus {
   private final String imageID;
 
-  public UploadStatus(@JsonProperty(value = "imageID") String imageID) {
+  public UploadStatus(@JsonProperty(value = "imageId") String imageID) {
     this.imageID = imageID;
   }
 

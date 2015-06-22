@@ -30,6 +30,13 @@ public enum Shape {
     return lookup.get(Character.toUpperCase(code));
   }
 
+  public static Shape fromString(String code) {
+    if (code.length() == 1) {
+      return lookup.get(Character.toUpperCase(code.charAt(0)));
+    }
+    throw new IllegalArgumentException("The provided shape string (" + code + ") has more than 1 character");
+  }
+
   public char getValue() {
     return value;
   }

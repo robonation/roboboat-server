@@ -9,6 +9,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 public class TimeSlot {
+  public static final TimeSlot DEFAULT_TIMESLOT = new TimeSlot(Course.openTest, LocalDateTime.now(), LocalDateTime.now().plusMinutes(20));
   private final Course course;
   private final LocalDateTime startTime;
   private final LocalDateTime endTime;

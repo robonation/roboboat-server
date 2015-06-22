@@ -22,11 +22,11 @@ public class BeaconReportTest {
   Course course = Course.courseA;
   TeamCode team = new TeamCode("AUVSI");
   BuoyColor buoyColor = BuoyColor.black;
-  BuoyPosition buoyPosition = new BuoyPosition(Datum.WGS84, new Latitude(40.689247f), new Longitude(-74.044500f));
+  Position buoyPosition = new Position(Datum.WGS84, new Latitude(40.689247f), new Longitude(-74.044500f));
 
   /**
    * Test method for
-   * {@link com.felixpageau.auvsif.roboboat2014.output.BeaconReport#BeaconReport(Course, TeamCode, BuoyColor, BuoyPosition)}
+   * {@link com.felixpageau.auvsif.roboboat2014.output.BeaconReport#BeaconReport(Course, TeamCode, BuoyColor, Position)}
    * .
    */
   @Test(expected = NullPointerException.class)

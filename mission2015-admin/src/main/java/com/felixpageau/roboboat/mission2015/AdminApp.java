@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import com.thetransactioncompany.cors.CORSFilter;
 
-public class App {
+public class AdminApp {
 
   public static void main(String[] args) throws Exception {
     URI baseUri = UriBuilder.fromUri("https://localhost/").port(9443).build();
@@ -36,13 +36,10 @@ public class App {
     JacksonJaxbJsonProvider provider = new JacksonJaxbJsonProvider();
     ObjectMapper mapper = new ObjectMapper();
     provider.setMapper(mapper);
-    SslContextFactory sslContextFactory = new SslContextFactory("src/main/resources/keystore");
+    SslContextFactory sslContextFactory = new SslContextFactory("mission2015-admin-war/src/main/resources/keystore");
     sslContextFactory.setKeyStorePassword("qwerty123");
-    CompetitionResourceConfig config = createApp();
+    final CompetitionResourceConfig config = createApp();
     System.out.println(config.toString());
-
-    // NMEA Server
-    final NMEAServer nmeaServer = new NMEAServer(config.getCompetition(), 9999, SentenceRegistryFactory.create2015NMEASentenceRegistry());
 
     // HTTP/JSON server
     JettyHttpContainer container = ContainerFactory.createContainer(JettyHttpContainer.class, config);
@@ -52,10 +49,11 @@ public class App {
     server.addConnector(http);
     WebAppContext wac = new WebAppContext();
     HashLoginService myrealm = new HashLoginService("RoboBoat");
-    myrealm.setConfig("src/main/resources/realm.properties");
+    // myrealm.setConfig(new
+    // File("mission2015-admin-war/src/main/resources/realm.properties").getAbsolutePath());
     wac.getSecurityHandler().setLoginService(myrealm);
-    wac.setResourceBase(new File("src/main/webapp/").getAbsolutePath());
-    wac.setDescriptor(new File("src/main/webapp/WEB-INF/web.xml").getAbsolutePath());
+    wac.setResourceBase(new File("mission2015-admin-war/src/main/webapp/").getAbsolutePath());
+    wac.setDescriptor(new File("mission2015-admin-war/src/main/webapp/WEB-INF/web.xml").getAbsolutePath());
     wac.setContextPath("/");
     wac.setParentLoaderPriority(true);
     wac.addFilter(CORSFilter.class, "/*", EnumSet.of(DispatcherType.INCLUDE, DispatcherType.REQUEST));
@@ -63,22 +61,21 @@ public class App {
     server.addLifeCycleListener(new JettyLifecycleAdapter() {
       @Override
       public void lifeCycleFailure(LifeCycle event, Throwable cause) {
-        nmeaServer.stop();
+        config.getNMEAServer().stop();
       }
 
       @Override
       public void lifeCycleStopping(LifeCycle event) {
-        nmeaServer.stop();
+        config.getNMEAServer().stop();
       }
 
       @Override
       public void lifeCycleStopped(LifeCycle event) {
-        nmeaServer.stop();
+        config.getNMEAServer().stop();
       }
     });
 
     // starting
-    nmeaServer.start();
     server.start();
     System.out.println("\n\nJSON/HTTP Server started on: "
         + Arrays.stream(server.getConnectors())
@@ -87,7 +84,7 @@ public class App {
   }
 
   public static CompetitionResourceConfig createApp() throws MalformedURLException, URISyntaxException {
-    return new Mission2015ResourceConfig();
+    return new AdminResourceConfig();
   }
 
   private static class JettyLifecycleAdapter implements LifeCycle.Listener {
@@ -103,6 +100,7 @@ public class App {
 
     @Override
     public void lifeCycleFailure(LifeCycle event, Throwable cause) {
+      cause.printStackTrace();
       // EMPTY
     }
 

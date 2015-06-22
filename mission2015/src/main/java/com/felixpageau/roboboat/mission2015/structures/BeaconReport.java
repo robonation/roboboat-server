@@ -58,4 +58,8 @@ public class BeaconReport {
     }
     return false;
   }
+
+  public static void main(String[] args) {
+    System.out.println(new BeaconReport(Course.courseA, new TeamCode("AUVSI"), BuoyColor.blue));
+  }
 }

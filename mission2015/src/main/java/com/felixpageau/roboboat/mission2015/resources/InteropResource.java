@@ -2,6 +2,7 @@ package com.felixpageau.roboboat.mission2015.resources;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.Consumes;
@@ -58,16 +59,17 @@ public class InteropResource {
   @GET
   @Produces({ MediaType.TEXT_HTML })
   public String listImages(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode) throws IOException {
+    List<String> images = manager.listInteropImages(course, teamCode);
     return "<html><head></head><body><ul>"
-        + manager.listInteropImages(course, teamCode).stream().map(i -> String.format("<li><a href=\"/interop/image/%s\">%s</a>", i, i))
-            .collect(Collectors.joining()) + "</ul></body></html>";
+        + images.stream().map(i -> String.format("<li><a href=\"/interop/image/%s/%s/%s\">%s</a>", course, teamCode, i, i)).collect(Collectors.joining())
+        + "</ul></body></html>";
   }
 
-  @Path("/images/{image}")
+  @Path("/image/{course}/{teamCode}/{image}")
   @GET
   @Produces({ "image/jpeg" })
-  public byte[] getImage(@PathParam("image") String image) throws IOException {
-    return manager.getInteropImage(image).orElseThrow(NotFoundException::new);
+  public byte[] getImage(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode, @PathParam("image") String image) throws IOException {
+    return manager.getInteropImage(course, teamCode, image).orElseThrow(NotFoundException::new);
   }
 
   // @Path("/report/{course}/{teamCode}")

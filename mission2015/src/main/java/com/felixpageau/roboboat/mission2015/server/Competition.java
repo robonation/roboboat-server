@@ -14,14 +14,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import com.felixpageau.roboboat.mission2015.structures.BuoyColor;
 import com.felixpageau.roboboat.mission2015.structures.Course;
@@ -43,13 +42,18 @@ public class Competition {
   private final Multimap<TimeSlot, RunArchiver> results = ArrayListMultimap.create();
   private final Map<Course, RunArchiver> activeRuns = new HashMap<>();
   private final Map<TimeSlot, TeamCode> schedule = new HashMap<>();
-  private final List<TeamCode> teams = new CopyOnWriteArrayList<>();
+  private final List<TeamCode> teams;
+  private final boolean activatePinger;
   private final EventBus eventBus = new EventBus();
 
-  public Competition(List<CompetitionDay> competitionDays, Map<Course, CourseLayout> layoutMap) throws MalformedURLException {
+  public Competition(List<CompetitionDay> competitionDays, List<TeamCode> teams, Map<Course, CourseLayout> layoutMap, boolean activatePinger)
+      throws MalformedURLException {
     this.competitionDays = Preconditions.checkNotNull(competitionDays);
     this.layoutMap = Preconditions.checkNotNull(layoutMap);
+    this.teams = ImmutableList.copyOf(Preconditions.checkNotNull(teams, "The provided team list cannot be null"));
+    this.activatePinger = activatePinger;
 
+    // Generate timeslots
     for (CompetitionDay day : competitionDays) {
       LocalDateTime timeSlotStart = day.getStartTime();
       int slotDurationMs = Config.TIME_SLOT_DURATION_MIN.get() * 60 * 1000;
@@ -65,9 +69,8 @@ public class Competition {
       }
     }
 
-    teams.addAll(Arrays.asList(new TeamCode("AUVSI"), new TeamCode("cedar"), new TeamCode("dipo"), new TeamCode("ERAU"), new TeamCode("FAU"), new TeamCode(
-        "GIT"), new TeamCode("NCKU"), new TeamCode("ODU"), new TeamCode("UCF"), new TeamCode("UF"), new TeamCode("UTA"), new TeamCode("UM"),
-        new TeamCode("URI"), new TeamCode("VU")));
+    // Always have a default run in OpenTest
+    startNewRun(TimeSlot.DEFAULT_TIMESLOT, new TeamCode("AUVSI"));
   }
 
   public List<TeamCode> getTeams() {
@@ -80,6 +83,10 @@ public class Competition {
 
   public Map<Course, RunArchiver> getActiveRuns() {
     return ImmutableMap.copyOf(activeRuns);
+  }
+
+  public RunArchiver getActiveRun(Course course) {
+    return Optional.ofNullable(activeRuns.get(course)).orElse(null);
   }
 
   public List<CompetitionDay> getCompetitionDays() {
@@ -154,7 +161,7 @@ public class Competition {
     activeRuns.put(slot.getCourse(), newRun);
     results.put(slot, newRun);
 
-    if (!slot.getCourse().equals(Course.openTest)) {
+    if (activatePinger && !slot.getCourse().equals(Course.openTest)) {
       boolean activated = false;
       for (int j = 0; j < 10 && !activated; j++) {
         try (Socket s = new Socket(layout.getPingerControlServer().getHost(), layout.getPingerControlServer().getPort());
@@ -185,14 +192,17 @@ public class Competition {
 
   public synchronized void endRun(Course course, TeamCode teamCode) {
     RunArchiver ra = activeRuns.get(course);
-    ra.endRun();
+    if (ra != null) {
+      ra.endRun();
+      activeRuns.remove(course);
+    }
   }
 
   public static void main(String[] args) throws MalformedURLException {
     List<CompetitionDay> days = ImmutableList.of(new CompetitionDay(LocalDateTime.now(), LocalDateTime.now().plusMinutes(1)));
     Map<Course, CourseLayout> layout = ImmutableMap.of(Course.courseA, new CourseLayout(Course.courseA, ImmutableList.of(new Pinger(BuoyColor.black)), new URL(
         "127.0.0.1:3000"), new URL("127.0.0.1:4000")));
-    Competition c = new Competition(days, layout);
+    Competition c = new Competition(days, ImmutableList.of(new TeamCode("AUVSI")), layout, false);
     List<TimeSlot> slots = new ArrayList<>(c.schedule.keySet());
 
     c.startNewRun(slots.get(0), new TeamCode("AUVSI"));
