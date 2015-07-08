@@ -5,5 +5,6 @@ public enum BuoyColor {
     blue, 
     black, 
     green,
-    red;
+    red,
+    none;
 }

@@ -44,7 +44,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 
 public class JSONServerTest {
-  private static final String basePath = "http://127.0.0.1:7000";
+  private static String basePath = "http://127.0.0.1:7000";
   private static Server server;
 
   @BeforeClass
@@ -68,7 +68,10 @@ public class JSONServerTest {
 
   @Test
   public void test() throws Exception {
+    // basePath = "http://ec2-52-7-253-202.compute-1.amazonaws.com";
+    // basePath = "http://10.0.2.1:8080";
 
+    System.out.println("Running test");
     ObjectMapper mapper = new ObjectMapper();
     try (CloseableHttpClient client = HttpClients.createDefault()) {
       CloseableHttpResponse resp;
@@ -76,13 +79,13 @@ public class JSONServerTest {
 
       // end run
       resp = client.execute(new HttpPost(basePath + "/run/end/courseB/AUVSI"));
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("End run status code", 200, resp.getStatusLine().getStatusCode());
       assertEquals(new ReportStatus(true), mapper.readValue(resp.getEntity().getContent(), ReportStatus.class));
       resp.close();
 
       // start run
       resp = client.execute(new HttpPost(basePath + "/run/start/courseB/AUVSI"));
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("Start run status code", 200, resp.getStatusLine().getStatusCode());
       assertEquals(new ReportStatus(true), mapper.readValue(resp.getEntity().getContent(), ReportStatus.class));
       resp.close();
 
@@ -91,7 +94,7 @@ public class JSONServerTest {
       post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new HeartbeatReport(new Timestamp(), Challenge.gates, Position.FOUNDERS))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("Gate heartbeat", 200, resp.getStatusLine().getStatusCode());
       assertEquals(new ReportStatus(true), mapper.readValue(resp.getEntity().getContent(), ReportStatus.class));
       resp.close();
 
@@ -100,13 +103,13 @@ public class JSONServerTest {
       post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new HeartbeatReport(new Timestamp(), Challenge.obstacles, Position.FOUNDERS))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("Obstacle heartbeat", 200, resp.getStatusLine().getStatusCode());
       assertEquals(new ReportStatus(true), mapper.readValue(resp.getEntity().getContent(), ReportStatus.class));
       resp.close();
 
       // Obstacle
       resp = client.execute(new HttpGet(basePath + "/obstacleAvoidance/courseB/AUVSI"));
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("Obstacle", 200, resp.getStatusLine().getStatusCode());
       GateCode gc = mapper.readValue(resp.getEntity().getContent(), GateCode.class);
       assertNotNull(gc);
       resp.close();
@@ -116,13 +119,13 @@ public class JSONServerTest {
       post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new HeartbeatReport(new Timestamp(), Challenge.docking, Position.FOUNDERS))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("Docking heartbeat", 200, resp.getStatusLine().getStatusCode());
       assertEquals(new ReportStatus(true), mapper.readValue(resp.getEntity().getContent(), ReportStatus.class));
       resp.close();
 
       // Docking
       resp = client.execute(new HttpGet(basePath + "/automatedDocking/courseB/AUVSI"));
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("Docking", 200, resp.getStatusLine().getStatusCode());
       DockingSequence ds = mapper.readValue(resp.getEntity().getContent(), DockingSequence.class);
       assertNotNull(ds);
       assertNotNull(ds.getDockingBaySequence());
@@ -134,7 +137,7 @@ public class JSONServerTest {
       post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new HeartbeatReport(new Timestamp(), Challenge.pinger, Position.FOUNDERS))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("Pinger heartbeat", 200, resp.getStatusLine().getStatusCode());
       assertEquals(new ReportStatus(true), mapper.readValue(resp.getEntity().getContent(), ReportStatus.class));
       resp.close();
 
@@ -143,7 +146,7 @@ public class JSONServerTest {
       post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new BeaconReport(Course.courseB, new TeamCode("AUVSI"), BuoyColor.black))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("Pinger", 200, resp.getStatusLine().getStatusCode());
       assertNotNull(mapper.readValue(resp.getEntity().getContent(), ReportStatus.class)); // We
                                                                                           // don't
                                                                                           // know
@@ -160,13 +163,13 @@ public class JSONServerTest {
       post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new HeartbeatReport(new Timestamp(), Challenge.interop, Position.FOUNDERS))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("Interp heartbeat", 200, resp.getStatusLine().getStatusCode());
       assertEquals(new ReportStatus(true), mapper.readValue(resp.getEntity().getContent(), ReportStatus.class));
       resp.close();
 
       // Interop - list images
       resp = client.execute(new HttpGet(basePath + "/interop/images/courseB/AUVSI"));
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("Interop - list", 200, resp.getStatusLine().getStatusCode());
       String listing = CharStreams.toString(new InputStreamReader(resp.getEntity().getContent(), Charsets.UTF_8));
       resp.close();
       assertNotNull(listing);
@@ -182,7 +185,8 @@ public class JSONServerTest {
       post.setEntity(MultipartEntityBuilder.create().addPart("file", new FileBody(new File("test.jpg"))).setMode(HttpMultipartMode.BROWSER_COMPATIBLE).build());
       // post.setHeader("Content-Type", "multipart/form-data");
       resp = client.execute(post);
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("Interop upload", 200, resp.getStatusLine().getStatusCode());
+      System.out.println(resp.toString());
       UploadStatus us = mapper.readValue(resp.getEntity().getContent(), UploadStatus.class);
       assertNotNull(us);
       resp.close();
@@ -192,7 +196,7 @@ public class JSONServerTest {
       post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new InteropReport(Course.courseB, new TeamCode("AUVSI"), Shape.EIGHT, us.getImageId()))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("Interop report", 200, resp.getStatusLine().getStatusCode());
       assertNotNull(mapper.readValue(resp.getEntity().getContent(), ReportStatus.class)); // We
                                                                                           // don't
                                                                                           // know
@@ -209,13 +213,13 @@ public class JSONServerTest {
       post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new HeartbeatReport(new Timestamp(), Challenge.return_to_dock, Position.FOUNDERS))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("Return heartbeat", 200, resp.getStatusLine().getStatusCode());
       assertEquals(new ReportStatus(true), mapper.readValue(resp.getEntity().getContent(), ReportStatus.class));
       resp.close();
 
       // end run
       resp = client.execute(new HttpPost(basePath + "/run/end/courseB/AUVSI"));
-      assertEquals(200, resp.getStatusLine().getStatusCode());
+      assertEquals("End run", 200, resp.getStatusLine().getStatusCode());
       assertEquals(new ReportStatus(true), mapper.readValue(resp.getEntity().getContent(), ReportStatus.class));
       resp.close();
     } catch (IOException e) {

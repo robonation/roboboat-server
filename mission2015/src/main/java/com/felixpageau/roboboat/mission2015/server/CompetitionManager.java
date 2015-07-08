@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 
 import com.felixpageau.roboboat.mission2015.structures.BeaconReport;
 import com.felixpageau.roboboat.mission2015.structures.Course;
+import com.felixpageau.roboboat.mission2015.structures.DisplayStatus;
 import com.felixpageau.roboboat.mission2015.structures.DockingSequence;
 import com.felixpageau.roboboat.mission2015.structures.GateCode;
 import com.felixpageau.roboboat.mission2015.structures.HeartbeatReport;
@@ -54,6 +55,9 @@ public interface CompetitionManager {
 
   @Nonnull
   ReportStatus reportHeartbeat(Course course, TeamCode teamCode, HeartbeatReport report);
+
+  @Nonnull
+  DisplayStatus getDisplayStatus();
 
   @Nonnull
   Competition getCompetition();

@@ -3,6 +3,7 @@ package com.felixpageau.roboboat.mission2015.structures;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
@@ -34,7 +35,7 @@ public class BeaconReport {
   @JsonIgnore
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("course", course).add("team", team).add("buoyColor", buoyColor).toString();
+    return MoreObjects.toStringHelper(this).add("course", course).add("team", team).add("buoyColor", buoyColor).toString();
   }
 
   @JsonIgnore

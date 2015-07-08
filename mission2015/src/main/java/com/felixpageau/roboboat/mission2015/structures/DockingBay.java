@@ -5,6 +5,7 @@ import java.util.Random;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
@@ -34,7 +35,7 @@ public class DockingBay {
   @JsonIgnore
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("symbol", symbol).add("color", color).toString();
+    return MoreObjects.toStringHelper(this).add("symbol", symbol).add("color", color).toString();
   }
 
   @JsonIgnore

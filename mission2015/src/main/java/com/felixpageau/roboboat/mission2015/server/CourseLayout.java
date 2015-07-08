@@ -6,6 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.felixpageau.roboboat.mission2015.structures.Course;
+import com.felixpageau.roboboat.mission2015.structures.Pinger;
 import com.google.common.base.Preconditions;
 
 public class CourseLayout {

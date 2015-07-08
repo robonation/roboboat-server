@@ -20,6 +20,7 @@ import com.felixpageau.roboboat.mission2015.server.TimeSlot;
 import com.felixpageau.roboboat.mission2015.server.TimeSlotComparator;
 import com.felixpageau.roboboat.mission2015.server.TimeSlotComparatorEntry;
 import com.felixpageau.roboboat.mission2015.structures.Course;
+import com.felixpageau.roboboat.mission2015.structures.DisplayStatus;
 import com.felixpageau.roboboat.mission2015.structures.ReportStatus;
 import com.felixpageau.roboboat.mission2015.structures.Run;
 import com.felixpageau.roboboat.mission2015.structures.TeamCode;
@@ -100,5 +101,12 @@ public class AdminResource {
   @Produces({ MediaType.APPLICATION_JSON })
   public ReportStatus endRun(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode) {
     return competitionManager.endRun(course, teamCode);
+  }
+
+  @Path("/display")
+  @GET
+  @Produces({ MediaType.APPLICATION_JSON })
+  public DisplayStatus display(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode) {
+    return competitionManager.getDisplayStatus();
   }
 }

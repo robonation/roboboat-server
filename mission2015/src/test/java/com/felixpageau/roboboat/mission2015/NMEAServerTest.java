@@ -43,8 +43,9 @@ public class NMEAServerTest {
 
   @Test
   public void test() {
-    try (//Socket s = new Socket("ec2-52-7-253-202.compute-1.amazonaws.com", 9999);
-        Socket s = new Socket("localhost", port);
+    try (// Socket s = new Socket("ec2-52-7-253-202.compute-1.amazonaws.com",
+         // 9999);
+    Socket s = new Socket("localhost", port);
         BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream()));
         BufferedWriter w = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))) {
       String line;

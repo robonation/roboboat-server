@@ -5,7 +5,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
 /**
@@ -32,6 +32,6 @@ public abstract class Field {
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("name", name()).add("criteria", validityCondition()).toString();
+    return MoreObjects.toStringHelper(this).add("name", name()).add("criteria", validityCondition()).toString();
   }
 }

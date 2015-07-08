@@ -10,6 +10,8 @@ import com.google.common.primitives.Floats;
 
 public class Position {
   public static final Position FOUNDERS = new Position(Datum.WGS84, new Latitude(36.8020641F), new Longitude(-76.1912658F));
+  public static final Position FOUNTAIN = new Position(Datum.WGS84, new Latitude(36.803219F), new Longitude(-76.1933718F));
+  public static final Position DOCK = new Position(Datum.WGS84, new Latitude(36.8017522F), new Longitude(-76.1908076F));
   private final Datum datum;
   private final Longitude longitude;
   private final Latitude latitude;

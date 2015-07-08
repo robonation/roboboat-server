@@ -24,10 +24,10 @@ import com.felixpageau.roboboat.mission2015.server.Competition;
 import com.felixpageau.roboboat.mission2015.server.CompetitionDay;
 import com.felixpageau.roboboat.mission2015.server.CompetitionManager;
 import com.felixpageau.roboboat.mission2015.server.CourseLayout;
-import com.felixpageau.roboboat.mission2015.server.Pinger;
 import com.felixpageau.roboboat.mission2015.server.impl.MockCompetitionManager;
 import com.felixpageau.roboboat.mission2015.structures.BuoyColor;
 import com.felixpageau.roboboat.mission2015.structures.Course;
+import com.felixpageau.roboboat.mission2015.structures.Pinger;
 import com.felixpageau.roboboat.mission2015.structures.TeamCode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -45,15 +45,12 @@ public class Mission2015ResourceConfig extends CompetitionResourceConfig {
       new CompetitionDay(LocalDateTime.of(2015, 7, 11, 8, 0), LocalDateTime.of(2015, 7, 11, 18, 0)), // Sa
       new CompetitionDay(LocalDateTime.of(2015, 7, 12, 8, 0), LocalDateTime.of(2015, 7, 12, 18, 0)) // Su
       );
-  private static final List<TeamCode> TEAMS = ImmutableList.of(new TeamCode("AUVSI"), new TeamCode("cedar"), new TeamCode("dipo"), new TeamCode("ERAU"),
-      new TeamCode("FAU"), new TeamCode("GIT"), new TeamCode("NCKU"), new TeamCode("ODU"), new TeamCode("UCF"), new TeamCode("UF"), new TeamCode("UTA"),
-      new TeamCode("UM"), new TeamCode("URI"), new TeamCode("VU"));
-  private static final List<Pinger> courseAPingers = ImmutableList.of(new Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new Pinger(BuoyColor.red),
-      new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.green));
-  private static final List<Pinger> courseBPingers = ImmutableList.of(new Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new Pinger(BuoyColor.red),
-      new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.green));
-  private static final List<Pinger> openTestPingers = ImmutableList.of(new Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new Pinger(BuoyColor.red),
-      new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.green));
+  private static final List<TeamCode> TEAMS = ImmutableList.of(new TeamCode("AUVSI"), new TeamCode("DBH"), new TeamCode("EEPIS"), new TeamCode("ERAU"),
+      new TeamCode("FAU"), new TeamCode("GIT"), new TeamCode("NCKU"), new TeamCode("ODUSM"), new TeamCode("ODUBB"), new TeamCode("TUCE"), new TeamCode("CUA"),
+      new TeamCode("UCF"), new TeamCode("UF"), new TeamCode("UOFM"), new TeamCode("ULSAN"), new TeamCode("UWF"), new TeamCode("VU"));
+  private static final List<Pinger> courseAPingers = ImmutableList.of(new Pinger(BuoyColor.blue), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.red));
+  private static final List<Pinger> courseBPingers = ImmutableList.of(new Pinger(BuoyColor.blue), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.black));
+  private static final List<Pinger> openTestPingers = ImmutableList.of(new Pinger(BuoyColor.green));
   private static final Map<Course, CourseLayout> COURSE_LAYOUT_MAP;
   public static final AtomicInteger port = new AtomicInteger(9999);
   private final NMEAServer nmeaServer;

@@ -14,13 +14,17 @@ import com.felixpageau.roboboat.mission2015.structures.BuoyColor;
 import com.felixpageau.roboboat.mission2015.structures.Course;
 import com.felixpageau.roboboat.mission2015.structures.DockingSequence;
 import com.felixpageau.roboboat.mission2015.structures.GateCode;
+import com.felixpageau.roboboat.mission2015.structures.Pinger;
 import com.felixpageau.roboboat.mission2015.structures.Shape;
 import com.felixpageau.roboboat.mission2015.structures.TeamCode;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 public class RunSetup {
+  public static final RunSetup NO_RUN = new RunSetup("", Course.openTest, new TeamCode("NONE"), GateCode.generateRandomGateCode(),
+      DockingSequence.generateRandomDockingSequence(), Pinger.NO_PINGER, Shape.generateRandomInteropShape());
   private final String runId;
   private final TeamCode activeTeam;
   private final Course course;
@@ -121,7 +125,7 @@ public class RunSetup {
   @JsonIgnore
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("runId", runId).add("course", course).add("activeTeam", activeTeam).add("activeGateCode", activeGateCode)
+    return MoreObjects.toStringHelper(this).add("runId", runId).add("course", course).add("activeTeam", activeTeam).add("activeGateCode", activeGateCode)
         .add("activeDockingBay", activeDockingSequence).add("activePinger", activePinger).add("activeInteropShape", activeInteropShape).toString();
   }
 

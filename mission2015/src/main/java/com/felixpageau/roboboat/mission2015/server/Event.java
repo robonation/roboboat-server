@@ -13,10 +13,12 @@ public class Event {
   private final LocalDateTime time;
   private final String message;
 
+  @Deprecated
   public Event(String message) {
     this(LocalDateTime.now(), message);
   }
 
+  @Deprecated
   @JsonCreator
   public Event(@JsonProperty(value = "time") LocalDateTime time, @JsonProperty(value = "message") String message) {
     this.time = Preconditions.checkNotNull(time);

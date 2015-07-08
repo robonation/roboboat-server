@@ -9,10 +9,18 @@ import java.io.OutputStreamWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.annotation.CheckForNull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.felixpageau.roboboat.mission2015.structures.BeaconReport;
+import com.felixpageau.roboboat.mission2015.structures.HeartbeatReport;
+import com.felixpageau.roboboat.mission2015.structures.InteropReport;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -26,6 +34,14 @@ public class RunArchiver {
   private LocalDateTime endTime;
   private final RunSetup runSetup;
   private final List<Event> events = new ArrayList<>();
+  private final AtomicReference<HeartbeatReport> lastHeartbeat = new AtomicReference<>();
+  private final AtomicBoolean requestedGateCode = new AtomicBoolean();
+  private final AtomicBoolean requestedDockingSequence = new AtomicBoolean();
+  private final AtomicReference<BeaconReport> reportedPinger = new AtomicReference<>();
+  private final AtomicBoolean requestedImageListing = new AtomicBoolean();
+  private final AtomicBoolean requestedImage = new AtomicBoolean();
+  private final AtomicReference<String> uploadedImage = new AtomicReference<>();
+  private final AtomicReference<InteropReport> reportedInterop = new AtomicReference<>();
 
   public RunArchiver(RunSetup runSetup, File f, EventBus eventBus) {
     this(runSetup, null, LocalDateTime.now(), f, eventBus);
@@ -78,6 +94,94 @@ public class RunArchiver {
 
   }
 
+  public void addHeartbeatEvent(Event event) {
+    Preconditions.checkNotNull(event);
+    this.events.add(event);
+    try (BufferedWriter bf = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f)))) {
+      bf.append(event.toString()).append("\n");
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    eventBus.post(event);
+    System.out.println(event);
+
+  }
+
+  /**
+   * @return the lastHeartbeat
+   */
+  @CheckForNull
+  public Optional<HeartbeatReport> getLastHeartbeat() {
+    return Optional.ofNullable(lastHeartbeat.get());
+  }
+
+  /**
+   * @param lastHeartbeat
+   *          the lastHeartbeat to set
+   */
+  public void setLastHeartbeat(HeartbeatReport lastHeartbeat) {
+    Preconditions.checkNotNull(lastHeartbeat, "The lastHeartbeat cannot be null");
+    this.lastHeartbeat.set(lastHeartbeat);
+  }
+
+  public boolean hasRequestedGateCode() {
+    return requestedGateCode.get();
+  }
+
+  public void requestedGateCode() {
+    this.requestedGateCode.set(true);
+  }
+
+  public boolean hasRequestedDockingSequence() {
+    return requestedDockingSequence.get();
+  }
+
+  public void requestedDockingSequence() {
+    this.requestedDockingSequence.set(true);
+  }
+
+  public Optional<BeaconReport> getReportedPinger() {
+    return Optional.ofNullable(reportedPinger.get());
+  }
+
+  public void reportPinger(BeaconReport report) {
+    this.reportedPinger.compareAndSet(null, report);
+  }
+
+  public boolean hasRequestedImageListing() {
+    return requestedImageListing.get();
+  }
+
+  public void requestedImageListing() {
+    this.requestedImageListing.set(true);
+  }
+
+  public boolean hasRequestedImage() {
+    return requestedImage.get();
+  }
+
+  public void requestedImage() {
+    this.requestedImage.set(true);
+  }
+
+  public Optional<String> getUploadedImage() {
+    return Optional.ofNullable(uploadedImage.get());
+  }
+
+  public void uploadedImage(String path) {
+    this.uploadedImage.compareAndSet(null, path);
+  }
+
+  public Optional<InteropReport> getReportedInterop() {
+    return Optional.ofNullable(reportedInterop.get());
+  }
+
+  public void reportInterop(InteropReport report) {
+    this.reportedInterop.compareAndSet(null, report);
+  }
+
   public List<Event> getEvents() {
     return ImmutableList.copyOf(events);
   }
@@ -88,13 +192,6 @@ public class RunArchiver {
 
   public LocalDateTime getStartTime() {
     return startTime;
-  }
-
-  public void endRun() {
-    if (endTime == null) {
-      this.endTime = LocalDateTime.now();
-      addEvent(new Event(this.endTime, String.format("%s - %s - End run", runSetup.getCourse(), runSetup.getActiveTeam())));
-    }
   }
 
   @JsonIgnore

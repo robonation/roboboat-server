@@ -21,9 +21,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import com.felixpageau.roboboat.mission2015.structures.BuoyColor;
+import com.felixpageau.roboboat.mission2015.structures.Challenge;
 import com.felixpageau.roboboat.mission2015.structures.Course;
+import com.felixpageau.roboboat.mission2015.structures.Pinger;
 import com.felixpageau.roboboat.mission2015.structures.TeamCode;
 import com.felixpageau.roboboat.mission2015.utils.NMEAUtils;
 import com.google.common.base.Preconditions;
@@ -45,6 +49,7 @@ public class Competition {
   private final List<TeamCode> teams;
   private final boolean activatePinger;
   private final EventBus eventBus = new EventBus();
+  private final Executor exec = Executors.newCachedThreadPool();
 
   public Competition(List<CompetitionDay> competitionDays, List<TeamCode> teams, Map<Course, CourseLayout> layoutMap, boolean activatePinger)
       throws MalformedURLException {
@@ -148,7 +153,7 @@ public class Competition {
     Collection<RunArchiver> previousRuns = results.get(slot);
     RunArchiver lastRun = activeRuns.get(slot.getCourse());
     if (lastRun != null) {
-      lastRun.endRun();
+      endRun(slot.getCourse(), teamCode);
     }
     int runCount = (previousRuns != null) ? previousRuns.size() : 0;
     String runId = String.format("%s-%s-%s", slot.getCourse(), slot.getStartTime().format(dateRunIdFormat), runCount);
@@ -156,25 +161,49 @@ public class Competition {
     RunSetup newSetup = RunSetup.generateRandomSetup(layoutMap.get(slot.getCourse()), teamCode, runId);
 
     RunArchiver newRun = new RunArchiver(newSetup, new File("competition-log." + LocalDateTime.now().format(DATE_FORMAT)), eventBus);
-    newRun
-        .addEvent(new Event(newRun.getStartTime(), String.format("%s - %s - Start run (config %s)", newSetup.getCourse(), newSetup.getActiveTeam(), newSetup)));
+    newRun.addEvent(new StructuredEvent(newSetup.getCourse(), newSetup.getActiveTeam(), Challenge.none, String.format("Start run (config %s)", newSetup)));
     activeRuns.put(slot.getCourse(), newRun);
     results.put(slot, newRun);
 
     if (activatePinger && !slot.getCourse().equals(Course.openTest)) {
+      exec.execute(new ActivatePinger(layout, newSetup));
+    }
+
+    return newSetup;
+  }
+
+  public class ActivatePinger implements Runnable {
+    private final CourseLayout layout;
+    private final RunSetup newSetup;
+
+    public ActivatePinger(CourseLayout layout, RunSetup newSetup) {
+      this.layout = Preconditions.checkNotNull(layout, "layout cannot be null");
+      this.newSetup = Preconditions.checkNotNull(newSetup, "newSetup cannot be null");
+    }
+
+    @Override
+    public void run() {
       boolean activated = false;
       for (int j = 0; j < 10 && !activated; j++) {
         try (Socket s = new Socket(layout.getPingerControlServer().getHost(), layout.getPingerControlServer().getPort());
             Writer w = new OutputStreamWriter(s.getOutputStream());
             BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream()))) {
-          for (int i = 0; i < layout.getPingers().size(); i++) {
-            if (newSetup.getActivePinger().equals(layout.getPingers().get(i))) {
-              String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(slot.getCourse(), i + 1));
-              w.write(pingerActivationMessage);
-              System.out.println(pingerActivationMessage);
-              w.flush();
-              activated = true;
-              break;
+          if (Pinger.NO_PINGER.equals(newSetup)) {
+            String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), 0));
+            w.write(pingerActivationMessage);
+            System.out.println(pingerActivationMessage);
+            w.flush();
+            activated = true;
+          } else {
+            for (int i = 0; i < layout.getPingers().size(); i++) {
+              if (newSetup.getActivePinger().equals(layout.getPingers().get(i))) {
+                String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), i + 1));
+                w.write(pingerActivationMessage);
+                System.out.println(pingerActivationMessage);
+                w.flush();
+                activated = true;
+                break;
+              }
             }
           }
           System.out.println(r.readLine());
@@ -186,15 +215,16 @@ public class Competition {
         }
       }
     }
-
-    return newSetup;
   }
 
   public synchronized void endRun(Course course, TeamCode teamCode) {
     RunArchiver ra = activeRuns.get(course);
     if (ra != null) {
-      ra.endRun();
+      ra.addEvent(new StructuredEvent(course, teamCode, Challenge.none, "End run"));
       activeRuns.remove(course);
+      if (activatePinger && !Course.openTest.equals(course)) {
+        exec.execute(new ActivatePinger(layoutMap.get(course), RunSetup.NO_RUN));
+      }
     }
   }
 

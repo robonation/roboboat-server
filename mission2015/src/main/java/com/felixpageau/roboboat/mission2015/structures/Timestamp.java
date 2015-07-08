@@ -1,6 +1,7 @@
 package com.felixpageau.roboboat.mission2015.structures;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -21,6 +22,11 @@ public class Timestamp {
 
   public Timestamp() {
     this.timestamp = LocalDateTime.now();
+  }
+
+  @JsonIgnore
+  public long getTimeAsLong() {
+    return timestamp.atOffset(ZoneOffset.UTC).toEpochSecond();
   }
 
   @JsonValue

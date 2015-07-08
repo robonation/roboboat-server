@@ -19,8 +19,11 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.5.1</version>
         <inherited>true</inherited>
         <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
           <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
         </configuration>
       </plugin>
@@ -30,13 +33,59 @@
         <configuration>
           <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
           <archiveClasses>true</archiveClasses>
-          <packagingExcludes>WEB-INF/classes/**</packagingExcludes>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <classpathPrefix>WEB-INF/lib</classpathPrefix>
+              <mainClass>com.felixpageau.roboboat.mission2015.AdminApp</mainClass>
+            </manifest>
+          </archive>
         </configuration>
       </plugin>
     </plugins>
   </build>
 
   <dependencies>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-continuation</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-http</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-io</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-server</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-servlet</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-security</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.jetty</groupId>
+      <artifactId>jetty-webapp</artifactId>
+      <scope>provided</scope>
+    </dependency>
     <dependency>
       <groupId>com.felixpageau.roboboat</groupId>
       <artifactId>mission2015-admin</artifactId>

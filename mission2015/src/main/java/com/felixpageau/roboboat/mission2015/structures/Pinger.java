@@ -1,13 +1,14 @@
-package com.felixpageau.roboboat.mission2015.server;
+package com.felixpageau.roboboat.mission2015.structures;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.felixpageau.roboboat.mission2015.structures.BuoyColor;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 public class Pinger {
+  public static final Pinger NO_PINGER = new Pinger(BuoyColor.none);
   private final BuoyColor buoyColor;
 
   @JsonCreator
@@ -22,7 +23,7 @@ public class Pinger {
   @JsonIgnore
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("buoyColor", buoyColor).toString();
+    return MoreObjects.toStringHelper(this).add("buoyColor", buoyColor).toString();
   }
 
   @JsonIgnore

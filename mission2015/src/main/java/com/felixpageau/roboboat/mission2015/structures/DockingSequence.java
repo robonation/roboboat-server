@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -33,7 +34,7 @@ public class DockingSequence {
   @JsonIgnore
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("dockingBaySequence", dockingBaySequence).toString();
+    return MoreObjects.toStringHelper(this).add("dockingBaySequence", dockingBaySequence).toString();
   }
 
   @JsonIgnore

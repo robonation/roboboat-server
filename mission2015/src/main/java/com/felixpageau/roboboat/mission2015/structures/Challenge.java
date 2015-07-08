@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Preconditions;
 
 public enum Challenge {
+  none,
   gates, 
   obstacles, 
   docking, 

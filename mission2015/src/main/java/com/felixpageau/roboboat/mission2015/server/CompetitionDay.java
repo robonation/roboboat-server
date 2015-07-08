@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
@@ -64,7 +65,7 @@ public class CompetitionDay {
   @JsonIgnore
   @Override
   public String toString() {
-    return Objects.toStringHelper(this).add("day", getDay()).add("startTime", startTime.format(Config.DATE_FORMATTER.get()))
+    return MoreObjects.toStringHelper(this).add("day", getDay()).add("startTime", startTime.format(Config.DATE_FORMATTER.get()))
         .add("endTime", endTime.format(Config.DATE_FORMATTER.get())).toString();
   }
 }
