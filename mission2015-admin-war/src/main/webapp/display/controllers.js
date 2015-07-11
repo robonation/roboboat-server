@@ -1,27 +1,82 @@
 var myApp = angular.module('control', ['ui.bootstrap']);
-var host = "https://localhost:9443";
+var host = "http://localhost:9000";
 <!-- var host = "http://192.168.1.111:8080"; -->
 <!-- var host = "https://192.168.1.68:9443"; -->
 
-myApp.controller('MapCtrl', function ($scope) {
+myApp.controller('TimeCtrl', function ($scope, $rootScope) {
+    $rootScope.lastUpdate = null;
+    
+    $scope.lastUpdate = function(epoch) {
+        if ($rootScope.lastUpdate) {
+            return $rootScope.lastUpdate.toUTCString();
+        }
+    }
+});
+
+myApp.controller('MapCtrl', function ($scope, $rootScope) {
     var mapOptions = {
-        center: { lat: 36.8023, lng: -76.191835},
+        center: { lat: 36.8023, lng: -76.1916},
         mapTypeId: google.maps.MapTypeId.SATELLITE,
         heading: 90,
         zoom: 19
     }
-    $scope.map = new google.maps.Map(document.getElementById('map'), mapOptions);
-    $scope.map.setTilt(0);
+    $rootScope.map = new google.maps.Map(document.getElementById('map'), mapOptions);
+    $rootScope.map.setTilt(0);
 });
 
-myApp.controller('Status', function ($scope, $http, $timeout) {
+myApp.controller('Status', function ($scope, $http, $timeout, $rootScope) {
+    $scope.markers = [];
+    
     $http.defaults.headers.common['Authorization'] = 'Basic YWRtaW46YnVveWFuY3k=';
+    $scope.uploadedImage = function(imageId) {
+        return host.concat("/admin/display/image/", imageId);
+    }
+    $scope.symbol = function(shape) {
+        switch(shape) {
+            case 'triangle':
+                return '&#x25B2;';
+            case 'cruciform':
+                return "+";//"&#x271A;";
+            case 'circle':
+                return '&#x2B24;';
+            default:
+                return "";
+        }
+    }
     $scope.getStatuses = function(){
       $http.get(host + '/admin/display').
           success(function(data) {
               $scope.status = data;
+              $rootScope.lastUpdate = new Date();
+              $scope.plotMarker(data);
       });
     };
+    
+    $scope.plotMarker = function(data) {
+        if (data.courseA.currentPosition) {
+            if ($scope.markers.length >= 20) {
+                var old = $scope.markers.shift();
+                old.setMap(null);
+            }
+            
+            var myLatlng = new google.maps.LatLng(data.courseA.currentPosition.latitude,data.courseA.currentPosition.longitude);
+            var marker = new google.maps.Marker({
+                position: myLatlng,
+                animation: google.maps.Animation.DROP//,
+                //title:"A"
+            });
+            $scope.markers.push(marker);
+            marker.setMap($rootScope.map);
+        }
+    }
+    
+    $scope.epochToDate = function(epoch) {
+        if (epoch) {
+            var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+            d.setUTCSeconds(epoch);
+            return d.toUTCString();
+        }
+    }
     
     // Function to replicate setInterval using $timeout service.
     $scope.intervalFunction = function(callback){

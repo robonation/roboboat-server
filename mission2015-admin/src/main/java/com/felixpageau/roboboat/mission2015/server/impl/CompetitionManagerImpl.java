@@ -118,8 +118,8 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public ReportStatus startRun(Course course, TeamCode teamCode) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive != null) {
-      throw new WebApplicationExceptionWithContext(String.format("There is already a run active on course %s! You can't go until team %s get out of %s", course,
-          archive.getRunSetup().getActiveTeam(), course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("There is already a run active on course %s! You can't go until team %s get out of %s",
+          course, archive.getRunSetup().getActiveTeam(), course), 400);
     }
     TimeSlot slot = competition.findCurrentTimeSlot(course);
     RunSetup r = competition.startNewRun(slot, teamCode);
@@ -131,7 +131,8 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public ReportStatus endRun(Course course, TeamCode teamCode) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive != null && !archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", archive.getRunSetup().getActiveTeam(), course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", archive
+          .getRunSetup().getActiveTeam(), course), 400);
     }
     if (archive != null && archive.getRunSetup().getActiveTeam().equals(teamCode)) {
       competition.endRun(course, teamCode);
@@ -144,10 +145,12 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public ReportStatus reportHeartbeat(Course course, TeamCode teamCode, HeartbeatReport report) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode),
+          400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode,
+          course), 400);
     }
     boolean success = true;// report.getShape().equals(archive.getRunSetup().getActiveInteropShape());
     archive.addHeartbeatEvent(new StructuredEvent(course, teamCode, report.getChallenge(), "Heartbeat report"));
@@ -159,10 +162,12 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public GateCode getObstacleCourseCode(Course course, TeamCode teamCode) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode),
+          400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode,
+          course), 400);
     }
     GateCode code = archive.getRunSetup().getActiveGateCode();
     archive.addEvent(new StructuredEvent(course, teamCode, Challenge.obstacles, String.format("request gatecode (%s)", code)));
@@ -174,10 +179,12 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public DockingSequence getDockingSequence(Course course, TeamCode teamCode) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode),
+          400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode,
+          course), 400);
     }
     DockingSequence sequence = archive.getRunSetup().getActiveDockingSequence();
     archive.addEvent(new StructuredEvent(course, teamCode, Challenge.docking, String.format("request bay (%s)", sequence)));
@@ -189,10 +196,12 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public ReportStatus reportPinger(Course course, TeamCode teamCode, BeaconReport payload) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode),
+          400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode,
+          course), 400);
     }
     Pinger reportedPinger = new Pinger(payload.getBuoyColor());
     boolean success = reportedPinger.getBuoyColor().equals(archive.getRunSetup().getActivePinger().getBuoyColor());
@@ -206,10 +215,12 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public ReportStatus reportInterop(Course course, TeamCode teamCode, InteropReport report) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode),
+          400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode,
+          course), 400);
     }
     boolean success = report.getShape().equals(archive.getRunSetup().getActiveInteropShape());
     archive.addEvent(new StructuredEvent(course, teamCode, Challenge.interop, String.format("reported shape (%s) -> %s", report, success ? "success"
@@ -222,10 +233,12 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public List<String> listInteropImages(Course course, TeamCode teamCode) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode),
+          400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode,
+          course), 400);
     }
     archive.addEvent(new StructuredEvent(course, teamCode, Challenge.interop, "listed image"));
     archive.requestedImageListing();
@@ -238,10 +251,12 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public Optional<byte[]> getInteropImage(Course course, TeamCode teamCode, String filename) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode),
+          400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode,
+          course), 400);
     }
     archive.addEvent(new StructuredEvent(course, teamCode, Challenge.interop, String.format("requested image %s", filename)));
     archive.requestedImage();
@@ -255,10 +270,12 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public UploadStatus uploadInteropImage(Course course, TeamCode teamCode, byte[] content) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode),
+          400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode,
+          course), 400);
     }
     UUID imageId = UUID.randomUUID();
 
@@ -280,7 +297,7 @@ public class CompetitionManagerImpl implements CompetitionManager {
     }
 
     archive.addEvent(new StructuredEvent(course, teamCode, Challenge.interop, String.format("uploaded image (%s)", imageId)));
-    archive.uploadedImage(path);
+    archive.uploadedImage(imageId.toString());
     return new UploadStatus(imageId.toString());
   }
 
@@ -319,7 +336,7 @@ public class CompetitionManagerImpl implements CompetitionManager {
           .map(HeartbeatReport::getChallenge).orElse(null), raA.getRunSetup().getActiveGateCode(), raA.hasRequestedGateCode(), raA.getRunSetup()
           .getActiveDockingSequence(), raA.hasRequestedDockingSequence(), raA.getRunSetup().getActivePinger().getBuoyColor(), raA.getReportedPinger()
           .map(BeaconReport::getBuoyColor).orElse(null), raA.hasRequestedImageListing(), raA.hasRequestedImage(), raA.getUploadedImage().orElse(null), raA
-          .getReportedInterop().map(InteropReport::getShape).orElse(null), raA.getRunSetup().getActiveInteropShape());
+          .getRunSetup().getActiveInteropShape(), raA.getReportedInterop().map(InteropReport::getShape).orElse(null));
     }
 
     DisplayReport reportB;
@@ -331,7 +348,7 @@ public class CompetitionManagerImpl implements CompetitionManager {
           .map(HeartbeatReport::getChallenge).orElse(null), raB.getRunSetup().getActiveGateCode(), raB.hasRequestedGateCode(), raB.getRunSetup()
           .getActiveDockingSequence(), raB.hasRequestedDockingSequence(), raB.getRunSetup().getActivePinger().getBuoyColor(), raB.getReportedPinger()
           .map(BeaconReport::getBuoyColor).orElse(null), raB.hasRequestedImageListing(), raB.hasRequestedImage(), raB.getUploadedImage().orElse(null), raB
-          .getReportedInterop().map(InteropReport::getShape).orElse(null), raB.getRunSetup().getActiveInteropShape());
+          .getRunSetup().getActiveInteropShape(), raB.getReportedInterop().map(InteropReport::getShape).orElse(null));
     }
 
     return new DisplayStatus(ImmutableMap.of(Course.courseA, reportA, Course.courseB, reportB));

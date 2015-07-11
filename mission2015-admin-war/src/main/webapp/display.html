@@ -36,23 +36,28 @@
     </style>
   </head>
   <body>
-    <nav class="navbar navbar-inverse">
-      <div class="container-fluid"><div class="navbar-header"></div><a class="navbar-brand" href="#">2015 RoboBoat - Course Display</a></div>
-    </nav>
+    
 
     <div ng-app="control">
+      <nav ng-controller="TimeCtrl" class="navbar navbar-inverse">
+        <div class="container-fluid">
+          <div class="navbar-header"></div><a class="navbar-brand" href="#">2015 RoboBoat - Course Display</a>
+          <div class="navbar-right"><a href="#">Last Update: {{lastUpdate()}}</a></div>
+        </div>
+      </nav>
+    
       <div class="container" ng-controller="Status" style="width: 1400px;">
                 <!-- Course B -->
-        <div id="columnright" class="jumbotron">
+        <div id="columnright" class="jumbotron" style="padding-right: 0px; padding-left: 50px">
           <div class="row">
-            <h2>Course B</h2>
+            <h2>Course A</h2>
           </div>
           <div class="row">
             <h6>Run information</h6>
             <ul>
               <li>Team: {{status.courseB.teamCode}}
               <li>Challenge: {{status.courseB.currentChallenge}}
-              <li>Heartbeat: {{status.courseB.lastHeartbeat}}
+              <li>Heartbeat: <span ng-show="status.courseB.lastHeartbeat">{{epochToDate(status.courseB.lastHeartbeat)}}</span>
             </ul>
           </div>
           <div class="row">
@@ -67,17 +72,31 @@
             <h6>Automated Docking</h6>
             <ul>
               <li>Requested seq: {{status.courseB.requestedDockingSequence}}
-              <li ng-show="status.courseB.requestedDockingSequence">Dock sequence: {{status.courseB.dockingSequence.dockingBaySequence}}
+              <li ng-show="status.courseB.requestedDockingSequence">Dock sequence: <ol><li ng-repeat="bay in status.courseB.dockingSequence.dockingBaySequence" style="color: {{bay.color}}">{{bay.symbol}}-{{bay.color}}</ol>
               <li ng-hide="status.courseB.requestedDockingSequence">Dock sequence: **hidden**
             </ul>
           </div>
           <div class="row">
             <h6>Pinger Location</h6>
             <ul>
-              <li>Reported pinger: {{status.courseB.reportedPinger}}
-              <li ng-show="status.courseB.reportedPinger">Active pinger: {{status.courseB.activePinger.buoyColor}}
+              <li>Reported pinger: <span style="color: {{status.courseB.reportedPinger}}">{{status.courseB.reportedPinger}}</span>
+              <li ng-show="status.courseB.reportedPinger">Active pinger: <span style="color: {{status.courseB.activePinger}}">{{status.courseB.activePinger}}</span>
               <li ng-hide="status.courseB.reportedPinger">Active pinger: **hidden**
             </ul>
+          </div>
+          <div class="row">
+            <h6>Interop</h6>
+            <ul>
+              <li>Listed available images: <span>{{status.courseB.requestedInteropImages}}</span>
+              <li>Retrieved one image: <span>{{status.courseB.requestedInteropImage}}</span>
+              <li ng-hide="status.courseB.uploadedImage">Uploaded image: none
+              <li ng-show="status.courseB.uploadedImage">Uploaded image: {{status.courseB.uploadedImage}}
+              <li>Reported shape: {{status.courseB.reportedShape}}
+              <li ng-show="status.courseB.reportedShape">Active shape: {{status.courseB.activeShape}}
+              <li ng-hide="status.courseB.reportedShape">Active shape: **hidden**
+            </ul>
+            <h6 ng-show="status.courseB.uploadedImage">Uploaded image</h6>
+            <img height="200" width="200" ng-show="status.courseB.uploadedImage" src="{{uploadedImage(status.courseB.uploadedImage)}}">
           </div>
         </div>
         
@@ -97,7 +116,7 @@
             <ul>
               <li>Team: {{status.courseA.teamCode}}
               <li>Challenge: {{status.courseA.currentChallenge}}
-              <li>Heartbeat: {{status.courseA.lastHeartbeat}}
+              <li>Heartbeat: <span ng-show="status.courseA.lastHeartbeat">{{epochToDate(status.courseA.lastHeartbeat)}}</span>
             </ul>
           </div>
           <div class="row">
@@ -112,17 +131,32 @@
             <h6>Automated Docking</h6>
             <ul>
               <li>Requested seq: {{status.courseA.requestedDockingSequence}}
-              <li ng-show="status.courseA.requestedDockingSequence">Dock sequence: {{status.courseA.dockingSequence.dockingBaySequence}}
+              <li ng-show="status.courseA.requestedDockingSequence">Dock sequence: <ol><li ng-repeat="bay in status.courseA.dockingSequence.dockingBaySequence" style="color: {{bay.color}}">{{bay.symbol}}-{{bay.color}}</ol>
               <li ng-hide="status.courseA.requestedDockingSequence">Dock sequence: **hidden**
             </ul>
           </div>
           <div class="row">
             <h6>Pinger Location</h6>
             <ul>
-              <li>Reported pinger: {{status.courseA.reportedPinger}}
-              <li ng-show="status.courseA.reportedPinger">Active pinger: {{status.courseA.activePinger.buoyColor}}
+              <li>Reported pinger: <span style="color: {{status.courseA.reportedPinger}}">{{status.courseA.reportedPinger}}</span>
+              <li ng-show="status.courseA.reportedPinger">Active pinger: <span style="color: {{status.courseA.activePinger}}">{{status.courseA.activePinger}}</span>
               <li ng-hide="status.courseA.reportedPinger">Active pinger: **hidden**
             </ul>
+          </div>
+          <div class="row">
+            <h6>Interop</h6>
+            <ul>
+              <li>Listed available images: <span>{{status.courseA.requestedInteropImages}}</span>
+              <li>Retrieved one image: <span>{{status.courseA.requestedInteropImage}}</span>
+              <li ng-hide="status.courseA.uploadedImage">Uploaded image: none
+              <li ng-show="status.courseA.uploadedImage">Uploaded image: {{status.courseA.uploadedImage}}
+              <li>Reported shape: {{status.courseA.reportedShape}}
+              <li ng-show="status.courseA.reportedShape">Active shape: {{status.courseA.activeShape}}
+              <li ng-hide="status.courseA.reportedShape">Active shape: **hidden**
+            </ul>
+<!--             <h6 ng-show="status.courseA.reportedShape">Listed images</h6> -->
+            <h6 ng-show="status.courseA.uploadedImage">Uploaded image</h6>
+            <img height="200" width="200" ng-show="status.courseA.uploadedImage" src="{{uploadedImage(status.courseA.uploadedImage)}}">
           </div>
         </div>
       </div>
