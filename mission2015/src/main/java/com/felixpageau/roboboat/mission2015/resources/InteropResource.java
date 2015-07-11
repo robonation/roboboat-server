@@ -11,13 +11,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import com.felixpageau.roboboat.mission2015.NotFoundException;
 import com.felixpageau.roboboat.mission2015.server.CompetitionManager;
 import com.felixpageau.roboboat.mission2015.structures.Course;
 import com.felixpageau.roboboat.mission2015.structures.InteropReport;
@@ -41,7 +40,7 @@ public class InteropResource {
   @Path("/image/{course}/{teamCode}")
   @POST
   @Produces({ MediaType.APPLICATION_JSON })
-  @Consumes({ MediaType.MULTIPART_FORM_DATA })
+  @Consumes({ MediaType.MULTIPART_FORM_DATA, "multipart/mixed" })
   public UploadStatus uploadImage(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode,
       @FormDataParam("file") InputStream fileInputStream, @FormDataParam("file") FormDataContentDisposition fileDetail) throws IOException {
     return manager.uploadInteropImage(course, teamCode, ByteStreams.toByteArray(fileInputStream));
@@ -95,10 +94,4 @@ public class InteropResource {
   // }
   // }
 
-  @SuppressWarnings("serial")
-  public class NotFoundException extends WebApplicationException {
-    public NotFoundException() {
-      super(Response.Status.NOT_FOUND);
-    }
-  }
 }

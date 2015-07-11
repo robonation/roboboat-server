@@ -78,19 +78,19 @@ public class JSONServerTest {
       HttpPost post;
 
       // end run
-      resp = client.execute(new HttpPost(basePath + "/run/end/courseB/AUVSI"));
+      resp = client.execute(new HttpPost(basePath + "/run/end/courseA/AUVSI"));
       assertEquals("End run status code", 200, resp.getStatusLine().getStatusCode());
       assertEquals(new ReportStatus(true), mapper.readValue(resp.getEntity().getContent(), ReportStatus.class));
       resp.close();
 
       // start run
-      resp = client.execute(new HttpPost(basePath + "/run/start/courseB/AUVSI"));
+      resp = client.execute(new HttpPost(basePath + "/run/start/courseA/AUVSI"));
       assertEquals("Start run status code", 200, resp.getStatusLine().getStatusCode());
       assertEquals(new ReportStatus(true), mapper.readValue(resp.getEntity().getContent(), ReportStatus.class));
       resp.close();
 
       // Heartbeat (gate)
-      post = new HttpPost(basePath + "/heartbeat/courseB/AUVSI");
+      post = new HttpPost(basePath + "/heartbeat/courseA/AUVSI");
       post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new HeartbeatReport(new Timestamp(), Challenge.gates, Position.FOUNDERS))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
@@ -99,7 +99,7 @@ public class JSONServerTest {
       resp.close();
 
       // Heartbeat (obstacles)
-      post = new HttpPost(basePath + "/heartbeat/courseB/AUVSI");
+      post = new HttpPost(basePath + "/heartbeat/courseA/AUVSI");
       post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new HeartbeatReport(new Timestamp(), Challenge.obstacles, Position.FOUNDERS))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
@@ -108,14 +108,14 @@ public class JSONServerTest {
       resp.close();
 
       // Obstacle
-      resp = client.execute(new HttpGet(basePath + "/obstacleAvoidance/courseB/AUVSI"));
+      resp = client.execute(new HttpGet(basePath + "/obstacleAvoidance/courseA/AUVSI"));
       assertEquals("Obstacle", 200, resp.getStatusLine().getStatusCode());
       GateCode gc = mapper.readValue(resp.getEntity().getContent(), GateCode.class);
       assertNotNull(gc);
       resp.close();
 
       // Heartbeat (docking)
-      post = new HttpPost(basePath + "/heartbeat/courseB/AUVSI");
+      post = new HttpPost(basePath + "/heartbeat/courseA/AUVSI");
       post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new HeartbeatReport(new Timestamp(), Challenge.docking, Position.FOUNDERS))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
@@ -124,7 +124,7 @@ public class JSONServerTest {
       resp.close();
 
       // Docking
-      resp = client.execute(new HttpGet(basePath + "/automatedDocking/courseB/AUVSI"));
+      resp = client.execute(new HttpGet(basePath + "/automatedDocking/courseA/AUVSI"));
       assertEquals("Docking", 200, resp.getStatusLine().getStatusCode());
       DockingSequence ds = mapper.readValue(resp.getEntity().getContent(), DockingSequence.class);
       assertNotNull(ds);
@@ -133,7 +133,7 @@ public class JSONServerTest {
       resp.close();
 
       // Heartbeat (pinger)
-      post = new HttpPost(basePath + "/heartbeat/courseB/AUVSI");
+      post = new HttpPost(basePath + "/heartbeat/courseA/AUVSI");
       post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new HeartbeatReport(new Timestamp(), Challenge.pinger, Position.FOUNDERS))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
@@ -142,8 +142,8 @@ public class JSONServerTest {
       resp.close();
 
       // Pinger
-      post = new HttpPost(basePath + "/pinger/courseB/AUVSI");
-      post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new BeaconReport(Course.courseB, new TeamCode("AUVSI"), BuoyColor.black))));
+      post = new HttpPost(basePath + "/pinger/courseA/AUVSI");
+      post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new BeaconReport(Course.courseA, new TeamCode("AUVSI"), BuoyColor.black))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
       assertEquals("Pinger", 200, resp.getStatusLine().getStatusCode());
@@ -159,7 +159,7 @@ public class JSONServerTest {
       resp.close();
 
       // Heartbeat (interop)
-      post = new HttpPost(basePath + "/heartbeat/courseB/AUVSI");
+      post = new HttpPost(basePath + "/heartbeat/courseA/AUVSI");
       post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new HeartbeatReport(new Timestamp(), Challenge.interop, Position.FOUNDERS))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
@@ -168,7 +168,7 @@ public class JSONServerTest {
       resp.close();
 
       // Interop - list images
-      resp = client.execute(new HttpGet(basePath + "/interop/images/courseB/AUVSI"));
+      resp = client.execute(new HttpGet(basePath + "/interop/images/courseA/AUVSI"));
       assertEquals("Interop - list", 200, resp.getStatusLine().getStatusCode());
       String listing = CharStreams.toString(new InputStreamReader(resp.getEntity().getContent(), Charsets.UTF_8));
       resp.close();
@@ -181,7 +181,7 @@ public class JSONServerTest {
       }
 
       // Interop - upload
-      post = new HttpPost(basePath + "/interop/image/courseB/AUVSI");
+      post = new HttpPost(basePath + "/interop/image/courseA/AUVSI");
       post.setEntity(MultipartEntityBuilder.create().addPart("file", new FileBody(new File("test.jpg"))).setMode(HttpMultipartMode.BROWSER_COMPATIBLE).build());
       // post.setHeader("Content-Type", "multipart/form-data");
       resp = client.execute(post);
@@ -192,8 +192,8 @@ public class JSONServerTest {
       resp.close();
 
       // Interop - report
-      post = new HttpPost(basePath + "/interop/report/courseB/AUVSI");
-      post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new InteropReport(Course.courseB, new TeamCode("AUVSI"), Shape.EIGHT, us.getImageId()))));
+      post = new HttpPost(basePath + "/interop/report/courseA/AUVSI");
+      post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new InteropReport(Course.courseA, new TeamCode("AUVSI"), Shape.EIGHT, us.getImageId()))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
       assertEquals("Interop report", 200, resp.getStatusLine().getStatusCode());
@@ -209,7 +209,7 @@ public class JSONServerTest {
       resp.close();
 
       // Heartbeat (return)
-      post = new HttpPost(basePath + "/heartbeat/courseB/AUVSI");
+      post = new HttpPost(basePath + "/heartbeat/courseA/AUVSI");
       post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new HeartbeatReport(new Timestamp(), Challenge.return_to_dock, Position.FOUNDERS))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
@@ -218,7 +218,7 @@ public class JSONServerTest {
       resp.close();
 
       // end run
-      resp = client.execute(new HttpPost(basePath + "/run/end/courseB/AUVSI"));
+      resp = client.execute(new HttpPost(basePath + "/run/end/courseA/AUVSI"));
       assertEquals("End run", 200, resp.getStatusLine().getStatusCode());
       assertEquals(new ReportStatus(true), mapper.readValue(resp.getEntity().getContent(), ReportStatus.class));
       resp.close();

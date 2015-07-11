@@ -1,9 +1,11 @@
 var myApp = angular.module('control');
-var host = "http://192.168.1.111:8080";
+var host = "http://admin:buoyancy@192.168.1.111:8080";
 <!-- var host = "https://192.168.1.40:9443"; -->
 <!-- var host = "https://192.168.1.68:9443"; -->
 
 myApp.controller('Teams', function ($scope, $http, $timeout) {
+    $http.defaults.headers.common = {"Access-Control-Request-Headers": "accept, origin, authorization"};
+    
     $scope.getTeams = function(){
       $http.get(host + '/admin/teams').
           success(function(data) {

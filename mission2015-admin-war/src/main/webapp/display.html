@@ -2,69 +2,50 @@
 <html xmlns:ng="http://angularjs.org">
   <head>
     <link href="display/bootstrap.css" rel="stylesheet">
+    <link href="display/bootstrap-theme.css" rel="stylesheet">
     <style type="text/css">
       #map {
 /*           height: 100%; */
 /*           width: 100%; */
-             height:600px;
-             width:800px;
+             height:750px;
+             width:750px;
+      }
+      
+      .container {
+        display: flex;
+        justify-content: space-around;
+        align-items: stretch;
+      }
+
+      #columnleft {
+        float: left;
+        width: 300px;
+      }
+
+      #columnright {
+        float: left;
+        width: 300px;
+        padding-right: 0px; padding-left: 50px
+      }
+
+      .column.center {
+        border-left: 1px solid #eee;
+        float: left;
+        width: 750px;
       }
     </style>
   </head>
   <body>
-    <h2 style="text-align: center;">2015 RoboBoat - Course Display</h2>
-    
+    <nav class="navbar navbar-inverse">
+      <div class="container-fluid"><div class="navbar-header"></div><a class="navbar-brand" href="#">2015 RoboBoat - Course Display</a></div>
+    </nav>
+
     <div ng-app="control">
-      <div class="container" ng-controller="Status">
-        <div class="col-md-2">
+      <div class="container" ng-controller="Status" style="width: 1400px;">
+                <!-- Course B -->
+        <div id="columnright" class="jumbotron">
           <div class="row">
-            <h4>courseA</h4>
-          </div>
-          <div class="row">
-            <h6>Run information</h6>
-            <ul>
-              <li>Team: {{status.courseA.teamCode}}
-              <li>Challenge: {{status.courseA.currentChallenge}}
-              <li>Heartbeat: {{status.courseA.lastHeartbeat}}
-            </ul>
-          </div>
-          <div class="row">
-            <h6>Obstacle Avoidance</h6>
-            <ul>
-              <li>Requested code: {{status.courseA.requestedGateCode}}
-              <li ng-show="status.courseA.requestedGateCode">Gate code: {{status.courseA.assignedGateCode.gateCode}}
-              <li ng-hide="status.courseA.requestedGateCode">Gate code: **hidden**
-            </ul>
-          </div>
-          <div class="row">
-            <h6>Automated Docking</h6>
-            <ul>
-              <li>Requested seq: {{status.courseA.requestedDockingSequence}}
-              <li ng-show="status.courseA.requestedDockingSequence">Dock sequence: {{status.courseA.dockingSequence.dockingBaySequence}}
-              <li ng-hide="status.courseA.requestedDockingSequence">Dock sequence: **hidden**
-            </ul>
-          </div>
-          <div class="row">
-            <h6>Pinger Location</h6>
-            <ul>
-              <li>Reported pinger: {{status.courseA.reportedPinger}}
-              <li ng-show="status.courseA.reportedPinger">Active pinger: {{status.courseA.activePinger.buoyColor}}
-              <li ng-hide="status.courseA.reportedPinger">Active pinger: **hidden**
-            </ul>
-          </div>
-        </div>
-        
-        <div class="col-md-7" ng-controller="MapCtrl">
-          <div id="map"></div>
-          <div id="class" ng-repeat="marker in markers | orderBy : 'title'">
-             <a href="#" ng-click="openInfoWindow($event, marker)">{{marker.title}}</a>
-          </div>
-        </div>
-        
-        <!-- Course B -->
-        <div class="col-md-2">
-          <div class="row">
-            <h4>courseB</h4>
+            <h2>Course B</h2>
           </div>
           <div class="row">
             <h6>Run information</h6>
@@ -99,12 +80,54 @@
             </ul>
           </div>
         </div>
+        
+        <div class="column center" ng-controller="MapCtrl">
+          <div id="map"></div>
+          <div id="class" ng-repeat="marker in markers | orderBy : 'title'">
+             <a href="#" ng-click="openInfoWindow($event, marker)">{{marker.title}}</a>
+          </div>
+        </div>
+        
+        <div id="columnleft" class="jumbotron" style="padding-right: 0px; padding-left: 50px">
+          <div class="row">
+            <h2>Course A</h2>
+          </div>
+          <div class="row">
+            <h6>Run information</h6>
+            <ul>
+              <li>Team: {{status.courseA.teamCode}}
+              <li>Challenge: {{status.courseA.currentChallenge}}
+              <li>Heartbeat: {{status.courseA.lastHeartbeat}}
+            </ul>
+          </div>
+          <div class="row">
+            <h6>Obstacle Avoidance</h6>
+            <ul>
+              <li>Requested code: {{status.courseA.requestedGateCode}}
+              <li ng-show="status.courseA.requestedGateCode">Gate code: {{status.courseA.assignedGateCode.gateCode}}
+              <li ng-hide="status.courseA.requestedGateCode">Gate code: **hidden**
+            </ul>
+          </div>
+          <div class="row">
+            <h6>Automated Docking</h6>
+            <ul>
+              <li>Requested seq: {{status.courseA.requestedDockingSequence}}
+              <li ng-show="status.courseA.requestedDockingSequence">Dock sequence: {{status.courseA.dockingSequence.dockingBaySequence}}
+              <li ng-hide="status.courseA.requestedDockingSequence">Dock sequence: **hidden**
+            </ul>
+          </div>
+          <div class="row">
+            <h6>Pinger Location</h6>
+            <ul>
+              <li>Reported pinger: {{status.courseA.reportedPinger}}
+              <li ng-show="status.courseA.reportedPinger">Active pinger: {{status.courseA.activePinger.buoyColor}}
+              <li ng-hide="status.courseA.reportedPinger">Active pinger: **hidden**
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
 
-    <footer>
-      <p>RoboBoat 2015</p>
-    </footer>
     </div> <!-- /container -->
     
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD9JAolnW7Wepz0hYoP3rAmRMfhFAK-w68"></script>
@@ -113,7 +136,7 @@
     <script type="text/javascript" src="display/angular-route.js"></script>
 <!--    <script type="text/javascript" src="https://cdn.auth0.com/w2/auth0-widget-4.0.min.js"> </script>   -->
 <!--    <script type="text/javascript" src="https://cdn.auth0.com/w2/auth0-angular-0.4.js"> </script>  -->
-    <script type="text/javascript" src="display/ui-bootstrap-tpls-0.11.0.js"></script>
+    <script type="text/javascript" src="display/ui-bootstrap-tpls-0.13.0.min.js"></script>
 
     <script type="text/javascript" src="display/judging.js"></script>
     <script type="text/javascript" src="display/controllers.js"></script>

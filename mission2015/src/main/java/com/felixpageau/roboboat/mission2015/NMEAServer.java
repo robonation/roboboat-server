@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
+import javax.ws.rs.WebApplicationException;
 
 import com.felixpageau.roboboat.mission2015.nmea.NMEASentence;
 import com.felixpageau.roboboat.mission2015.nmea.SentenceDefinition;
@@ -182,7 +183,7 @@ public class NMEAServer implements Runnable {
                 w.write("** ILLEGAL TALKER ID in message (You should use 'SV' instead of 'TD'): " + sentence.toString());
                 break;
               }
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | WebApplicationException e) {
               if (debug.get()) {
                 w.write("** ERROR: " + e.getMessage());
               }

@@ -3,10 +3,13 @@
  */
 package com.felixpageau.roboboat.mission2015.server.impl;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -16,13 +19,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
-import javax.ws.rs.WebApplicationException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.felixpageau.roboboat.mission2015.WebApplicationExceptionWithContext;
 import com.felixpageau.roboboat.mission2015.server.Competition;
 import com.felixpageau.roboboat.mission2015.server.CompetitionManager;
 import com.felixpageau.roboboat.mission2015.server.RunArchiver;
@@ -41,6 +46,7 @@ import com.felixpageau.roboboat.mission2015.structures.ImageUploadDescriptor;
 import com.felixpageau.roboboat.mission2015.structures.InteropReport;
 import com.felixpageau.roboboat.mission2015.structures.Pinger;
 import com.felixpageau.roboboat.mission2015.structures.ReportStatus;
+import com.felixpageau.roboboat.mission2015.structures.Shape;
 import com.felixpageau.roboboat.mission2015.structures.TeamCode;
 import com.felixpageau.roboboat.mission2015.structures.Timestamp;
 import com.felixpageau.roboboat.mission2015.structures.UploadStatus;
@@ -50,6 +56,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteStreams;
 import com.google.common.io.Files;
 
 /**
@@ -74,16 +81,30 @@ public class CompetitionManagerImpl implements CompetitionManager {
 
   public CompetitionManagerImpl(Competition competition) throws URISyntaxException, MalformedURLException {
     this.competition = Preconditions.checkNotNull(competition);
-    this.basePath = new File("/tmp/roboboat2015-images/uploads/" + DateTimeFormatter.ofPattern("YYYYMMdd/").format(LocalDateTime.now()));
-    this.sourcePath = new File(new File("/tmp/roboboat2015-images/source/").toURL().toURI());
+    this.basePath = new File("/etc/roboboat2015-images/uploads/" + DateTimeFormatter.ofPattern("YYYYMMdd/").format(LocalDateTime.now()));
+    this.sourcePath = new File(new File("/etc/roboboat2015-images/source/").toURL().toURI());
     Preconditions.checkArgument(basePath.exists() || basePath.mkdirs(), "Could not create directory: " + basePath);
     Preconditions.checkArgument(sourcePath.exists(), "Could not find source image directory: " + sourcePath.getAbsolutePath());
-    for (String file : sourcePath.list()) {
-      System.out.println("Loading source image: " + file);
-      try {
-        fileCache.get(file);
-      } catch (ExecutionException e) {
-        e.printStackTrace();
+    loadImage("", sourcePath);
+  }
+
+  private void loadImage(String path, File file) {
+    if (file.exists()) {
+      if (file.isFile() && !file.getName().startsWith(".")) {
+        try {
+          System.out.println("Loading source image: " + file);
+          fileCache.get((path.isEmpty() ? path : path + "/") + file.getName());
+        } catch (ExecutionException e) {
+          e.printStackTrace();
+        }
+      } else if (file.isDirectory()) {
+        for (File child : file.listFiles()) {
+          String relPath = child.getParent().replace(sourcePath.getAbsolutePath(), "");
+          if (relPath.startsWith("/")) {
+            relPath = relPath.substring(1);
+          }
+          loadImage(relPath, child);
+        }
       }
     }
   }
@@ -97,8 +118,8 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public ReportStatus startRun(Course course, TeamCode teamCode) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive != null) {
-      throw new WebApplicationException(String.format("There is already a run active on course %s! Try doing a POST against /run/endRun/%s/%s", course, course,
-          teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("There is already a run active on course %s! You can't go until team %s get out of %s", course,
+          archive.getRunSetup().getActiveTeam(), course), 400);
     }
     TimeSlot slot = competition.findCurrentTimeSlot(course);
     RunSetup r = competition.startNewRun(slot, teamCode);
@@ -110,7 +131,7 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public ReportStatus endRun(Course course, TeamCode teamCode) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive != null && !archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationException(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", archive.getRunSetup().getActiveTeam(), course), 400);
     }
     if (archive != null && archive.getRunSetup().getActiveTeam().equals(teamCode)) {
       competition.endRun(course, teamCode);
@@ -123,10 +144,10 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public ReportStatus reportHeartbeat(Course course, TeamCode teamCode, HeartbeatReport report) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationException(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationException(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
     }
     boolean success = true;// report.getShape().equals(archive.getRunSetup().getActiveInteropShape());
     archive.addHeartbeatEvent(new StructuredEvent(course, teamCode, report.getChallenge(), "Heartbeat report"));
@@ -138,10 +159,10 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public GateCode getObstacleCourseCode(Course course, TeamCode teamCode) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationException(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationException(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
     }
     GateCode code = archive.getRunSetup().getActiveGateCode();
     archive.addEvent(new StructuredEvent(course, teamCode, Challenge.obstacles, String.format("request gatecode (%s)", code)));
@@ -153,10 +174,10 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public DockingSequence getDockingSequence(Course course, TeamCode teamCode) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationException(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationException(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
     }
     DockingSequence sequence = archive.getRunSetup().getActiveDockingSequence();
     archive.addEvent(new StructuredEvent(course, teamCode, Challenge.docking, String.format("request bay (%s)", sequence)));
@@ -168,10 +189,10 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public ReportStatus reportPinger(Course course, TeamCode teamCode, BeaconReport payload) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationException(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationException(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
     }
     Pinger reportedPinger = new Pinger(payload.getBuoyColor());
     boolean success = reportedPinger.getBuoyColor().equals(archive.getRunSetup().getActivePinger().getBuoyColor());
@@ -185,10 +206,10 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public ReportStatus reportInterop(Course course, TeamCode teamCode, InteropReport report) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationException(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationException(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
     }
     boolean success = report.getShape().equals(archive.getRunSetup().getActiveInteropShape());
     archive.addEvent(new StructuredEvent(course, teamCode, Challenge.interop, String.format("reported shape (%s) -> %s", report, success ? "success"
@@ -201,38 +222,43 @@ public class CompetitionManagerImpl implements CompetitionManager {
   public List<String> listInteropImages(Course course, TeamCode teamCode) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationException(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationException(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
     }
     archive.addEvent(new StructuredEvent(course, teamCode, Challenge.interop, "listed image"));
     archive.requestedImageListing();
-    return ImmutableList.copyOf(fileCache.asMap().keySet());
+    Shape active = archive.getRunSetup().getActiveInteropShape();
+    return ImmutableList.copyOf(fileCache.asMap().keySet().stream().filter(n -> n.startsWith(Character.toString(active.getValue())))
+        .map(a -> a.replaceFirst(".*/", "")).collect(Collectors.toSet()));
   }
 
   @Override
   public Optional<byte[]> getInteropImage(Course course, TeamCode teamCode, String filename) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationException(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationException(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
     }
     archive.addEvent(new StructuredEvent(course, teamCode, Challenge.interop, String.format("requested image %s", filename)));
     archive.requestedImage();
-    return Optional.ofNullable(fileCache.getIfPresent(filename));
+    Shape active = archive.getRunSetup().getActiveInteropShape();
+    String key = active.getValue() + "/" + filename;
+    System.out.println("*** DEBUG interop image: " + key + "    ->    " + fileCache.getIfPresent(key));
+    return Optional.ofNullable(fileCache.getIfPresent(key));
   }
 
   @Override
   public UploadStatus uploadInteropImage(Course course, TeamCode teamCode, byte[] content) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
-      throw new WebApplicationException(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
+      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode), 400);
     }
     if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationException(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
+      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode, course), 400);
     }
     UUID imageId = UUID.randomUUID();
 
@@ -258,45 +284,55 @@ public class CompetitionManagerImpl implements CompetitionManager {
     return new UploadStatus(imageId.toString());
   }
 
+  @Nonnull
+  @Override
+  public Optional<byte[]> getUploadedImage(String imageId) {
+    try {
+      File f = new File(basePath, imageId + ".jpg");
+      if (!f.exists()) {
+        f = new File(basePath, imageId + ".png");
+      }
+      if (!f.exists()) {
+        return Optional.empty();
+      }
+
+      try (InputStream is = new BufferedInputStream(new FileInputStream(f))) {
+        return Optional.ofNullable(ByteStreams.toByteArray(is));
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+      return Optional.empty();
+    }
+  }
+
   @Override
   public DisplayStatus getDisplayStatus() {
     RunArchiver raA = competition.getActiveRun(Course.courseA);
     RunArchiver raB = competition.getActiveRun(Course.courseB);
 
-    DisplayReport reportA = new DisplayReport(
-        raA.getRunSetup().getCourse(), 
-        raA.getRunSetup().getActiveTeam(), 
-        raA.getLastHeartbeat().map(HeartbeatReport::getPosition).orElse(null), 
-        raA.getLastHeartbeat().map(hr -> hr.getTimestamp().getTimeAsLong()).orElse(null), 
-        raA.getLastHeartbeat().map(HeartbeatReport::getChallenge).orElse(null), 
-        raA.getRunSetup().getActiveGateCode(), 
-        raA.hasRequestedGateCode(), 
-        raA.getRunSetup().getActiveDockingSequence(), 
-        raA.hasRequestedDockingSequence(),
-        raA.getRunSetup().getActivePinger().getBuoyColor(), 
-        raA.getReportedPinger().map(BeaconReport::getBuoyColor).orElse(null),
-        raA.hasRequestedImageListing(),
-        raA.hasRequestedImage(),
-        raA.getUploadedImage().orElse(null),
-        raA.getReportedInterop().map(InteropReport::getShape).orElse(null),
-        raA.getRunSetup().getActiveInteropShape());
-    DisplayReport reportB = new DisplayReport(
-        raB.getRunSetup().getCourse(), 
-        raB.getRunSetup().getActiveTeam(), 
-        raB.getLastHeartbeat().map(HeartbeatReport::getPosition).orElse(null), 
-        raB.getLastHeartbeat().map(hr -> hr.getTimestamp().getTimeAsLong()).orElse(null), 
-        raB.getLastHeartbeat().map(HeartbeatReport::getChallenge).orElse(null), 
-        raB.getRunSetup().getActiveGateCode(), 
-        raB.hasRequestedGateCode(), 
-        raB.getRunSetup().getActiveDockingSequence(), 
-        raB.hasRequestedDockingSequence(),
-        raB.getRunSetup().getActivePinger().getBuoyColor(), 
-        raB.getReportedPinger().map(BeaconReport::getBuoyColor).orElse(null),
-        raB.hasRequestedImageListing(),
-        raB.hasRequestedImage(),
-        raB.getUploadedImage().orElse(null),
-        raB.getReportedInterop().map(InteropReport::getShape).orElse(null),
-        raB.getRunSetup().getActiveInteropShape());
+    DisplayReport reportA;
+    if (raA == null) {
+      reportA = DisplayReport.NO_REPORT_A;
+    } else {
+      reportA = new DisplayReport(raA.getRunSetup().getCourse(), raA.getRunSetup().getActiveTeam(), raA.getLastHeartbeat().map(HeartbeatReport::getPosition)
+          .orElse(null), raA.getLastHeartbeat().map(hr -> hr.getTimestamp().getTimeAsLong()).orElse(0L), raA.getLastHeartbeat()
+          .map(HeartbeatReport::getChallenge).orElse(null), raA.getRunSetup().getActiveGateCode(), raA.hasRequestedGateCode(), raA.getRunSetup()
+          .getActiveDockingSequence(), raA.hasRequestedDockingSequence(), raA.getRunSetup().getActivePinger().getBuoyColor(), raA.getReportedPinger()
+          .map(BeaconReport::getBuoyColor).orElse(null), raA.hasRequestedImageListing(), raA.hasRequestedImage(), raA.getUploadedImage().orElse(null), raA
+          .getReportedInterop().map(InteropReport::getShape).orElse(null), raA.getRunSetup().getActiveInteropShape());
+    }
+
+    DisplayReport reportB;
+    if (raB == null) {
+      reportB = DisplayReport.NO_REPORT_B;
+    } else {
+      reportB = new DisplayReport(raB.getRunSetup().getCourse(), raB.getRunSetup().getActiveTeam(), raB.getLastHeartbeat().map(HeartbeatReport::getPosition)
+          .orElse(null), raB.getLastHeartbeat().map(hr -> hr.getTimestamp().getTimeAsLong()).orElse(0L), raB.getLastHeartbeat()
+          .map(HeartbeatReport::getChallenge).orElse(null), raB.getRunSetup().getActiveGateCode(), raB.hasRequestedGateCode(), raB.getRunSetup()
+          .getActiveDockingSequence(), raB.hasRequestedDockingSequence(), raB.getRunSetup().getActivePinger().getBuoyColor(), raB.getReportedPinger()
+          .map(BeaconReport::getBuoyColor).orElse(null), raB.hasRequestedImageListing(), raB.hasRequestedImage(), raB.getUploadedImage().orElse(null), raB
+          .getReportedInterop().map(InteropReport::getShape).orElse(null), raB.getRunSetup().getActiveInteropShape());
+    }
 
     return new DisplayStatus(ImmutableMap.of(Course.courseA, reportA, Course.courseB, reportB));
   }

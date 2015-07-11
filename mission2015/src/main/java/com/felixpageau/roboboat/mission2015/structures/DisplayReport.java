@@ -7,6 +7,9 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 public class DisplayReport {
+  public static DisplayReport NO_REPORT_A = new DisplayReport(Course.courseA, null, null, 0, null, null, false, null, false, null, null, false, false, null, null, null);
+  public static DisplayReport NO_REPORT_B = new DisplayReport(Course.courseB, null, null, 0, null, null, false, null, false, null, null, false, false, null, null, null);
+  public static DisplayReport NO_REPORT_OT = new DisplayReport(Course.openTest, null, null, 0, null, null, false, null, false, null, null, false, false, null, null, null);
   private final Course course;
   private final TeamCode teamCode;
   private final Position currentPosition;

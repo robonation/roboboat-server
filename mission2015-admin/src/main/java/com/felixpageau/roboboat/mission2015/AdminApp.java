@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import javax.servlet.DispatcherType;
 import javax.ws.rs.core.UriBuilder;
 
-import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.server.HttpConfiguration;
 import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Server;
@@ -48,10 +47,6 @@ public class AdminApp {
     http.setPort(9000);
     server.addConnector(http);
     WebAppContext wac = new WebAppContext();
-    HashLoginService myrealm = new HashLoginService("RoboBoat");
-    // myrealm.setConfig(new
-    // File("mission2015-admin-war/src/main/resources/realm.properties").getAbsolutePath());
-    wac.getSecurityHandler().setLoginService(myrealm);
     wac.setResourceBase(new File("mission2015-admin-war/src/main/webapp/").getAbsolutePath());
     wac.setDescriptor(new File("mission2015-admin-war/src/main/webapp/WEB-INF/web.xml").getAbsolutePath());
     wac.setContextPath("/");

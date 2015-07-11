@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Preconditions;
 
 public enum Shape {
@@ -22,14 +25,17 @@ public enum Shape {
     this.value = Preconditions.checkNotNull(value, "value cannot be null");
   }
 
+  @JsonIgnore
   public static Shape generateRandomInteropShape() {
     return Shape.values()[new Random().nextInt(Shape.values().length)];
   }
 
+  @JsonIgnore
   public static Shape get(char code) {
     return lookup.get(Character.toUpperCase(code));
   }
 
+  @JsonCreator
   public static Shape fromString(String code) {
     if (code.length() == 1) {
       return lookup.get(Character.toUpperCase(code.charAt(0)));
@@ -37,6 +43,7 @@ public enum Shape {
     throw new IllegalArgumentException("The provided shape string (" + code + ") has more than 1 character");
   }
 
+  @JsonValue
   public char getValue() {
     return value;
   }

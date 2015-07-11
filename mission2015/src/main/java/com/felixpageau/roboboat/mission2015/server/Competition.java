@@ -114,7 +114,11 @@ public class Competition {
    * @return the teamInWater
    */
   public TeamCode getTeamInWater(Course course) {
-    return teamInWater.get(course);
+    RunArchiver ra = activeRuns.get(course);
+    if (ra != null) {
+      return ra.getRunSetup().getActiveTeam();
+    }
+    return null;
   }
 
   /**
@@ -188,10 +192,10 @@ public class Competition {
         try (Socket s = new Socket(layout.getPingerControlServer().getHost(), layout.getPingerControlServer().getPort());
             Writer w = new OutputStreamWriter(s.getOutputStream());
             BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream()))) {
-          if (Pinger.NO_PINGER.equals(newSetup)) {
+          if (Pinger.NO_PINGER.equals(newSetup.getActivePinger())) {
             String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), 0));
             w.write(pingerActivationMessage);
-            System.out.println(pingerActivationMessage);
+            System.out.println("TURN OFF PINGER: " + pingerActivationMessage);
             w.flush();
             activated = true;
           } else {
@@ -221,10 +225,10 @@ public class Competition {
     RunArchiver ra = activeRuns.get(course);
     if (ra != null) {
       ra.addEvent(new StructuredEvent(course, teamCode, Challenge.none, "End run"));
-      activeRuns.remove(course);
       if (activatePinger && !Course.openTest.equals(course)) {
         exec.execute(new ActivatePinger(layoutMap.get(course), RunSetup.NO_RUN));
       }
+      activeRuns.remove(course);
     }
   }
 

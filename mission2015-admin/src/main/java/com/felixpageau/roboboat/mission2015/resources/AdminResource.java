@@ -14,6 +14,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.felixpageau.roboboat.mission2015.NotFoundException;
 import com.felixpageau.roboboat.mission2015.server.CompetitionManager;
 import com.felixpageau.roboboat.mission2015.server.RunArchiver;
 import com.felixpageau.roboboat.mission2015.server.TimeSlot;
@@ -108,5 +109,12 @@ public class AdminResource {
   @Produces({ MediaType.APPLICATION_JSON })
   public DisplayStatus display(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode) {
     return competitionManager.getDisplayStatus();
+  }
+
+  @Path("/display/image/{imageId}")
+  @GET
+  @Produces({ "image/jpeg", "image/png" })
+  public byte[] getUploadedImage(@PathParam("imageId") String imageId) {
+    return competitionManager.getUploadedImage(imageId).orElseThrow(NotFoundException::new);
   }
 }

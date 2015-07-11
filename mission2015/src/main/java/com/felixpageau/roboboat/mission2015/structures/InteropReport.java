@@ -41,7 +41,7 @@ public class InteropReport {
   @JsonIgnore
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add("course", course).add("team", team).add("shape", shape).add("imageId", imageId).toString();
+    return MoreObjects.toStringHelper(this).add("course", course).add("team", team).add("shape", shape.getValue()).add("imageId", imageId).toString();
   }
 
   @JsonIgnore

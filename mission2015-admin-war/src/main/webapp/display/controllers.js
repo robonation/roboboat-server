@@ -1,6 +1,6 @@
-var myApp = angular.module('control');
+var myApp = angular.module('control', ['ui.bootstrap']);
 var host = "https://localhost:9443";
-<!-- var host = "https://192.168.1.40:9443"; -->
+<!-- var host = "http://192.168.1.111:8080"; -->
 <!-- var host = "https://192.168.1.68:9443"; -->
 
 myApp.controller('MapCtrl', function ($scope) {
@@ -15,6 +15,7 @@ myApp.controller('MapCtrl', function ($scope) {
 });
 
 myApp.controller('Status', function ($scope, $http, $timeout) {
+    $http.defaults.headers.common['Authorization'] = 'Basic YWRtaW46YnVveWFuY3k=';
     $scope.getStatuses = function(){
       $http.get(host + '/admin/display').
           success(function(data) {
@@ -27,14 +28,14 @@ myApp.controller('Status', function ($scope, $http, $timeout) {
       $timeout(function() {
         callback();
         $scope.intervalFunction(callback);
-      }, 30000)
+      }, 1000)
     };
     
     $scope.intervalFunction = function(callback, arg){
       $timeout(function() {
         callback(arg);
         $scope.intervalFunction(callback, arg);
-      }, 5000)
+      }, 1000)
     };
     
     $scope.getById = function (arr, id) {

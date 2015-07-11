@@ -49,10 +49,8 @@ public class AdminResourceConfig extends CompetitionResourceConfig {
   private static final List<TeamCode> TEAMS = ImmutableList.of(new TeamCode("AUVSI"), new TeamCode("DBH"), new TeamCode("EEPIS"), new TeamCode("ERAU"),
       new TeamCode("FAU"), new TeamCode("GIT"), new TeamCode("NCKU"), new TeamCode("ODUSM"), new TeamCode("ODUBB"), new TeamCode("TUCE"), new TeamCode("CUA"),
       new TeamCode("UCF"), new TeamCode("UF"), new TeamCode("UOFM"), new TeamCode("ULSAN"), new TeamCode("UWF"), new TeamCode("VU"));
-  private static final List<Pinger> courseAPingers = ImmutableList.of(new Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new Pinger(BuoyColor.red),
-      new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.green));
-  private static final List<Pinger> courseBPingers = ImmutableList.of(new Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new Pinger(BuoyColor.red),
-      new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.green));
+  private static final List<Pinger> courseAPingers = ImmutableList.of(new Pinger(BuoyColor.blue), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.red));
+  private static final List<Pinger> courseBPingers = ImmutableList.of(new Pinger(BuoyColor.blue), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.black));
   private static final List<Pinger> openTestPingers = ImmutableList.of(new Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new Pinger(BuoyColor.red),
       new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.green));
   private static final Map<Course, CourseLayout> COURSE_LAYOUT_MAP;

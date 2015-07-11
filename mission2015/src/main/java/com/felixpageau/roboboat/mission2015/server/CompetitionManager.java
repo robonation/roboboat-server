@@ -7,9 +7,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
+import com.felixpageau.roboboat.mission2015.WebApplicationExceptionWithContext;
 import com.felixpageau.roboboat.mission2015.structures.BeaconReport;
 import com.felixpageau.roboboat.mission2015.structures.Course;
 import com.felixpageau.roboboat.mission2015.structures.DisplayStatus;
@@ -51,6 +51,9 @@ public interface CompetitionManager {
   Optional<byte[]> getInteropImage(Course course, TeamCode teamCode, String filename);
 
   @Nonnull
+  Optional<byte[]> getUploadedImage(String imageId);
+
+  @Nonnull
   UploadStatus uploadInteropImage(Course course, TeamCode teamCode, byte[] content);
 
   @Nonnull
@@ -81,6 +84,6 @@ public interface CompetitionManager {
       if (valid) return ".png";
     }
 
-    throw new WebApplicationException("image uploaded is neither jpg or png", Response.Status.BAD_REQUEST);
+    throw new WebApplicationExceptionWithContext("image uploaded is neither jpg or png", Response.Status.BAD_REQUEST);
   }
 }
