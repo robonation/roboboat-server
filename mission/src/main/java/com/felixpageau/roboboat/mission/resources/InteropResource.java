@@ -70,28 +70,4 @@ public class InteropResource {
   public byte[] getImage(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode, @PathParam("image") String image) throws IOException {
     return manager.getInteropImage(course, teamCode, image).orElseThrow(NotFoundException::new);
   }
-
-  // @Path("/report/{course}/{teamCode}")
-  // @POST
-  // @Produces({ MediaType.APPLICATION_JSON })
-  // @Consumes("application/json")
-  // public ReportStatus reportLightSequence(@PathParam("course") Course course,
-  // @PathParam("teamCode") TeamCode teamCode, LightSequence payload)
-  // throws IOException {
-  // RunArchiver ra = competition.getActiveRuns().get(course);
-  // if (ra == null) {
-  // System.out.println(String.format("No active run, but reported: %s - %s - LightSequence - report sequence - sequence: %s",
-  // course, teamCode, payload));
-  // return new ReportStatus(false);
-  // } else {
-  // LightSequence correctSequence = ra.getRunSetup().getActiveLightSequence();
-  // boolean success = payload.equals(correctSequence);
-  // ra.addEvent(new Event(new DateTime(),
-  // String.format("%s - %s - LightSequence - reported sequence (%s) -> %s",
-  // course, teamCode, payload,
-  // (success ? "success" : "incorrect"))));
-  // return new ReportStatus(success);
-  // }
-  // }
-
 }

@@ -325,7 +325,7 @@ public class CompetitionManagerImpl implements CompetitionManager {
   @Override
   public DisplayStatus getDisplayStatus() {
     RunArchiver raA = competition.getActiveRun(Course.courseA);
-    //RunArchiver raB = competition.getActiveRun(Course.courseB);
+    RunArchiver raB = competition.getActiveRun(Course.courseB);
 
     DisplayReport reportA;
     if (raA == null) {
@@ -339,18 +339,18 @@ public class CompetitionManagerImpl implements CompetitionManager {
           .getRunSetup().getActiveInteropShape(), raA.getReportedInterop().map(InteropReport::getShape).orElse(null));
     }
 
-//    DisplayReport reportB;
-//    if (raB == null) {
-//      reportB = DisplayReport.NO_REPORT_B;
-//    } else {
-//      reportB = new DisplayReport(raB.getRunSetup().getCourse(), raB.getRunSetup().getActiveTeam(), raB.getLastHeartbeat().map(HeartbeatReport::getPosition)
-//          .orElse(null), raB.getLastHeartbeat().map(hr -> hr.getTimestamp().getTimeAsLong()).orElse(0L), raB.getLastHeartbeat()
-//          .map(HeartbeatReport::getChallenge).orElse(null), raB.getRunSetup().getActiveGateCode(), raB.hasRequestedGateCode(), raB.getRunSetup()
-//          .getActiveDockingSequence(), raB.hasRequestedDockingSequence(), raB.getRunSetup().getActivePinger().getBuoyColor(), raB.getReportedPinger()
-//          .map(BeaconReport::getBuoyColor).orElse(null), raB.hasRequestedImageListing(), raB.hasRequestedImage(), raB.getUploadedImage().orElse(null), raB
-//          .getRunSetup().getActiveInteropShape(), raB.getReportedInterop().map(InteropReport::getShape).orElse(null));
-//    }
+    DisplayReport reportB;
+    if (raB == null) {
+      reportB = DisplayReport.NO_REPORT_B;
+    } else {
+      reportB = new DisplayReport(raB.getRunSetup().getCourse(), raB.getRunSetup().getActiveTeam(), raB.getLastHeartbeat().map(HeartbeatReport::getPosition)
+          .orElse(null), raB.getLastHeartbeat().map(hr -> hr.getTimestamp().getTimeAsLong()).orElse(0L), raB.getLastHeartbeat()
+          .map(HeartbeatReport::getChallenge).orElse(null), raB.getRunSetup().getActiveGateCode(), raB.hasRequestedGateCode(), raB.getRunSetup()
+          .getActiveDockingSequence(), raB.hasRequestedDockingSequence(), raB.getRunSetup().getActivePinger().getBuoyColor(), raB.getReportedPinger()
+          .map(BeaconReport::getBuoyColor).orElse(null), raB.hasRequestedImageListing(), raB.hasRequestedImage(), raB.getUploadedImage().orElse(null), raB
+          .getRunSetup().getActiveInteropShape(), raB.getReportedInterop().map(InteropReport::getShape).orElse(null));
+    }
 
-    return new DisplayStatus(ImmutableMap.of(Course.courseA, reportA));//, Course.courseB, reportB));
+    return new DisplayStatus(ImmutableMap.of(Course.courseA, reportA, Course.courseB, reportB));
   }
 }

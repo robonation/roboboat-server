@@ -13,7 +13,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <github.maven.repository>file:///Users/felixpageau/maven/repository/maven-repository/</github.maven.repository>
     <jetty.version>9.2.9</jetty.version>
-    <jersey.version>2.17</jersey.version>
+    <jersey.version>2.22.2</jersey.version>
     <jackson.version>2.3.0</jackson.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -97,7 +97,6 @@
       <groupId>org.glassfish.jersey.media</groupId>
       <artifactId>jersey-media-multipart</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>

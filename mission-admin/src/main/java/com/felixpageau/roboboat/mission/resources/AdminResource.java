@@ -39,13 +39,6 @@ public class AdminResource {
     this.competitionManager = Preconditions.checkNotNull(competitionManager);
   }
 
-  @Path("/flash")
-  @GET
-  @Produces({ MediaType.APPLICATION_JSON })
-  public void test() {
-    System.out.println("Flash tes lumieres");
-  }
-
   @Path("/teams")
   @GET
   @Produces({ MediaType.APPLICATION_JSON })
