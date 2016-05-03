@@ -1,12 +1,56 @@
 var myApp = angular.module('control');
-var host = "http://admin:buoyancy@192.168.1.111:8080";
+var host = "https://localhost:9443";
 <!-- var host = "https://192.168.1.40:9443"; -->
 <!-- var host = "https://192.168.1.68:9443"; -->
 
-myApp.controller('Teams', function ($scope, $http, $timeout) {
-    //$http.defaults.headers.common = {"Access-Control-Request-Headers": "accept, origin, authorization"};
-    $http.defaults.headers.common['Authorization'] = 'Basic YWRtaW46YnVveWFuY3k=';
+myApp.controller('MapCtrl', function ($scope) {
+    var mapOptions = {
+        center: { lat: 36.8023, lng: -76.191835},
+        mapTypeId: google.maps.MapTypeId.SATELLITE,
+        heading: 90,
+        zoom: 19
+    }
+    $scope.map = new google.maps.Map(document.getElementById('map'), mapOptions);
+    $scope.map.setTilt(0);
+});
+
+myApp.controller('Status', function ($scope, $http, $timeout) {
+    $scope.getStatuses = function(){
+      $http.get(host + '/admin/display').
+          success(function(data) {
+              $scope.status = data;
+      });
+    };
     
+    // Function to replicate setInterval using $timeout service.
+    $scope.intervalFunction = function(callback){
+      $timeout(function() {
+        callback();
+        $scope.intervalFunction(callback);
+      }, 30000)
+    };
+    
+    $scope.intervalFunction = function(callback, arg){
+      $timeout(function() {
+        callback(arg);
+        $scope.intervalFunction(callback, arg);
+      }, 5000)
+    };
+    
+    $scope.getById = function (arr, id) {
+        for (var d = 0, len = arr.length; d < len; d += 1) {
+            if (arr[d].id === id) {
+                return arr[d];
+            }
+        }
+    }
+  
+    // Kick off the interval
+    $scope.getStatuses();
+    $scope.intervalFunction($scope.getStatuses);
+});
+
+myApp.controller('Teams', function ($scope, $http, $timeout) {
     $scope.getTeams = function(){
       $http.get(host + '/admin/teams').
           success(function(data) {
@@ -26,16 +70,11 @@ myApp.controller('Teams', function ($scope, $http, $timeout) {
     $scope.getEvents = function (course){
       $http.get(host + '/admin/events/'+course.id).
           success(function(data) {
-              function isNotHeartbeat(value) {
-                  return value.message != "Heartbeat report";
-              }
-              
               course.events = data;
               course.events.forEach(function(run) {
-                  run.start = "".concat(run.start.year, "/", run.start.monthValue, "/", run.start.dayOfMonth, "-", run.start.hour, ":", run.start.minute);
-                  run.events = run.events.filter(isNotHeartbeat);
+                  run.start = new Date(run.start).toLocaleTimeString();
                   run.events.forEach(function(entry) {
-                      entry.time = "".concat(entry.time.year, "/", entry.time.monthValue, "/", entry.time.dayOfMonth, "-", entry.time.hour, ":", entry.time.minute);
+                      entry.time = new Date(entry.time).toLocaleTimeString();
                   });
               });
       });

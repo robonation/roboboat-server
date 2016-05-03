@@ -1,6 +1,6 @@
 var myApp = angular.module('control', ['ui.bootstrap']);
-var host = "http://localhost:9000";
-<!-- var host = "http://192.168.1.111:8080"; -->
+//var host = "http://localhost:9000";
+var host = "http://192.168.1.111:8080";
 <!-- var host = "https://192.168.1.68:9443"; -->
 
 myApp.controller('TimeCtrl', function ($scope, $rootScope) {

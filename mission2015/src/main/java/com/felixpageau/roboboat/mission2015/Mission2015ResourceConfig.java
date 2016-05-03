@@ -27,7 +27,10 @@ import com.felixpageau.roboboat.mission2015.server.CourseLayout;
 import com.felixpageau.roboboat.mission2015.server.impl.MockCompetitionManager;
 import com.felixpageau.roboboat.mission2015.structures.BuoyColor;
 import com.felixpageau.roboboat.mission2015.structures.Course;
+import com.felixpageau.roboboat.mission2015.structures.DockingBay;
 import com.felixpageau.roboboat.mission2015.structures.Pinger;
+import com.felixpageau.roboboat.mission2015.structures.Symbol;
+import com.felixpageau.roboboat.mission2015.structures.SymbolColor;
 import com.felixpageau.roboboat.mission2015.structures.TeamCode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -48,6 +51,12 @@ public class Mission2015ResourceConfig extends CompetitionResourceConfig {
   private static final List<TeamCode> TEAMS = ImmutableList.of(new TeamCode("AUVSI"), new TeamCode("DBH"), new TeamCode("EEPIS"), new TeamCode("ERAU"),
       new TeamCode("FAU"), new TeamCode("GIT"), new TeamCode("NCKU"), new TeamCode("ODUSM"), new TeamCode("ODUBB"), new TeamCode("TUCE"), new TeamCode("CUA"),
       new TeamCode("UCF"), new TeamCode("UF"), new TeamCode("UOFM"), new TeamCode("ULSAN"), new TeamCode("UWF"), new TeamCode("VU"));
+  private static final List<DockingBay> dockingBaysA = ImmutableList.of(new DockingBay(Symbol.triangle, SymbolColor.red), new DockingBay(Symbol.cruciform,
+      SymbolColor.blue), new DockingBay(Symbol.cruciform, SymbolColor.black));
+  private static final List<DockingBay> dockingBaysB = ImmutableList.of(new DockingBay(Symbol.triangle, SymbolColor.black), new DockingBay(Symbol.circle,
+      SymbolColor.blue), new DockingBay(Symbol.cruciform, SymbolColor.green));
+  private static final List<DockingBay> dockingBaysOpenTest = ImmutableList.of(new DockingBay(Symbol.triangle, SymbolColor.red), new DockingBay(
+      Symbol.cruciform, SymbolColor.black), new DockingBay(Symbol.cruciform, SymbolColor.blue));
   private static final List<Pinger> courseAPingers = ImmutableList.of(new Pinger(BuoyColor.blue), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.red));
   private static final List<Pinger> courseBPingers = ImmutableList.of(new Pinger(BuoyColor.blue), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.black));
   private static final List<Pinger> openTestPingers = ImmutableList.of(new Pinger(BuoyColor.green));
@@ -57,10 +66,10 @@ public class Mission2015ResourceConfig extends CompetitionResourceConfig {
 
   static {
     try {
-      COURSE_LAYOUT_MAP = ImmutableMap.of(Course.courseA, new CourseLayout(Course.courseA, courseAPingers, new URL("http://192.168.1.7:5000"), new URL(
-          "http://192.168.1.5:4000")), Course.courseB, new CourseLayout(Course.courseB, courseBPingers, new URL("http://192.168.1.8:5000"), new URL(
-          "http://192.168.1.6:4000")), Course.openTest, new CourseLayout(Course.openTest, openTestPingers, new URL("http://127.0.0.1:5000"), new URL(
-          "http://127.0.0.1:4000")));
+      COURSE_LAYOUT_MAP = ImmutableMap.of(Course.courseA, new CourseLayout(Course.courseA, courseAPingers, dockingBaysA, new URL("http://192.168.1.7:5000"),
+          new URL("http://192.168.1.5:4000")), Course.courseB, new CourseLayout(Course.courseB, courseBPingers, dockingBaysB,
+          new URL("http://192.168.1.8:5000"), new URL("http://192.168.1.6:4000")), Course.openTest, new CourseLayout(Course.openTest, openTestPingers,
+          dockingBaysOpenTest, new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:4000")));
     } catch (MalformedURLException e) {
       e.printStackTrace();
       throw new RuntimeException(e);

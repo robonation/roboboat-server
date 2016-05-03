@@ -8,7 +8,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.net.Socket;
-import java.net.URL;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -24,7 +23,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import com.felixpageau.roboboat.mission2015.structures.BuoyColor;
 import com.felixpageau.roboboat.mission2015.structures.Challenge;
 import com.felixpageau.roboboat.mission2015.structures.Course;
 import com.felixpageau.roboboat.mission2015.structures.Pinger;
@@ -75,7 +73,7 @@ public class Competition {
     }
 
     // Always have a default run in OpenTest
-    startNewRun(TimeSlot.DEFAULT_TIMESLOT, new TeamCode("AUVSI"));
+    // startNewRun(TimeSlot.DEFAULT_TIMESLOT, new TeamCode("AUVSI"));
   }
 
   public List<TeamCode> getTeams() {
@@ -231,14 +229,4 @@ public class Competition {
       activeRuns.remove(course);
     }
   }
-
-  public static void main(String[] args) throws MalformedURLException {
-    List<CompetitionDay> days = ImmutableList.of(new CompetitionDay(LocalDateTime.now(), LocalDateTime.now().plusMinutes(1)));
-    Map<Course, CourseLayout> layout = ImmutableMap.of(Course.courseA, new CourseLayout(Course.courseA, ImmutableList.of(new Pinger(BuoyColor.black)), new URL(
-        "127.0.0.1:3000"), new URL("127.0.0.1:4000")));
-    Competition c = new Competition(days, ImmutableList.of(new TeamCode("AUVSI")), layout, false);
-    List<TimeSlot> slots = new ArrayList<>(c.schedule.keySet());
-
-    c.startNewRun(slots.get(0), new TeamCode("AUVSI"));
-  };
 }

@@ -1,17 +1,14 @@
 package com.felixpageau.roboboat.mission2015.server;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.felixpageau.roboboat.mission2015.structures.BuoyColor;
 import com.felixpageau.roboboat.mission2015.structures.Course;
+import com.felixpageau.roboboat.mission2015.structures.DockingBay;
 import com.felixpageau.roboboat.mission2015.structures.DockingSequence;
 import com.felixpageau.roboboat.mission2015.structures.GateCode;
 import com.felixpageau.roboboat.mission2015.structures.Pinger;
@@ -50,9 +47,11 @@ public class RunSetup {
   public static RunSetup generateRandomSetup(CourseLayout courseLayout, TeamCode teamCode, String runId) {
     List<Pinger> pingers = courseLayout.getPingers();
     Pinger activePinger = new ArrayList<Pinger>(pingers).get(new Random().nextInt(pingers.size()));
-
-    return new RunSetup(runId, courseLayout.getCourse(), teamCode, GateCode.generateRandomGateCode(), DockingSequence.generateRandomDockingSequence(),
-        activePinger, Shape.generateRandomInteropShape());
+    List<DockingBay> availableBays = new ArrayList<>(courseLayout.getDockingBays());
+    List<DockingBay> bays = ImmutableList.of(availableBays.remove(new Random().nextInt(availableBays.size())),
+        availableBays.remove(new Random().nextInt(availableBays.size())));
+    return new RunSetup(runId, courseLayout.getCourse(), teamCode, GateCode.generateRandomGateCode(), new DockingSequence(bays), activePinger,
+        Shape.generateRandomInteropShape());
   }
 
   /**
@@ -127,19 +126,5 @@ public class RunSetup {
   public String toString() {
     return MoreObjects.toStringHelper(this).add("runId", runId).add("course", course).add("activeTeam", activeTeam).add("activeGateCode", activeGateCode)
         .add("activeDockingBay", activeDockingSequence).add("activePinger", activePinger).add("activeInteropShape", activeInteropShape).toString();
-  }
-
-  public static void main(String[] args) throws MalformedURLException {
-    Pinger black = new Pinger(BuoyColor.black);
-    Pinger red = new Pinger(BuoyColor.red);
-    Pinger green = new Pinger(BuoyColor.green);
-    Pinger blue = new Pinger(BuoyColor.blue);
-    Pinger yellow = new Pinger(BuoyColor.yellow);
-    CourseLayout layout = new CourseLayout(Course.courseA, ImmutableList.copyOf(Arrays.asList(black, red, green, blue, yellow)), new URL(
-        "http://127.0.0.1:5000"), new URL("http://192.168.1.5:4000"));
-
-    for (int i = 0; i < 100; i++) {
-      System.out.println(generateRandomSetup(layout, new TeamCode("AUVSI"), "runId-1"));
-    }
   }
 }
