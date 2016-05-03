@@ -1,11 +1,11 @@
 competition-log.*
-mission201*/target/
+mission*/target/
 /target/
 /output/
 .settings/
 WEB-INF/
 bin/
-
+.cache-main
 *.jar
 *.tgz
 *.zip

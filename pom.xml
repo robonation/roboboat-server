@@ -7,7 +7,7 @@
   <artifactId>roboboat_server</artifactId>
   <packaging>pom</packaging>
   <version>1.0</version>
-  <name>Competition Server for RoboBoat 2015</name>
+  <name>Competition Server for RoboBoat</name>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -19,14 +19,14 @@
   </properties>
 
   <modules>
-    <module>mission2015</module>
-    <module>mission2015-admin</module>
-    <module>mission2015-war</module>
-    <module>mission2015-admin-war</module>
+    <module>mission</module>
+    <module>mission-admin</module>
+    <module>mission-war</module>
+    <module>mission-admin-war</module>
   </modules>
 
   <build>
-    <finalName>mission2015</finalName>
+    <finalName>mission</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
