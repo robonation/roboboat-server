@@ -5,6 +5,7 @@ mission*/target/
 .settings/
 WEB-INF/
 bin/
+hs_err_pid*.log
 .cache-main
 *.jar
 *.tgz

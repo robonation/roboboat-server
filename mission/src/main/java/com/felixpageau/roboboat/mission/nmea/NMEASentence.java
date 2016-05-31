@@ -117,8 +117,8 @@ public class NMEASentence {
   }
 
   public String getField(int index) {
-    Preconditions.checkArgument(index < 0, String.format("index (%d) is negative", index));
-    Preconditions.checkArgument(index >= fields.size(), String.format("index (%d) is greater than fields size (%d)", index, fields.size()));
+    Preconditions.checkArgument(index >= 0, String.format("index (%d) is negative", index));
+    Preconditions.checkArgument(index < fields.size(), String.format("index (%d) is greater than fields size (%d)", index, fields.size()));
     return fields.get(index);
   }
 

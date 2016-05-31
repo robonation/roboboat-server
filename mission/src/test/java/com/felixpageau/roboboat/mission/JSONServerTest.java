@@ -7,7 +7,6 @@ import static org.junit.Assert.fail;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URI;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -26,8 +25,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.felixpageau.roboboat.mission.CompetitionResourceConfig;
-import com.felixpageau.roboboat.mission.Mission2015ResourceConfig;
 import com.felixpageau.roboboat.mission.structures.BeaconReport;
 import com.felixpageau.roboboat.mission.structures.BuoyColor;
 import com.felixpageau.roboboat.mission.structures.Challenge;
@@ -42,8 +39,6 @@ import com.felixpageau.roboboat.mission.structures.Shape;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
 import com.felixpageau.roboboat.mission.structures.Timestamp;
 import com.felixpageau.roboboat.mission.structures.UploadStatus;
-import com.google.common.base.Charsets;
-import com.google.common.io.CharStreams;
 
 public class JSONServerTest {
   private static String basePath = "http://127.0.0.1:9000";
@@ -168,19 +163,6 @@ public class JSONServerTest {
       assertEquals("Interp heartbeat", 200, resp.getStatusLine().getStatusCode());
       assertEquals(new ReportStatus(true), mapper.readValue(resp.getEntity().getContent(), ReportStatus.class));
       resp.close();
-
-      // Interop - list images
-      resp = client.execute(new HttpGet(basePath + "/interop/images/courseA/AUVSI"));
-      assertEquals("Interop - list", 200, resp.getStatusLine().getStatusCode());
-      String listing = CharStreams.toString(new InputStreamReader(resp.getEntity().getContent(), Charsets.UTF_8));
-      resp.close();
-      assertNotNull(listing);
-      String[] images = listing.replaceAll(".*?href\\=\"([^\"]+)\".*?", "$1,").replaceFirst(",>.*", "").split(",");
-      for (String image : images) {
-        resp = client.execute(new HttpGet(basePath + image));
-        assertEquals(200, resp.getStatusLine().getStatusCode());
-        resp.close();
-      }
 
       // Interop - upload
       post = new HttpPost(basePath + "/interop/image/courseA/AUVSI");

@@ -198,6 +198,7 @@ public class NMEAServer implements Runnable {
               if (debug.get()) {
                 w.write("** ERROR: " + e.getMessage());
               }
+              LOG.debug("NMEA Exception with message {}", line, e);
             }
             w.write("\n");
             w.flush();

@@ -32,7 +32,7 @@ public class GateCode {
 
   public static GateCode generateRandomGateCode() {
     int entrance = (int) Math.round(Math.random() * 3f + 0.5f);
-    String exit = "" + (char) (Math.round(Math.random() * 3f + 0.5f) + 87);
+    String exit = Character.toString((char) (Math.round(Math.random() * 3f + 0.5f) + 87));
     return new GateCode(entrance, exit);
   }
 

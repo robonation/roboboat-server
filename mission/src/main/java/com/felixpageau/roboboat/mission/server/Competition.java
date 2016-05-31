@@ -188,6 +188,7 @@ public class Competition {
       this.newSetup = Preconditions.checkNotNull(newSetup, "newSetup cannot be null");
     }
 
+    @SuppressFBWarnings(value = "CC_CYCLOMATIC_COMPLEXITY")
     @Override
     public void run() {
       boolean activated = false;
