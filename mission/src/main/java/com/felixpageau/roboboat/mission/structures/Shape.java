@@ -1,9 +1,9 @@
 package com.felixpageau.roboboat.mission.structures;
 
+import java.security.SecureRandom;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -29,7 +29,7 @@ public enum Shape {
 
   @JsonIgnore
   public static Shape generateRandomInteropShape() {
-    return Shape.values()[new Random().nextInt(Shape.values().length)];
+    return Shape.values()[new SecureRandom().nextInt(Shape.values().length)];
   }
 
   @JsonIgnore

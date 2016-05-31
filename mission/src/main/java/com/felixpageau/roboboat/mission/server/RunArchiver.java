@@ -1,5 +1,7 @@
 package com.felixpageau.roboboat.mission.server;
 
+import static com.felixpageau.roboboat.mission.utils.FunctionalUtils.rethrow;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,64 +10,86 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.concurrent.GuardedBy;
+import javax.annotation.concurrent.ThreadSafe;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.felixpageau.roboboat.mission.App;
 import com.felixpageau.roboboat.mission.structures.BeaconReport;
 import com.felixpageau.roboboat.mission.structures.HeartbeatReport;
 import com.felixpageau.roboboat.mission.structures.InteropReport;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.google.common.eventbus.EventBus;
 
-public class RunArchiver {
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@ThreadSafe
+@ParametersAreNonnullByDefault
+@ReturnValuesAreNonNullByDefault
+public final class RunArchiver {
+  private static final Logger LOG = LoggerFactory.getLogger(RunArchiver.class);
   private final File f;
-  private final EventBus eventBus;
   private final LocalDateTime startTime;
-  private LocalDateTime endTime;
   private final RunSetup runSetup;
-  private final List<Event> events = new ArrayList<>();
-  private final AtomicReference<HeartbeatReport> lastHeartbeat = new AtomicReference<>();
-  private final AtomicBoolean requestedGateCode = new AtomicBoolean();
-  private final AtomicBoolean requestedDockingSequence = new AtomicBoolean();
-  private final AtomicReference<BeaconReport> reportedPinger = new AtomicReference<>();
-  private final AtomicBoolean requestedImageListing = new AtomicBoolean();
-  private final AtomicBoolean requestedImage = new AtomicBoolean();
-  private final AtomicReference<String> uploadedImage = new AtomicReference<>();
-  private final AtomicReference<InteropReport> reportedInterop = new AtomicReference<>();
+  private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-  public RunArchiver(RunSetup runSetup, File f, EventBus eventBus) {
-    this(runSetup, null, LocalDateTime.now(), f, eventBus);
+  @GuardedBy(value = "lock")
+  private LocalDateTime endTime;
+  @GuardedBy(value = "lock")
+  private final List<Event> events = new ArrayList<>();
+  @GuardedBy(value = "lock")
+  private HeartbeatReport lastHeartbeat;
+  @GuardedBy(value = "lock")
+  private boolean requestedGateCode = false;
+  @GuardedBy(value = "lock")
+  private boolean requestedDockingSequence = false;
+  @GuardedBy(value = "lock")
+  private BeaconReport reportedPinger;
+  @GuardedBy(value = "lock")
+  private String uploadedImage;
+  @GuardedBy(value = "lock")
+  private InteropReport reportedInterop;
+
+  public RunArchiver(RunSetup runSetup, File f) {
+    this(runSetup, null, LocalDateTime.now(), f);
   }
 
   @JsonCreator
-  public RunArchiver(@JsonProperty(value = "runSetup") RunSetup runSetup, @JsonProperty(value = "events") List<Event> events,
+  public RunArchiver(@JsonProperty(value = "runSetup") RunSetup runSetup, @JsonProperty(value = "events") @Nullable List<Event> events,
       @JsonProperty(value = "startTime") LocalDateTime startTime) {
-    this(runSetup, events, startTime, new File("competition-log." + Math.random()), new EventBus());
+    this(runSetup, events, startTime, new File("competition-log." + Math.random()));
   }
 
-  public RunArchiver(RunSetup runSetup, List<Event> events, LocalDateTime startTime, File f, EventBus eventBus) {
+  @SuppressFBWarnings(value = "EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS", justification = "Crashing the server with an unchecked exception is the right thing to do here")
+  public RunArchiver(RunSetup runSetup, @Nullable List<Event> events, LocalDateTime startTime, File f) {
     this.runSetup = Preconditions.checkNotNull(runSetup);
     this.startTime = Preconditions.checkNotNull(startTime);
     if (events != null && !events.isEmpty()) {
-      this.events.addAll(events);
+      addEvent(events);
     }
-    this.eventBus = Preconditions.checkNotNull(eventBus);
     this.f = Preconditions.checkNotNull(f);
     if (!f.exists()) {
       try {
-        f.createNewFile();
+        if (!f.createNewFile()) {
+          throw new RuntimeException(String.format("Unable to create run log file at (%s). Restart server", f.getAbsolutePath()));
+        }
       } catch (IOException e) {
-        e.printStackTrace();
+        throw new RuntimeException(String.format("Unable to create run log file at (%s). Restart server", f.getAbsolutePath()), e);
       }
     }
   }
@@ -79,42 +103,29 @@ public class RunArchiver {
     return runSetup;
   }
 
-  public void addEvent(Event event) {
-    Preconditions.checkNotNull(event);
-    this.events.add(event);
-    try (BufferedWriter bf = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f)))) {
-      bf.append(event.toString()).append("\n");
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    eventBus.post(event);
-    System.out.println(event);
+  public void addEvent(Event... events) {
+    this.addEvent(Arrays.asList(Preconditions.checkNotNull(events)));
+  }
 
+  public void addEvent(List<Event> events) {
+    Preconditions.checkNotNull(events);
+    lock.writeLock().lock();
+    try {
+      this.events.addAll(events);
+    } finally {
+      lock.writeLock().unlock();
+    }
+    try (BufferedWriter bf = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), App.APP_CHARSET))) {
+      events.stream().forEach(rethrow(event -> bf.append(event.toString()).append("\n")));
+    } catch (FileNotFoundException e) {
+      LOG.error("Can't find log file", e);
+    } catch (IOException e) {
+      LOG.error("Can't write to log file", e);
+    }
   }
 
   public void addHeartbeatEvent(Event event) {
-    Preconditions.checkNotNull(event);
-    this.events.add(event);
-    try (BufferedWriter bf = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f)))) {
-      bf.append(event.toString()).append("\n");
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    eventBus.post(event);
-    System.out.println(event);
-
-  }
-
-  /**
-   * @return the lastHeartbeat
-   */
-  @CheckForNull
-  public Optional<HeartbeatReport> getLastHeartbeat() {
-    return Optional.ofNullable(lastHeartbeat.get());
+    this.addEvent(Preconditions.checkNotNull(event));
   }
 
   /**
@@ -123,71 +134,149 @@ public class RunArchiver {
    */
   public void setLastHeartbeat(HeartbeatReport lastHeartbeat) {
     Preconditions.checkNotNull(lastHeartbeat, "The lastHeartbeat cannot be null");
-    this.lastHeartbeat.set(lastHeartbeat);
+    lock.writeLock().lock();
+    try {
+      this.lastHeartbeat = lastHeartbeat;
+    } finally {
+      lock.writeLock().unlock();
+    }
+  }
+
+  /**
+   * @return the lastHeartbeat
+   */
+  public Optional<HeartbeatReport> getLastHeartbeat() {
+    lock.readLock().lock();
+    try {
+      return Optional.ofNullable(lastHeartbeat);
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   public boolean hasRequestedGateCode() {
-    return requestedGateCode.get();
+    lock.readLock().lock();
+    try {
+      return requestedGateCode;
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   public void requestedGateCode() {
-    this.requestedGateCode.set(true);
+    lock.writeLock().lock();
+    try {
+      this.requestedGateCode = true;
+    } finally {
+      lock.writeLock().unlock();
+    }
   }
 
   public boolean hasRequestedDockingSequence() {
-    return requestedDockingSequence.get();
+    lock.readLock().lock();
+    try {
+      return requestedDockingSequence;
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   public void requestedDockingSequence() {
-    this.requestedDockingSequence.set(true);
+    lock.writeLock().lock();
+    try {
+      this.requestedDockingSequence = true;
+    } finally {
+      lock.writeLock().unlock();
+    }
   }
 
   public Optional<BeaconReport> getReportedPinger() {
-    return Optional.ofNullable(reportedPinger.get());
+    lock.readLock().lock();
+    try {
+      return Optional.ofNullable(reportedPinger);
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   public void reportPinger(BeaconReport report) {
-    this.reportedPinger.compareAndSet(null, report);
-  }
-
-  public boolean hasRequestedImageListing() {
-    return requestedImageListing.get();
-  }
-
-  public void requestedImageListing() {
-    this.requestedImageListing.set(true);
-  }
-
-  public boolean hasRequestedImage() {
-    return requestedImage.get();
-  }
-
-  public void requestedImage() {
-    this.requestedImage.set(true);
+    Preconditions.checkNotNull(report, "The report cannot be null");
+    lock.writeLock().lock();
+    try {
+      this.reportedPinger = report;
+    } finally {
+      lock.writeLock().unlock();
+    }
   }
 
   public Optional<String> getUploadedImage() {
-    return Optional.ofNullable(uploadedImage.get());
+    lock.readLock().lock();
+    try {
+      return Optional.ofNullable(uploadedImage);
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   public void uploadedImage(String path) {
-    this.uploadedImage.compareAndSet(null, path);
+    Preconditions.checkNotNull(path, "The path cannot be null");
+    lock.writeLock().lock();
+    try {
+      this.uploadedImage = path;
+    } finally {
+      lock.writeLock().unlock();
+    }
   }
 
   public Optional<InteropReport> getReportedInterop() {
-    return Optional.ofNullable(reportedInterop.get());
+    lock.readLock().lock();
+    try {
+      return Optional.ofNullable(reportedInterop);
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   public void reportInterop(InteropReport report) {
-    this.reportedInterop.compareAndSet(null, report);
+    Preconditions.checkNotNull(report, "The report cannot be null");
+    lock.writeLock().lock();
+    try {
+      this.reportedInterop = report;
+    } finally {
+      lock.writeLock().unlock();
+    }
   }
 
   public List<Event> getEvents() {
-    return ImmutableList.copyOf(events);
+    lock.readLock().lock();
+    try {
+      return ImmutableList.copyOf(events);
+    } finally {
+      lock.readLock().unlock();
+    }
+  }
+
+  public boolean endRun(Event event) {
+    lock.writeLock().lock();
+    try {
+      if (endTime == null) {
+        this.addEvent(event);
+        endTime = event.getTime();
+        return true;
+      }
+      return false;
+    } finally {
+      lock.writeLock().unlock();
+    }
   }
 
   public LocalDateTime getEndTime() {
-    return endTime;
+    lock.readLock().lock();
+    try {
+      return endTime;
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   public LocalDateTime getStartTime() {
@@ -208,18 +297,33 @@ public class RunArchiver {
     }
     RunArchiver other = (RunArchiver) obj;
 
-    return Objects.equal(runSetup, other.runSetup) && Objects.equal(events, other.events);
+    lock.readLock().lock();
+    try {
+      return Objects.equal(runSetup, other.runSetup) && Objects.equal(events, other.events);
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   @JsonIgnore
   @Override
   public int hashCode() {
-    return Objects.hashCode(runSetup, events);
+    lock.readLock().lock();
+    try {
+      return Objects.hashCode(runSetup, events);
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 
   @JsonIgnore
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add("runSetup", runSetup).add("events", events).toString();
+    lock.readLock().lock();
+    try {
+      return MoreObjects.toStringHelper(this).add("runSetup", runSetup).add("events", events).toString();
+    } finally {
+      lock.readLock().unlock();
+    }
   }
 }

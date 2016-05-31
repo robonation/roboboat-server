@@ -1,10 +1,10 @@
 package com.felixpageau.roboboat.mission.resources;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -25,14 +25,15 @@ import com.felixpageau.roboboat.mission.structures.DisplayStatus;
 import com.felixpageau.roboboat.mission.structures.ReportStatus;
 import com.felixpageau.roboboat.mission.structures.Run;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
+import com.felixpageau.roboboat.mission.utils.GuavaCollectors;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 
 /**
  * Resource for admin operations (exposed at "ping" path)
  */
 @Path("/admin")
-public class AdminResource {
+public final class AdminResource {
   private final CompetitionManager competitionManager;
 
   public AdminResource(CompetitionManager competitionManager) {
@@ -65,13 +66,10 @@ public class AdminResource {
   public List<Run> getEvents(final @PathParam("course") Course course) {
     List<Map.Entry<TimeSlot, RunArchiver>> entries = new ArrayList<>(competitionManager.getCompetition().getResults().entries());
     Collections.sort(entries, new TimeSlotComparatorEntry<RunArchiver>(true));
-    ImmutableList.Builder<Run> builder = ImmutableList.builder();
-    for (Entry<TimeSlot, RunArchiver> entry : entries) {
-      if (course.equals(entry.getValue().getRunSetup().getCourse())) {
-        builder.add(new Run(entry.getValue().getStartTime(), entry.getValue().getRunSetup().getActiveTeam(), entry.getValue().getEvents()));
-      }
-    }
-    return builder.build();
+    return entries.stream().filter(e -> e.getValue().getRunSetup().getCourse() == course).map(c -> {
+      RunArchiver archiver = c.getValue();
+      return new Run(archiver.getStartTime(), archiver.getRunSetup().getActiveTeam(), archiver.getEvents());
+    }).collect(GuavaCollectors.immutableList());
   }
 
   @Path("/timeSlots")
@@ -100,8 +98,8 @@ public class AdminResource {
   @Path("/display")
   @GET
   @Produces({ MediaType.APPLICATION_JSON })
-  public DisplayStatus display(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode) {
-    return competitionManager.getDisplayStatus();
+  public DisplayStatus display() {
+    return competitionManager.getDisplayStatus(Arrays.asList(Course.courseA, Course.courseB));
   }
 
   @Path("/display/image/{imageId}")
@@ -109,5 +107,10 @@ public class AdminResource {
   @Produces({ "image/jpeg", "image/png" })
   public byte[] getUploadedImage(@PathParam("imageId") String imageId) {
     return competitionManager.getUploadedImage(imageId).orElseThrow(NotFoundException::new);
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this).toString();
   }
 }

@@ -3,7 +3,7 @@
  */
 package com.felixpageau.roboboat.mission.nmea;
 
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Preconditions;
@@ -13,9 +13,9 @@ import com.google.common.base.Preconditions;
  *
  */
 public class EnumField extends Field {
-  private final List<String> enumeration;
+  private final Set<String> enumeration;
 
-  public EnumField(String name, List<String> enumeration) {
+  public EnumField(String name, Set<String> enumeration) {
     super(name);
     this.enumeration = Preconditions.checkNotNull(enumeration, "enumeration cannot be null");
   }

@@ -12,9 +12,10 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <github.maven.repository>file:///Users/felixpageau/maven/repository/maven-repository/</github.maven.repository>
-    <jetty.version>9.2.9</jetty.version>
+    <jetty.version>9.2.11</jetty.version>
     <jersey.version>2.22.2</jersey.version>
-    <jackson.version>2.3.0</jackson.version>
+    <jackson.version>2.7.4</jackson.version>
+    <findbugs.version>3.0.1</findbugs.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
 
@@ -37,6 +38,35 @@
           <source>1.8</source>
           <target>1.8</target>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>3.0.3</version>
+        <configuration>
+          <effort>Max</effort>
+          <threshold>Low</threshold>
+          <xmlOutput>true</xmlOutput>
+          <findbugsXmlOutputDirectory>${project.build.directory}/findbugs</findbugsXmlOutputDirectory>
+          <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
+          <plugins>
+              <plugin>
+                  <groupId>com.mebigfatguy.fb-contrib</groupId>
+                  <artifactId>fb-contrib</artifactId>
+                  <version>6.6.1</version>
+              </plugin>
+          </plugins>
+        </configuration>
+        <executions>
+          <!-- Ensures that FindBugs inspects source code when project is compiled. -->
+          <execution>
+            <id>analyze-compile</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
@@ -69,10 +99,16 @@
         <version>4.3.4</version>
         <scope>import</scope>
       </dependency>
+ 
     </dependencies>
   </dependencyManagement>
 
   <dependencies>
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-jersey2-jaxrs</artifactId>
+      <version>1.5.8</version>
+    </dependency> 
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-server</artifactId>
@@ -116,11 +152,6 @@
       <version>1.9.1</version>
     </dependency>
     <dependency>
-      <groupId>net.sf.marineapi</groupId>
-      <artifactId>marineapi</artifactId>
-      <version>0.8.1</version>
-    </dependency>
-    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.12</version>
@@ -134,7 +165,17 @@
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
-      <version>3.0.0</version>
+      <version>3.0.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>annotations</artifactId>
+      <version>3.0.1u2</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.1.7</version>
     </dependency>
   </dependencies>
   <repositories>

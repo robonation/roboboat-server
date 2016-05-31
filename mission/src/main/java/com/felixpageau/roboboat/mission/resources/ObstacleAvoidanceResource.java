@@ -11,6 +11,7 @@ import com.felixpageau.roboboat.mission.server.CompetitionManager;
 import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.GateCode;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
 /**
@@ -28,5 +29,10 @@ public class ObstacleAvoidanceResource {
   @Produces({ MediaType.APPLICATION_JSON })
   public GateCode getGateCode(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode) throws JsonProcessingException {
     return manager.getObstacleCourseCode(course, teamCode);
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this).toString();
   }
 }

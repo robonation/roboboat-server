@@ -1,15 +1,28 @@
 package com.felixpageau.roboboat.mission.structures;
 
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.felixpageau.roboboat.mission.server.RunArchiver;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 
+@ParametersAreNonnullByDefault
+@ThreadSafe
+@Immutable
+@ReturnValuesAreNonNullByDefault
 public class DisplayReport {
-  public static DisplayReport NO_REPORT_A = new DisplayReport(Course.courseA, null, null, 0, null, null, false, null, false, null, null, false, false, null, null, null);
-  public static DisplayReport NO_REPORT_B = new DisplayReport(Course.courseB, null, null, 0, null, null, false, null, false, null, null, false, false, null, null, null);
-  public static DisplayReport NO_REPORT_OT = new DisplayReport(Course.openTest, null, null, 0, null, null, false, null, false, null, null, false, false, null, null, null);
+  public static final DisplayReport NO_REPORT_A = buildNoReport(Course.courseA);
+  public static final DisplayReport NO_REPORT_B = buildNoReport(Course.courseB);
+  public static final DisplayReport NO_REPORT_OT = buildNoReport(Course.openTest);
   private final Course course;
   private final TeamCode teamCode;
   private final Position currentPosition;
@@ -21,22 +34,21 @@ public class DisplayReport {
   private final boolean requestedDockingSequence;
   private final BuoyColor activePinger;
   private final BuoyColor reportedPinger;
-  private final boolean requestedInteropImages;
-  private final boolean requestedInteropImage;
   private final String uploadedImage;
   private final Shape activeShape;
   private final Shape reportedShape;
 
   @JsonCreator
-  public DisplayReport(@JsonProperty(value = "course") Course course, @JsonProperty(value = "teamCode") TeamCode teamCode,
-      @JsonProperty(value = "currentPosition") Position currentPosition, @JsonProperty(value = "lastHeartbeat") long lastHeartbeat,
-      @JsonProperty(value = "currentChallenge") Challenge currentChallenge, @JsonProperty(value = "assignedGateCode") GateCode assignedGateCode,
-      @JsonProperty(value = "requestedGateCode") boolean requestedGateCode, @JsonProperty(value = "dockingSequence") DockingSequence dockingSequence,
-      @JsonProperty(value = "requestedDockingSequence") boolean requestedDockingSequence, @JsonProperty(value = "activePinger") BuoyColor activePinger,
-      @JsonProperty(value = "reportedPinger") BuoyColor reportedPinger, @JsonProperty(value = "requestedInteropImages") boolean requestedInteropImages,
-      @JsonProperty(value = "requestedInteropImage") boolean requestedInteropImage, @JsonProperty(value = "uploadedImage") String uploadedImage,
-      @JsonProperty(value = "activeShape") Shape activeShape, @JsonProperty(value = "reportedShape") Shape reportedShape) {
-    this.course = course;
+  public DisplayReport(@JsonProperty(value = "course") Course course, @Nullable @JsonProperty(value = "teamCode") TeamCode teamCode,
+      @Nullable @JsonProperty(value = "currentPosition") Position currentPosition, @JsonProperty(value = "lastHeartbeat") long lastHeartbeat,
+      @JsonProperty(value = "currentChallenge") @Nullable Challenge currentChallenge,
+      @Nullable @JsonProperty(value = "assignedGateCode") GateCode assignedGateCode, @JsonProperty(value = "requestedGateCode") boolean requestedGateCode,
+      @Nullable @JsonProperty(value = "dockingSequence") DockingSequence dockingSequence,
+      @JsonProperty(value = "requestedDockingSequence") boolean requestedDockingSequence,
+      @Nullable @JsonProperty(value = "activePinger") BuoyColor activePinger, @Nullable @JsonProperty(value = "reportedPinger") BuoyColor reportedPinger,
+      @Nullable @JsonProperty(value = "uploadedImage") String uploadedImage, @Nullable @JsonProperty(value = "activeShape") Shape activeShape,
+      @Nullable @JsonProperty(value = "reportedShape") Shape reportedShape) {
+    this.course = Preconditions.checkNotNull(course, "course cannot be null");
     this.teamCode = teamCode;
     this.currentPosition = currentPosition;
     this.lastHeartbeat = lastHeartbeat;
@@ -47,11 +59,41 @@ public class DisplayReport {
     this.requestedDockingSequence = requestedDockingSequence;
     this.activePinger = activePinger;
     this.reportedPinger = reportedPinger;
-    this.requestedInteropImages = requestedInteropImages;
-    this.requestedInteropImage = requestedInteropImage;
     this.uploadedImage = uploadedImage;
     this.activeShape = activeShape;
     this.reportedShape = reportedShape;
+  }
+
+  /**
+   * @param course
+   *          the course which to create a *no report* {@link DisplayReport}
+   * @return a {@link DisplayReport} instance
+   */
+  private static final DisplayReport buildNoReport(Course course) {
+    Preconditions.checkNotNull(course, "course cannot be null");
+    return new DisplayReport(course, null, null, 0, null, null, false, null, false, null, null, null, null, null);
+  }
+
+  /**
+   * Build a {@link DisplayReport} based on a {@link RunArchiver} instance.
+   * 
+   * @param course
+   *          the course for which a {@link DisplayReport} should be generated
+   * @param archiver
+   *          the {@link RunArchiver} instance instance. May be null
+   * @return an instance of {@link DisplayReport}
+   */
+  public static DisplayReport buildDisplayReport(Course course, @Nullable RunArchiver archiver) {
+    Preconditions.checkNotNull(course, "course cannot be null");
+    if (archiver == null) {
+      return DisplayReport.buildNoReport(course);
+    }
+    return new DisplayReport(archiver.getRunSetup().getCourse(), archiver.getRunSetup().getActiveTeam(), archiver.getLastHeartbeat()
+        .map(HeartbeatReport::getPosition).orElse(null), archiver.getLastHeartbeat().map(hr -> hr.getTimestamp().getTimeAsLong()).orElse(0L), archiver
+        .getLastHeartbeat().map(HeartbeatReport::getChallenge).orElse(null), archiver.getRunSetup().getActiveGateCode(), archiver.hasRequestedGateCode(),
+        archiver.getRunSetup().getActiveDockingSequence(), archiver.hasRequestedDockingSequence(), archiver.getRunSetup().getActivePinger().getBuoyColor(),
+        archiver.getReportedPinger().map(BeaconReport::getBuoyColor).orElse(null), archiver.getUploadedImage().orElse(null), archiver.getRunSetup()
+            .getActiveInteropShape(), archiver.getReportedInterop().map(InteropReport::getShape).orElse(null));
   }
 
   /**
@@ -64,6 +106,7 @@ public class DisplayReport {
   /**
    * @return the teamCode
    */
+  @CheckForNull
   public TeamCode getTeamCode() {
     return teamCode;
   }
@@ -71,6 +114,7 @@ public class DisplayReport {
   /**
    * @return the currentPosition
    */
+  @CheckForNull
   public Position getCurrentPosition() {
     return currentPosition;
   }
@@ -85,6 +129,7 @@ public class DisplayReport {
   /**
    * @return the currentChallenge
    */
+  @CheckForNull
   public Challenge getCurrentChallenge() {
     return currentChallenge;
   }
@@ -92,6 +137,7 @@ public class DisplayReport {
   /**
    * @return the assignedGateCode
    */
+  @CheckForNull
   public GateCode getAssignedGateCode() {
     return assignedGateCode;
   }
@@ -106,6 +152,7 @@ public class DisplayReport {
   /**
    * @return the dockingSequence
    */
+  @CheckForNull
   public DockingSequence getDockingSequence() {
     return dockingSequence;
   }
@@ -120,6 +167,7 @@ public class DisplayReport {
   /**
    * @return the activePinger
    */
+  @CheckForNull
   public BuoyColor getActivePinger() {
     return activePinger;
   }
@@ -127,27 +175,15 @@ public class DisplayReport {
   /**
    * @return the reportedPinger
    */
+  @CheckForNull
   public BuoyColor getReportedPinger() {
     return reportedPinger;
   }
 
   /**
-   * @return the requestedInteropImages
-   */
-  public boolean isRequestedInteropImages() {
-    return requestedInteropImages;
-  }
-
-  /**
-   * @return the requestedInteropImage
-   */
-  public boolean isRequestedInteropImage() {
-    return requestedInteropImage;
-  }
-
-  /**
    * @return the uploadedImage
    */
+  @CheckForNull
   public String getUploadedImage() {
     return uploadedImage;
   }
@@ -155,6 +191,7 @@ public class DisplayReport {
   /**
    * @return the activeShape
    */
+  @CheckForNull
   public Shape getActiveShape() {
     return activeShape;
   }
@@ -162,6 +199,7 @@ public class DisplayReport {
   /**
    * @return the reportedShape
    */
+  @CheckForNull
   public Shape getReportedShape() {
     return reportedShape;
   }
@@ -172,15 +210,14 @@ public class DisplayReport {
     return MoreObjects.toStringHelper(this).add("course", course).add("teamCode", teamCode).add("currentPosition", currentPosition)
         .add("lastHeartbeat", lastHeartbeat).add("currentChallenge", currentChallenge).add("assignedGateCode", assignedGateCode)
         .add("requestedGateCode", requestedGateCode).add("dockingSequence", dockingSequence).add("requestedDockingSequence", requestedDockingSequence)
-        .add("activePinger", activePinger).add("reportedPinger", reportedPinger).add("requestedInteropImages", requestedInteropImages)
-        .add("requestedInteropImage", requestedInteropImage).add("activeShape", activeShape).add("reportedShape", reportedShape).toString();
+        .add("activePinger", activePinger).add("reportedPinger", reportedPinger).add("activeShape", activeShape).add("reportedShape", reportedShape).toString();
   }
 
   @JsonIgnore
   @Override
   public int hashCode() {
     return Objects.hashCode(course, teamCode, currentPosition, lastHeartbeat, currentChallenge, assignedGateCode, requestedGateCode, dockingSequence,
-        requestedDockingSequence, activePinger, reportedPinger, requestedInteropImages, requestedInteropImage, activeShape, reportedShape);
+        requestedDockingSequence, activePinger, reportedPinger, activeShape, reportedShape);
   }
 
   @JsonIgnore
@@ -199,7 +236,6 @@ public class DisplayReport {
           && Objects.equal(assignedGateCode, other.assignedGateCode) && Objects.equal(requestedGateCode, other.requestedGateCode)
           && Objects.equal(dockingSequence, other.dockingSequence) && Objects.equal(requestedDockingSequence, other.requestedDockingSequence)
           && Objects.equal(activePinger, other.activePinger) && Objects.equal(reportedPinger, other.reportedPinger)
-          && Objects.equal(requestedInteropImages, other.requestedInteropImages) && Objects.equal(requestedInteropImage, other.requestedInteropImage)
           && Objects.equal(activeShape, other.activeShape) && Objects.equal(reportedShape, other.reportedShape);
     }
     return false;

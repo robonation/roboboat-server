@@ -10,6 +10,7 @@ import com.felixpageau.roboboat.mission.server.CompetitionManager;
 import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.ReportStatus;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
 /**
@@ -35,5 +36,10 @@ public class RunResource {
   @Produces({ MediaType.APPLICATION_JSON })
   public ReportStatus endRun(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode) {
     return competitionManager.endRun(course, teamCode);
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this).toString();
   }
 }

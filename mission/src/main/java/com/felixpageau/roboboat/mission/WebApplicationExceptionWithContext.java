@@ -7,10 +7,13 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * @author felixpageau
  *
  */
+@SuppressFBWarnings(value = "DRE_DECLARED_RUNTIME_EXCEPTION", justification = "bad detector")
 public class WebApplicationExceptionWithContext extends WebApplicationException {
   private static final long serialVersionUID = 5410018941310786986L;
 

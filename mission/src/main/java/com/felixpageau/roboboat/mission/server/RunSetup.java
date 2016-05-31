@@ -1,8 +1,12 @@
 package com.felixpageau.roboboat.mission.server;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -12,13 +16,23 @@ import com.felixpageau.roboboat.mission.structures.DockingBay;
 import com.felixpageau.roboboat.mission.structures.DockingSequence;
 import com.felixpageau.roboboat.mission.structures.GateCode;
 import com.felixpageau.roboboat.mission.structures.Pinger;
+import com.felixpageau.roboboat.mission.structures.Run;
 import com.felixpageau.roboboat.mission.structures.Shape;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
+/**
+ * Setup of a {@link Run}
+ *
+ */
+@ParametersAreNonnullByDefault
+@ThreadSafe
+@Immutable
+@ReturnValuesAreNonNullByDefault
 public class RunSetup {
   public static final RunSetup NO_RUN = new RunSetup("", Course.openTest, new TeamCode("NONE"), GateCode.generateRandomGateCode(),
       DockingSequence.generateRandomDockingSequence(), Pinger.NO_PINGER, Shape.generateRandomInteropShape());
@@ -46,10 +60,10 @@ public class RunSetup {
 
   public static RunSetup generateRandomSetup(CourseLayout courseLayout, TeamCode teamCode, String runId) {
     List<Pinger> pingers = courseLayout.getPingers();
-    Pinger activePinger = new ArrayList<Pinger>(pingers).get(new Random().nextInt(pingers.size()));
+    Pinger activePinger = new ArrayList<Pinger>(pingers).get(new SecureRandom().nextInt(pingers.size()));
     List<DockingBay> availableBays = new ArrayList<>(courseLayout.getDockingBays());
-    List<DockingBay> bays = ImmutableList.of(availableBays.remove(new Random().nextInt(availableBays.size())),
-        availableBays.remove(new Random().nextInt(availableBays.size())));
+    List<DockingBay> bays = ImmutableList.of(availableBays.remove(new SecureRandom().nextInt(availableBays.size())),
+        availableBays.remove(new SecureRandom().nextInt(availableBays.size())));
     return new RunSetup(runId, courseLayout.getCourse(), teamCode, GateCode.generateRandomGateCode(), new DockingSequence(bays), activePinger,
         Shape.generateRandomInteropShape());
   }

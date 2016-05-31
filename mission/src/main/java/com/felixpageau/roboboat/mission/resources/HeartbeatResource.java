@@ -12,6 +12,7 @@ import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.HeartbeatReport;
 import com.felixpageau.roboboat.mission.structures.ReportStatus;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
 /**
@@ -31,5 +32,10 @@ public class HeartbeatResource {
   @Consumes({ MediaType.APPLICATION_JSON })
   public ReportStatus startRun(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode, HeartbeatReport report) {
     return competitionManager.reportHeartbeat(course, teamCode, report);
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this).toString();
   }
 }

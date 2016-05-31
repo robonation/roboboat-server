@@ -13,10 +13,6 @@ import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.internal.scanning.PackageNamesScanner;
 
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
-import com.felixpageau.roboboat.mission.CompetitionResourceConfig;
-import com.felixpageau.roboboat.mission.JacksonObjectMapperProvider;
-import com.felixpageau.roboboat.mission.NMEAServer;
-import com.felixpageau.roboboat.mission.SentenceRegistryFactory;
 import com.felixpageau.roboboat.mission.nmea.SentenceRegistry;
 import com.felixpageau.roboboat.mission.resources.AdminResource;
 import com.felixpageau.roboboat.mission.resources.AutomatedDockingResource;
@@ -40,11 +36,15 @@ import com.felixpageau.roboboat.mission.structures.TeamCode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Sets the resource configuration for the web-application to use Jackson for
  * marshalling/unmarshalling
  */
+@SuppressFBWarnings(value = "UUF_UNUSED_FIELD")
 public class AdminResourceConfig extends CompetitionResourceConfig {
+  private static final JacksonObjectMapperProvider OM_PROVIDER = new JacksonObjectMapperProvider();
   private static final List<CompetitionDay> COMPETITION_DAYS = ImmutableList.<CompetitionDay> of(new CompetitionDay(LocalDateTime.of(2015, 7, 7, 8, 0),
       LocalDateTime.of(2015, 7, 7, 18, 0)), // Tu
       new CompetitionDay(LocalDateTime.of(2015, 7, 8, 8, 0), LocalDateTime.of(2015, 7, 8, 18, 0)), // We
@@ -81,8 +81,7 @@ public class AdminResourceConfig extends CompetitionResourceConfig {
 
   static {
     try {
-      COURSE_LAYOUT_MAP = ImmutableMap.of(Course.courseA, new CourseLayout(Course.courseA, courseAPingers, dockingBaysA, new URL("http://192.168.1.7:5000"),
-          new URL("http://192.168.1.5:4000")));
+      COURSE_LAYOUT_MAP = ImmutableMap.of(Course.courseA, new CourseLayout(Course.courseA, courseAPingers, dockingBaysA, new URL("http://192.168.1.7:5000")));
 
       // ,
       // new URL("http://192.168.1.5:4000")), Course.courseB, new
@@ -94,16 +93,15 @@ public class AdminResourceConfig extends CompetitionResourceConfig {
       // URL("http://127.0.0.1:4000"))
 
     } catch (MalformedURLException e) {
-      e.printStackTrace();
       throw new RuntimeException(e);
     }
   }
 
-  public AdminResourceConfig() throws MalformedURLException, URISyntaxException {
-    this(new CompetitionManagerImpl(new Competition(COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, true)));
+  public AdminResourceConfig() throws URISyntaxException {
+    this(new CompetitionManagerImpl(new Competition(COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, true), OM_PROVIDER.getObjectMapper()));
   }
 
-  public AdminResourceConfig(CompetitionManager competitionManager) throws MalformedURLException, URISyntaxException {
+  public AdminResourceConfig(CompetitionManager competitionManager) throws URISyntaxException {
     super(competitionManager, JacksonFeatures.class, JacksonObjectMapperProvider.class, MultiPartFeature.class);
     this.registerFinder(new PackageNamesScanner(new String[] { "com.felixpageau.roboboat.mission2015.resources", "com.fasterxml.jackson.jaxrs.base" }, false));
     this.register(new AutomatedDockingResource(competitionManager));
@@ -122,7 +120,7 @@ public class AdminResourceConfig extends CompetitionResourceConfig {
   }
 
   @Override
-  public SentenceRegistry createNMEASentenceRegistry() {
+  public final SentenceRegistry createNMEASentenceRegistry() {
     return SentenceRegistryFactory.create2015NMEASentenceRegistry();
   }
 

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
@@ -23,19 +22,27 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.felixpageau.roboboat.mission.App;
 import com.felixpageau.roboboat.mission.structures.Challenge;
 import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.Pinger;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
 import com.felixpageau.roboboat.mission.utils.NMEAUtils;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
-import com.google.common.eventbus.EventBus;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+@SuppressFBWarnings(value = "UEC_USE_ENUM_COLLECTIONS", justification = "There are no ConcurrentEnumMap or EnumMultimap")
 public class Competition {
+  private static final Logger LOG = LoggerFactory.getLogger(Competition.class);
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd-hh");
   private final DateTimeFormatter dateRunIdFormat = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
   private final Map<Course, CourseLayout> layoutMap;
@@ -46,11 +53,9 @@ public class Competition {
   private final Map<TimeSlot, TeamCode> schedule = new HashMap<>();
   private final List<TeamCode> teams;
   private final boolean activatePinger;
-  private final EventBus eventBus = new EventBus();
   private final Executor exec = Executors.newCachedThreadPool();
 
-  public Competition(List<CompetitionDay> competitionDays, List<TeamCode> teams, Map<Course, CourseLayout> layoutMap, boolean activatePinger)
-      throws MalformedURLException {
+  public Competition(List<CompetitionDay> competitionDays, List<TeamCode> teams, Map<Course, CourseLayout> layoutMap, boolean activatePinger) {
     this.competitionDays = Preconditions.checkNotNull(competitionDays);
     this.layoutMap = Preconditions.checkNotNull(layoutMap);
     this.teams = ImmutableList.copyOf(Preconditions.checkNotNull(teams, "The provided team list cannot be null"));
@@ -138,7 +143,7 @@ public class Competition {
     List<TimeSlot> slots = new ArrayList<>(schedule.keySet());
     Collections.sort(slots, new TimeSlotComparator());
     for (TimeSlot timeSlot : slots) {
-      if (timeSlot.getCourse().equals(course) && timeSlot.getStartTime().isBefore(LocalDateTime.now()) && timeSlot.getEndTime().isAfter(LocalDateTime.now())) {
+      if (timeSlot.getCourse() == course && timeSlot.getStartTime().isBefore(LocalDateTime.now()) && timeSlot.getEndTime().isAfter(LocalDateTime.now())) {
         return timeSlot;
       }
     }
@@ -162,19 +167,19 @@ public class Competition {
     CourseLayout layout = layoutMap.get(slot.getCourse());
     RunSetup newSetup = RunSetup.generateRandomSetup(layoutMap.get(slot.getCourse()), teamCode, runId);
 
-    RunArchiver newRun = new RunArchiver(newSetup, new File("competition-log." + LocalDateTime.now().format(DATE_FORMAT)), eventBus);
+    RunArchiver newRun = new RunArchiver(newSetup, new File("competition-log." + LocalDateTime.now().format(DATE_FORMAT)));
     newRun.addEvent(new StructuredEvent(newSetup.getCourse(), newSetup.getActiveTeam(), Challenge.none, String.format("Start run (config %s)", newSetup)));
     activeRuns.put(slot.getCourse(), newRun);
     results.put(slot, newRun);
 
-    if (activatePinger && !slot.getCourse().equals(Course.openTest)) {
+    if (activatePinger && slot.getCourse() != Course.openTest) {
       exec.execute(new ActivatePinger(layout, newSetup));
     }
 
     return newSetup;
   }
 
-  public class ActivatePinger implements Runnable {
+  public static class ActivatePinger implements Runnable {
     private final CourseLayout layout;
     private final RunSetup newSetup;
 
@@ -188,8 +193,8 @@ public class Competition {
       boolean activated = false;
       for (int j = 0; j < 10 && !activated; j++) {
         try (Socket s = new Socket(layout.getPingerControlServer().getHost(), layout.getPingerControlServer().getPort());
-            Writer w = new OutputStreamWriter(s.getOutputStream());
-            BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream()))) {
+            Writer w = new OutputStreamWriter(s.getOutputStream(), App.APP_CHARSET);
+            BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream(), App.APP_CHARSET))) {
           if (Pinger.NO_PINGER.equals(newSetup.getActivePinger())) {
             String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), 0));
             w.write(pingerActivationMessage);
@@ -211,9 +216,9 @@ public class Competition {
           System.out.println(r.readLine());
           System.out.println(r.readLine());
         } catch (UnknownHostException e) {
-          e.printStackTrace();
+          LOG.error(String.format("Failed to find pinger server (%s)", layout.getPingerControlServer().toString()), e);
         } catch (IOException e) {
-          e.printStackTrace();
+          LOG.error(String.format("Comm failed with pinger server (%s)", layout.getPingerControlServer().toString()), e);
         }
       }
     }
@@ -222,11 +227,16 @@ public class Competition {
   public synchronized void endRun(Course course, TeamCode teamCode) {
     RunArchiver ra = activeRuns.get(course);
     if (ra != null) {
-      ra.addEvent(new StructuredEvent(course, teamCode, Challenge.none, "End run"));
-      if (activatePinger && !Course.openTest.equals(course)) {
+      ra.endRun(new StructuredEvent(course, teamCode, Challenge.none, "End run"));
+      if (activatePinger && Course.openTest != course) {
         exec.execute(new ActivatePinger(layoutMap.get(course), RunSetup.NO_RUN));
       }
       activeRuns.remove(course);
     }
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this).add("competitionDays", competitionDays).add("teams", teams).toString();
   }
 }

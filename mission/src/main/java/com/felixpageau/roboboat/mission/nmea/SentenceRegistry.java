@@ -14,6 +14,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.felixpageau.roboboat.mission.App;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 
@@ -44,11 +46,16 @@ public class SentenceRegistry {
   @CheckForNull
   public SentenceDefinition getDefinition(String talkerId, String sentenceId) {
     Preconditions.checkNotNull(sentenceId, "sentenceId cannot be null");
-    return definitions.get(talkerId.toUpperCase() + sentenceId.toUpperCase());
+    return definitions.get(talkerId.toUpperCase(App.APP_LOCALE) + sentenceId.toUpperCase(App.APP_LOCALE));
   }
 
   @Nonnull
   public Collection<SentenceDefinition> listDefinitions() {
     return definitions.values();
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(SentenceRegistry.class).add("definitions", definitions).toString();
   }
 }

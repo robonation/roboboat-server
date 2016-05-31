@@ -14,6 +14,7 @@ import com.felixpageau.roboboat.mission.structures.BeaconReport;
 import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.ReportStatus;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
 /**
@@ -32,5 +33,10 @@ public class PingerResource {
   @Consumes(MediaType.APPLICATION_JSON)
   public ReportStatus reportPinger(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode, BeaconReport payload) throws IOException {
     return manager.reportPinger(course, teamCode, payload);
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this).toString();
   }
 }

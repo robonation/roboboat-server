@@ -13,6 +13,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import com.felixpageau.roboboat.mission.nmea.SentenceRegistry;
 import com.felixpageau.roboboat.mission.server.CompetitionManager;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Base class for a CompetitionResourceConfig
@@ -23,36 +24,24 @@ public abstract class CompetitionResourceConfig extends ResourceConfig {
   private final CompetitionManager competitionManager;
 
   /**
-   * @param competitionManager the competition manager instance
-   */
-  public CompetitionResourceConfig(CompetitionManager competitionManager) {
-    this.competitionManager = Preconditions.checkNotNull(competitionManager, "competitionManager cannot be null");
-  }
-
-  /**
-   * @param competitionManager the competition manager instance
-   * @param classes the classes to load in jetty's context
-   */
-  public CompetitionResourceConfig(CompetitionManager competitionManager, Set<Class<?>> classes) {
-    super(classes);
-    this.competitionManager = Preconditions.checkNotNull(competitionManager, "competitionManager cannot be null");
-  }
-
-  /**
-   * @param competitionManager the competition manager instance
-   * @param classes classes the classes to load in jetty's context
+   * @param competitionManager
+   *          the competition manager instance
+   * @param classes
+   *          classes the classes to load in jetty's context
    */
   public CompetitionResourceConfig(CompetitionManager competitionManager, Class<?>... classes) {
-    super(classes);
-    this.competitionManager = Preconditions.checkNotNull(competitionManager, "competitionManager cannot be null");
+    this(competitionManager, ImmutableSet.of(), classes);
   }
 
   /**
-   * @param competitionManager the competition manager instance
-   * @param original the parent {@link ResourceConfig}
+   * @param competitionManager
+   *          the competition manager instance
+   * @param original
+   *          the parent {@link ResourceConfig}
    */
-  public CompetitionResourceConfig(CompetitionManager competitionManager, ResourceConfig original) {
-    super(original);
+  public CompetitionResourceConfig(CompetitionManager competitionManager, Set<Object> components, Class<?>... classes) {
+    super(classes);
+    this.registerInstances(ImmutableSet.copyOf(components));
     this.competitionManager = Preconditions.checkNotNull(competitionManager, "competitionManager cannot be null");
   }
 

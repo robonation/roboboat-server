@@ -1,6 +1,6 @@
 package com.felixpageau.roboboat.mission.structures;
 
-import java.util.Random;
+import java.security.SecureRandom;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -20,8 +20,8 @@ public class DockingBay {
   }
 
   public static DockingBay generateRandomDockingBay() {
-    return new DockingBay(Symbol.values()[new Random().nextInt(Symbol.values().length)],
-        SymbolColor.values()[new Random().nextInt(SymbolColor.values().length)]);
+    return new DockingBay(Symbol.values()[new SecureRandom().nextInt(Symbol.values().length)], SymbolColor.values()[new SecureRandom().nextInt(SymbolColor
+        .values().length)]);
   }
 
   public Symbol getSymbol() {

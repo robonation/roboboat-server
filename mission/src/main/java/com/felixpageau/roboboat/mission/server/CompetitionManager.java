@@ -22,6 +22,8 @@ import com.felixpageau.roboboat.mission.structures.TeamCode;
 import com.felixpageau.roboboat.mission.structures.UploadStatus;
 import com.google.common.base.Preconditions;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @ThreadSafe
 @Immutable
 @ParametersAreNonnullByDefault
@@ -45,12 +47,6 @@ public interface CompetitionManager {
   ReportStatus reportInterop(Course course, TeamCode teamCode, InteropReport report);
 
   @Nonnull
-  List<String> listInteropImages(Course course, TeamCode teamCode);
-
-  @Nonnull
-  Optional<byte[]> getInteropImage(Course course, TeamCode teamCode, String filename);
-
-  @Nonnull
   Optional<byte[]> getUploadedImage(String imageId);
 
   @Nonnull
@@ -60,11 +56,12 @@ public interface CompetitionManager {
   ReportStatus reportHeartbeat(Course course, TeamCode teamCode, HeartbeatReport report);
 
   @Nonnull
-  DisplayStatus getDisplayStatus();
+  DisplayStatus getDisplayStatus(List<Course> courses);
 
   @Nonnull
   Competition getCompetition();
 
+  @SuppressFBWarnings(value = "WEM_WEAK_EXCEPTION_MESSAGING")
   default public String getExtension(byte[] content) {
     byte[] jpg = new byte[] { (byte) 0xFF, (byte) 0xD8 };
     byte[] png = new byte[] { (byte) 0x89, (byte) 0x50, (byte) 0x4E, (byte) 0x47 };

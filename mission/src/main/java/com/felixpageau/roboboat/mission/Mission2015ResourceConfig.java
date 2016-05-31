@@ -1,8 +1,9 @@
 package com.felixpageau.roboboat.mission;
 
 //import org.glassfish.jersey.jackson.JacksonFeature;
+import io.swagger.jaxrs.config.BeanConfig;
+
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -34,12 +35,17 @@ import com.felixpageau.roboboat.mission.structures.SymbolColor;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * Sets the resource configuration for the web-application to use Jackson for
  * marshalling/unmarshalling
  */
+@SuppressFBWarnings(value = "UUF_UNUSED_FIELD")
 public class Mission2015ResourceConfig extends CompetitionResourceConfig {
+  private static final JacksonObjectMapperProvider OM_PROVIDER = new JacksonObjectMapperProvider();
   private static final List<CompetitionDay> COMPETITION_DAYS = ImmutableList.<CompetitionDay> of(new CompetitionDay(LocalDateTime.of(2015, 7, 7, 8, 0),
       LocalDateTime.of(2015, 7, 7, 18, 0)), // Tu
       new CompetitionDay(LocalDateTime.of(2015, 7, 8, 8, 0), LocalDateTime.of(2015, 7, 8, 18, 0)), // We
@@ -61,27 +67,26 @@ public class Mission2015ResourceConfig extends CompetitionResourceConfig {
   private static final List<Pinger> courseBPingers = ImmutableList.of(new Pinger(BuoyColor.blue), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.black));
   private static final List<Pinger> openTestPingers = ImmutableList.of(new Pinger(BuoyColor.green));
   private static final Map<Course, CourseLayout> COURSE_LAYOUT_MAP;
+  @SuppressFBWarnings(value = "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD", justification = "NMEAServerTest uses this field")
   public static final AtomicInteger port = new AtomicInteger(9999);
   private final NMEAServer nmeaServer;
 
   static {
     try {
-      COURSE_LAYOUT_MAP = ImmutableMap.of(Course.courseA, new CourseLayout(Course.courseA, courseAPingers, dockingBaysA, new URL("http://192.168.1.7:5000"),
-          new URL("http://192.168.1.5:4000")), Course.courseB, new CourseLayout(Course.courseB, courseBPingers, dockingBaysB,
-          new URL("http://192.168.1.8:5000"), new URL("http://192.168.1.6:4000")), Course.openTest, new CourseLayout(Course.openTest, openTestPingers,
-          dockingBaysOpenTest, new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:4000")));
+      COURSE_LAYOUT_MAP = ImmutableMap.of(Course.courseA, new CourseLayout(Course.courseA, courseAPingers, dockingBaysA, new URL("http://192.168.1.7:5000")),
+          Course.courseB, new CourseLayout(Course.courseB, courseBPingers, dockingBaysB, new URL("http://192.168.1.8:5000")), Course.openTest,
+          new CourseLayout(Course.openTest, openTestPingers, dockingBaysOpenTest, new URL("http://127.0.0.1:5000")));
     } catch (MalformedURLException e) {
-      e.printStackTrace();
       throw new RuntimeException(e);
     }
   }
 
-  public Mission2015ResourceConfig() throws MalformedURLException, URISyntaxException {
-    this(new MockCompetitionManager(new Competition(COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, false)));
+  public Mission2015ResourceConfig() throws MalformedURLException {
+    this(new MockCompetitionManager(new Competition(COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, false), OM_PROVIDER.getObjectMapper()));
   }
 
   public Mission2015ResourceConfig(CompetitionManager competitionManager) throws MalformedURLException {
-    super(competitionManager, JacksonFeatures.class, JacksonObjectMapperProvider.class, MultiPartFeature.class);
+    super(competitionManager, ImmutableSet.of(OM_PROVIDER), JacksonFeatures.class, JacksonObjectMapperProvider.class, MultiPartFeature.class);
     this.registerFinder(new PackageNamesScanner(new String[] { "com.felixpageau.roboboat.mission2015.resources", "com.fasterxml.jackson.jaxrs.base" }, false));
     this.register(new AutomatedDockingResource(competitionManager));
     this.register(new InteropResource(competitionManager));
@@ -89,16 +94,23 @@ public class Mission2015ResourceConfig extends CompetitionResourceConfig {
     this.register(new ObstacleAvoidanceResource(competitionManager));
     this.register(new HeartbeatResource(competitionManager));
     this.register(new PingerResource(competitionManager));
-    this.register(JacksonFeatures.class);
-    this.register(JacksonObjectMapperProvider.class);
-    this.register(MultiPartFeature.class);
+    // this.register(JacksonFeatures.class);
+    // this.register(MultiPartFeature.class);
+
+    BeanConfig beanConfig = new BeanConfig();
+    beanConfig.setVersion("1.0.2");
+    beanConfig.setSchemes(new String[] { "http" });
+    beanConfig.setHost("localhost:8002");
+    beanConfig.setBasePath("/api");
+    beanConfig.setResourcePackage("io.swagger.resources");
+    beanConfig.setScan(true);
 
     this.nmeaServer = new NMEAServer(competitionManager, port.get(), createNMEASentenceRegistry(), true);
     this.nmeaServer.start();
   }
 
   @Override
-  public SentenceRegistry createNMEASentenceRegistry() {
+  public final SentenceRegistry createNMEASentenceRegistry() {
     return SentenceRegistryFactory.create2015NMEASentenceRegistry();
   }
 

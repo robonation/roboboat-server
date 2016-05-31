@@ -21,6 +21,9 @@ import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.ws.rs.WebApplicationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.felixpageau.roboboat.mission.nmea.NMEASentence;
 import com.felixpageau.roboboat.mission.nmea.SentenceDefinition;
 import com.felixpageau.roboboat.mission.nmea.SentenceRegistry;
@@ -39,12 +42,16 @@ import com.felixpageau.roboboat.mission.structures.ReportStatus;
 import com.felixpageau.roboboat.mission.structures.Shape;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
 import com.felixpageau.roboboat.mission.structures.Timestamp;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @ParametersAreNonnullByDefault
 @ThreadSafe
 @Immutable
 public class NMEAServer implements Runnable {
+  private static final Logger LOG = LoggerFactory.getLogger(NMEAServer.class);
   private final int port;
   private final SentenceRegistry registry;
   private final AtomicBoolean abort = new AtomicBoolean(false);
@@ -69,7 +76,7 @@ public class NMEAServer implements Runnable {
         executor.execute(new NMEAWorker(competitionManager, registry, client));
       }
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException("NMEAServer failed to start on port: " + port, e);
     }
   }
 
@@ -116,17 +123,21 @@ public class NMEAServer implements Runnable {
       Preconditions.checkNotNull(sentenceId, "sentenceId cannot be null");
       Preconditions.checkNotNull(fields, "fields cannot be null");
       SentenceDefinition sd = registry.getDefinition(talkerId, sentenceId);
+      if (sd == null) {
+        throw new IllegalArgumentException(String.format("There is no definition for talker %s and sentence %s", talkerId, sentenceId));
+      }
       return new NMEASentence(sentenceId, talkerId, sd, fields).toString();
     }
 
+    @SuppressFBWarnings(value = "CC_CYCLOMATIC_COMPLEXITY")
     @Override
     public void run() {
-      try (BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream()));
-          BufferedWriter w = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))) {
+      try (BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream(), App.APP_CHARSET));
+          BufferedWriter w = new BufferedWriter(new OutputStreamWriter(s.getOutputStream(), App.APP_CHARSET))) {
         while (!abort.get()) {
           String line = r.readLine();
-          if (line == null || line.isEmpty() || line.equals("\n")) {
-            // System.err.println("Read empty line");
+          if (line == null || line.isEmpty() || "\n".equals(line)) {
+            // Empty line. Continue
             continue;
           } else {
             try {
@@ -135,8 +146,8 @@ public class NMEAServer implements Runnable {
               }
               NMEASentence sentence = NMEASentence.parse(registry, line);
               ReportStatus status;
-              Course course = Course.fromString(sentence.getFields().get(0));
-              TeamCode team = new TeamCode(sentence.getFields().get(1));
+              Course course = Course.fromString(sentence.getField(0));
+              TeamCode team = new TeamCode(sentence.getField(1));
               switch (sentence.getTalkerId() + sentence.getSentenceId()) {
               case "SVSTR":
                 status = competitionManager.startRun(course, team);
@@ -147,8 +158,8 @@ public class NMEAServer implements Runnable {
                 w.write(createResponse("TD", sentence.getSentenceId(), status.isSuccess()));
                 break;
               case "SVHRT":
-                Challenge c = Challenge.fromString(sentence.getFields().get(3));
-                Position p = Position.fromNMEA(sentence.getFields().get(4), sentence.getFields().get(5));
+                Challenge c = Challenge.fromString(sentence.getField(3));
+                Position p = Position.fromNMEA(sentence.getField(4), sentence.getField(5));
                 status = competitionManager.reportHeartbeat(course, team, new HeartbeatReport(new Timestamp(), c, p));
                 w.write(createResponse("TD", sentence.getSentenceId(), Arrays.asList(timestamp(), Boolean.toString(status.isSuccess()))));
                 break;
@@ -164,11 +175,11 @@ public class NMEAServer implements Runnable {
                 w.write(createResponse("TD", sentence.getSentenceId(), args));
                 break;
               case "SVPIN":
-                status = competitionManager.reportPinger(course, team, new BeaconReport(course, team, BuoyColor.valueOf(sentence.getFields().get(2))));
+                status = competitionManager.reportPinger(course, team, new BeaconReport(course, team, BuoyColor.valueOf(sentence.getField(2))));
                 w.write(createResponse("TD", sentence.getSentenceId(), Arrays.asList(timestamp(), Boolean.toString(status.isSuccess()))));
                 break;
               case "SVUAV":
-                InteropReport ir = new InteropReport(course, team, Shape.fromString(sentence.getFields().get(2)), sentence.getFields().get(3));
+                InteropReport ir = new InteropReport(course, team, Shape.fromString(sentence.getField(2)), sentence.getField(3));
                 status = competitionManager.reportInterop(course, team, ir);
                 w.write(createResponse("TD", sentence.getSentenceId(), Arrays.asList(timestamp(), Boolean.toString(status.isSuccess()))));
                 break;
@@ -193,8 +204,13 @@ public class NMEAServer implements Runnable {
           }
         }
       } catch (IOException e) {
-        e.printStackTrace();
+        LOG.warn("IOException in NMEA", e);
       }
     }
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this).add("port", port).add("debug", debug.get()).add("abort", abort.get()).toString();
   }
 }

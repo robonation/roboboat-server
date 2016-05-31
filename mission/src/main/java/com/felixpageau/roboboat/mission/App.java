@@ -3,9 +3,10 @@ package com.felixpageau.roboboat.mission;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import javax.servlet.DispatcherType;
@@ -25,7 +26,11 @@ import org.glassfish.jersey.server.ContainerFactory;
 
 import com.thetransactioncompany.cors.CORSFilter;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class App {
+  public static final Charset APP_CHARSET = Charset.defaultCharset();
+  public static final Locale APP_LOCALE = Locale.US;
 
   public static void main(String[] args) throws Exception {
     URI baseUri = UriBuilder.fromUri("https://localhost/").port(9443).build();
@@ -76,7 +81,7 @@ public class App {
             .collect(Collectors.joining(", ")));
   }
 
-  public static CompetitionResourceConfig createApp() throws MalformedURLException, URISyntaxException {
+  private static CompetitionResourceConfig createApp() throws MalformedURLException {
     return new Mission2015ResourceConfig();
   }
 
@@ -91,6 +96,7 @@ public class App {
       // EMPTY
     }
 
+    @SuppressFBWarnings(value = "IMC_IMMATURE_CLASS_PRINTSTACKTRACE")
     @Override
     public void lifeCycleFailure(LifeCycle event, Throwable cause) {
       cause.printStackTrace();

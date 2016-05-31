@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <Bug pattern="OPM_OVERLY_PERMISSIVE_METHOD"/>
+  <Bug pattern="ISB_TOSTRING_APPENDING"/>
+  <Bug pattern="MDM_PROMISCUOUS_SERVERSOCKET"/>
+  <Bug pattern="WOC_WRITE_ONLY_COLLECTION_FIELD"/>
+  <Bug pattern="PRMC_POSSIBLY_REDUNDANT_METHOD_CALLS"/>
+  <Class name="~.*Test$"/>
+  <Package name="~test\..*"/>
+</FindBugsFilter>

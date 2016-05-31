@@ -7,7 +7,7 @@ public enum Course {
   courseA, courseB, openTest, testCourse1, testCourse2, testCourse3, testCourse4, testCourse5, testCourse6, testCourse7, testCourse8, testCourse9, testCourse10;
 
   @JsonCreator
-  public static Course fromString(final String value) throws IllegalArgumentException {
+  public static Course fromString(final String value) {
     Preconditions.checkNotNull(value, "value cannot be null");
     return valueOf(value);
   }

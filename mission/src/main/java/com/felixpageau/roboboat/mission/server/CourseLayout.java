@@ -8,23 +8,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.DockingBay;
 import com.felixpageau.roboboat.mission.structures.Pinger;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
 public class CourseLayout {
   private final Course course;
-  private final URL lightControlServer;
   private final URL pingerControlServer;
   private final List<Pinger> pingers;
   private final List<DockingBay> dockingBays;
 
   @JsonCreator
   public CourseLayout(@JsonProperty(value = "course") Course course, @JsonProperty(value = "pingers") List<Pinger> pingers,
-      @JsonProperty(value = "dockingBays") List<DockingBay> dockingBays, @JsonProperty(value = "lightControlServer") URL lightControlServer,
-      @JsonProperty(value = "pingerControlServer") URL pingerControlServer) {
+      @JsonProperty(value = "dockingBays") List<DockingBay> dockingBays, @JsonProperty(value = "pingerControlServer") URL pingerControlServer) {
     this.course = Preconditions.checkNotNull(course);
     this.pingers = Preconditions.checkNotNull(pingers);
     this.dockingBays = Preconditions.checkNotNull(dockingBays);
-    this.lightControlServer = Preconditions.checkNotNull(lightControlServer);
     this.pingerControlServer = Preconditions.checkNotNull(pingerControlServer);
   }
 
@@ -46,11 +44,13 @@ public class CourseLayout {
     return dockingBays;
   }
 
-  public URL getLightControlServer() {
-    return lightControlServer;
-  }
-
   public URL getPingerControlServer() {
     return pingerControlServer;
+  }
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this).add("course", course).add("dockingBays", dockingBays).add("pingers", pingers)
+        .add("pingerControlServer", pingerControlServer).toString();
   }
 }

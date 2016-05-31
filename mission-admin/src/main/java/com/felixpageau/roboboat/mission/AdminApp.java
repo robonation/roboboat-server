@@ -1,7 +1,6 @@
 package com.felixpageau.roboboat.mission;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -24,8 +23,9 @@ import org.glassfish.jersey.server.ContainerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
-import com.felixpageau.roboboat.mission.CompetitionResourceConfig;
 import com.thetransactioncompany.cors.CORSFilter;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class AdminApp {
 
@@ -79,7 +79,7 @@ public class AdminApp {
             .collect(Collectors.joining(", ")));
   }
 
-  public static CompetitionResourceConfig createApp() throws MalformedURLException, URISyntaxException {
+  public static CompetitionResourceConfig createApp() throws URISyntaxException {
     return new AdminResourceConfig();
   }
 
@@ -94,6 +94,7 @@ public class AdminApp {
       // EMPTY
     }
 
+    @SuppressFBWarnings(value = "IMC_IMMATURE_CLASS_PRINTSTACKTRACE")
     @Override
     public void lifeCycleFailure(LifeCycle event, Throwable cause) {
       cause.printStackTrace();

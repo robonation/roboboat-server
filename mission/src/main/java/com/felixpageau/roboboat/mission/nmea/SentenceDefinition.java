@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableList;
 @ThreadSafe
 @Immutable
 @ParametersAreNonnullByDefault
-public class SentenceDefinition implements Cloneable {
+public class SentenceDefinition {
   private final List<Field> fields;
   private final String description;
   private final String sentenceId;
