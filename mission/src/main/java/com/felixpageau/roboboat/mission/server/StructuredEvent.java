@@ -10,7 +10,9 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.felixpageau.roboboat.mission.structures.Challenge;
 import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
@@ -39,7 +41,9 @@ public class StructuredEvent extends Event {
   /**
    * @param message
    */
-  public StructuredEvent(Course course, TeamCode team, Challenge challenge, LocalDateTime time, String message) {
+  @JsonCreator
+  public StructuredEvent(@JsonProperty(value = "course") Course course, @JsonProperty(value = "team") TeamCode team,
+      @JsonProperty(value = "challenge") Challenge challenge, @JsonProperty(value = "time") LocalDateTime time, @JsonProperty(value = "message") String message) {
     super(String.format("%s - %s - %s - %s - %s", time.format(Config.DATE_FORMATTER.get()), course, team, challenge, message), time);
     this.course = Preconditions.checkNotNull(course, "The provided course cannot be null");
     this.team = Preconditions.checkNotNull(team, "The provided team cannot be null");

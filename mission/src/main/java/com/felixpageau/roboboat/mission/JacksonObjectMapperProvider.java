@@ -7,6 +7,9 @@ import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
@@ -17,10 +20,11 @@ public class JacksonObjectMapperProvider implements ContextResolver<ObjectMapper
   private final ObjectMapper om;
 
   public JacksonObjectMapperProvider() {
-    this(new ObjectMapper());
+    this(new ObjectMapper().registerModules(new GuavaModule(), new JavaTimeModule(), new Jdk8Module()));
   }
 
   public JacksonObjectMapperProvider(ObjectMapper om) {
+    om.registerModule(new JacksonTimeslotModule(om));
     this.om = Preconditions.checkNotNull(om, "om cannot be null");
   }
 

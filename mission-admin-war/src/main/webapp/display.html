@@ -41,7 +41,7 @@
     <div ng-app="control">
       <nav ng-controller="TimeCtrl" class="navbar navbar-inverse">
         <div class="container-fluid">
-          <div class="navbar-header"></div><a class="navbar-brand" href="#">2015 RoboBoat - Course Display</a>
+          <div class="navbar-header"></div><a class="navbar-brand" href="#">2016 RoboBoat - Course Display</a>
           <div class="navbar-right"><a href="#">Last Update: {{lastUpdate()}}</a></div>
         </div>
       </nav>
@@ -87,10 +87,6 @@
           <div class="row">
             <h6>Interop</h6>
             <ul>
-              <li>Listed available images: <span>{{status.courseB.requestedInteropImages}}</span>
-              <li>Retrieved one image: <span>{{status.courseB.requestedInteropImage}}</span>
-              <li ng-hide="status.courseB.uploadedImage">Uploaded image: none
-              <li ng-show="status.courseB.uploadedImage">Uploaded image: {{status.courseB.uploadedImage}}
               <li>Reported shape: {{status.courseB.reportedShape}}
               <li ng-show="status.courseB.reportedShape">Active shape: {{status.courseB.activeShape}}
               <li ng-hide="status.courseB.reportedShape">Active shape: **hidden**
@@ -146,10 +142,6 @@
           <div class="row">
             <h6>Interop</h6>
             <ul>
-              <li>Listed available images: <span>{{status.courseA.requestedInteropImages}}</span>
-              <li>Retrieved one image: <span>{{status.courseA.requestedInteropImage}}</span>
-              <li ng-hide="status.courseA.uploadedImage">Uploaded image: none
-              <li ng-show="status.courseA.uploadedImage">Uploaded image: {{status.courseA.uploadedImage}}
               <li>Reported shape: {{status.courseA.reportedShape}}
               <li ng-show="status.courseA.reportedShape">Active shape: {{status.courseA.activeShape}}
               <li ng-hide="status.courseA.reportedShape">Active shape: **hidden**

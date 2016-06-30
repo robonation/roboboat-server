@@ -48,14 +48,14 @@ public class RunSetup {
   public RunSetup(@JsonProperty(value = "runId") String runId, @JsonProperty(value = "course") Course course,
       @JsonProperty(value = "activeTeam") TeamCode activeTeam, @JsonProperty(value = "activeGateCode") GateCode activeGateCode,
       @JsonProperty(value = "activeDockingSequence") DockingSequence activeDockingSequence, @JsonProperty(value = "activePinger") Pinger activePinger,
-      @JsonProperty(value = "interopShape") Shape interopShape) {
+      @JsonProperty(value = "activeInteropShape") Shape activeInteropShape) {
     this.runId = Preconditions.checkNotNull(runId);
     this.course = Preconditions.checkNotNull(course);
     this.activeTeam = Preconditions.checkNotNull(activeTeam);
     this.activeGateCode = Preconditions.checkNotNull(activeGateCode);
     this.activeDockingSequence = Preconditions.checkNotNull(activeDockingSequence);
     this.activePinger = Preconditions.checkNotNull(activePinger);
-    this.activeInteropShape = Preconditions.checkNotNull(interopShape);
+    this.activeInteropShape = Preconditions.checkNotNull(activeInteropShape);
   }
 
   public static RunSetup generateRandomSetup(CourseLayout courseLayout, TeamCode teamCode, String runId) {
@@ -101,6 +101,13 @@ public class RunSetup {
    */
   public Pinger getActivePinger() {
     return activePinger;
+  }
+
+  /**
+   * @return the runId
+   */
+  public String getRunId() {
+    return runId;
   }
 
   /**

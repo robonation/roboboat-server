@@ -4,6 +4,7 @@ package com.felixpageau.roboboat.mission;
 import io.swagger.jaxrs.config.BeanConfig;
 
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,16 +45,17 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * marshalling/unmarshalling
  */
 @SuppressFBWarnings(value = "UUF_UNUSED_FIELD")
-public class Mission2015ResourceConfig extends CompetitionResourceConfig {
+public class MissionResourceConfig extends CompetitionResourceConfig {
   private static final JacksonObjectMapperProvider OM_PROVIDER = new JacksonObjectMapperProvider();
-  private static final List<CompetitionDay> COMPETITION_DAYS = ImmutableList.<CompetitionDay> of(new CompetitionDay(LocalDateTime.of(2015, 7, 7, 8, 0),
-      LocalDateTime.of(2015, 7, 7, 18, 0)), // Tu
-      new CompetitionDay(LocalDateTime.of(2015, 7, 8, 8, 0), LocalDateTime.of(2015, 7, 8, 18, 0)), // We
-      new CompetitionDay(LocalDateTime.of(2015, 7, 9, 8, 0), LocalDateTime.of(2015, 7, 9, 18, 0)), // Th
-      new CompetitionDay(LocalDateTime.of(2015, 7, 10, 8, 0), LocalDateTime.of(2015, 7, 10, 18, 0)), // Fr
-      new CompetitionDay(LocalDateTime.of(2015, 7, 11, 8, 0), LocalDateTime.of(2015, 7, 11, 18, 0)), // Sa
-      new CompetitionDay(LocalDateTime.of(2015, 7, 12, 8, 0), LocalDateTime.of(2015, 7, 12, 18, 0)) // Su
-      );
+  private static final String COMPETITION_NAME = "RoboBoat 2016";
+  private static final List<CompetitionDay> COMPETITION_DAYS = ImmutableList.<CompetitionDay> of(
+      new CompetitionDay(LocalDateTime.of(2016, 7, 5, 8, 0), LocalDateTime.of(2016, 7, 5, 18, 0)), // Tu
+      new CompetitionDay(LocalDateTime.of(2016, 7, 6, 8, 0), LocalDateTime.of(2016, 7, 6, 18, 0)), // We
+      new CompetitionDay(LocalDateTime.of(2016, 7, 7, 8, 0), LocalDateTime.of(2016, 7, 7, 18, 0)), // Th
+      new CompetitionDay(LocalDateTime.of(2016, 7, 8, 8, 0), LocalDateTime.of(2016, 7, 8, 18, 0)), // Fr
+      new CompetitionDay(LocalDateTime.of(2016, 7, 9, 8, 0), LocalDateTime.of(2016, 7, 9, 18, 0)), // Sa
+      new CompetitionDay(LocalDateTime.of(2016, 7, 10, 8, 0), LocalDateTime.of(2016, 7, 10, 18, 0)) // Su
+  );
   private static final List<TeamCode> TEAMS = ImmutableList.of(new TeamCode("AUVSI"), new TeamCode("DBH"), new TeamCode("EEPIS"), new TeamCode("ERAU"),
       new TeamCode("FAU"), new TeamCode("GIT"), new TeamCode("NCKU"), new TeamCode("ODUSM"), new TeamCode("ODUBB"), new TeamCode("TUCE"), new TeamCode("CUA"),
       new TeamCode("UCF"), new TeamCode("UF"), new TeamCode("UOFM"), new TeamCode("ULSAN"), new TeamCode("UWF"), new TeamCode("VU"));
@@ -81,11 +83,12 @@ public class Mission2015ResourceConfig extends CompetitionResourceConfig {
     }
   }
 
-  public Mission2015ResourceConfig() throws MalformedURLException {
-    this(new MockCompetitionManager(new Competition(COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, false), OM_PROVIDER.getObjectMapper()));
+  public MissionResourceConfig() throws URISyntaxException {
+    this(new MockCompetitionManager(new Competition(COMPETITION_NAME, COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, false, OM_PROVIDER.getObjectMapper()),
+        OM_PROVIDER.getObjectMapper()));
   }
 
-  public Mission2015ResourceConfig(CompetitionManager competitionManager) throws MalformedURLException {
+  public MissionResourceConfig(CompetitionManager competitionManager) throws URISyntaxException {
     super(competitionManager, ImmutableSet.of(OM_PROVIDER), JacksonFeatures.class, JacksonObjectMapperProvider.class, MultiPartFeature.class);
     this.registerFinder(new PackageNamesScanner(new String[] { "com.felixpageau.roboboat.mission2015.resources", "com.fasterxml.jackson.jaxrs.base" }, false));
     this.register(new AutomatedDockingResource(competitionManager));
@@ -111,7 +114,7 @@ public class Mission2015ResourceConfig extends CompetitionResourceConfig {
 
   @Override
   public final SentenceRegistry createNMEASentenceRegistry() {
-    return SentenceRegistryFactory.create2015NMEASentenceRegistry();
+    return SentenceRegistryFactory.createNMEASentenceRegistry();
   }
 
   @Override

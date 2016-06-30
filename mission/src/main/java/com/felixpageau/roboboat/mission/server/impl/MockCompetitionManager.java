@@ -69,7 +69,7 @@ public class MockCompetitionManager implements CompetitionManager {
   protected final File basePath;
 
   public MockCompetitionManager(Competition competition, ObjectMapper om) {
-    this(competition, om, new File("/etc/roboboat2015-images/uploads/" + DateTimeFormatter.ofPattern("YYYYMMdd/").format(LocalDateTime.now())));
+    this(competition, om, new File("/etc/roboboat2016-images/uploads/" + DateTimeFormatter.ofPattern("YYYYMMdd/").format(LocalDateTime.now())));
   }
 
   protected MockCompetitionManager(Competition competition, ObjectMapper om, final File basePath) {
@@ -78,7 +78,7 @@ public class MockCompetitionManager implements CompetitionManager {
     this.basePath = Preconditions.checkNotNull(basePath);
     Preconditions.checkArgument(basePath.exists() || basePath.mkdirs(), "Could not create directory: " + basePath);
   }
-  
+
   @Override
   public Competition getCompetition() {
     return competition;

@@ -11,7 +11,7 @@
   <artifactId>mission</artifactId>
   <packaging>jar</packaging>
   <version>2016.0</version>
-  <name>Base version of the competition server for RoboBoat </name>
+  <name>Base version of the competition server for RoboBoat</name>
 
   <build>
     <finalName>mission</finalName>

@@ -7,6 +7,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.Preconditions;
 
 /**
@@ -15,6 +16,7 @@ import com.google.common.base.Preconditions;
 @Immutable
 @ThreadSafe
 @ParametersAreNonnullByDefault
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "@class")
 public abstract class Event {
   private final LocalDateTime time;
   private final String message;

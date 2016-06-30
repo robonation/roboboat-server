@@ -18,7 +18,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 public class SentenceRegistryFactory {
-  public static SentenceRegistry create2015NMEASentenceRegistry() {
+  public static SentenceRegistry createNMEASentenceRegistry() {
     Field course = new EnumField("Course", Arrays.stream(Course.values()).map(c -> c.name()).collect(Collectors.toSet()));
     Field teamCode = new RegexField("Teamcode", "[a-zA-Z]{2,5}");
     Field timestamp = new RegexField("Timestamp", "[0-9]{14}");

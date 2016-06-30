@@ -35,6 +35,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.eventbus.EventBus;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -46,6 +47,7 @@ public final class RunArchiver {
   private final File f;
   private final LocalDateTime startTime;
   private final RunSetup runSetup;
+  private final EventBus bus;
   private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
   @GuardedBy(value = "lock")
@@ -65,27 +67,41 @@ public final class RunArchiver {
   @GuardedBy(value = "lock")
   private InteropReport reportedInterop;
 
-  public RunArchiver(RunSetup runSetup, File f) {
-    this(runSetup, null, LocalDateTime.now(), f);
+  public RunArchiver(RunSetup runSetup, File f, EventBus bus) {
+    this(runSetup, null, LocalDateTime.now(), null, null, false, false, null, null, null, f, bus);
   }
 
   @JsonCreator
   public RunArchiver(@JsonProperty(value = "runSetup") RunSetup runSetup, @JsonProperty(value = "events") @Nullable List<Event> events,
-      @JsonProperty(value = "startTime") LocalDateTime startTime) {
-    this(runSetup, events, startTime, new File("competition-log." + Math.random()));
+      @JsonProperty(value = "startTime") LocalDateTime startTime, @JsonProperty(value = "endTime") LocalDateTime endTime,
+      @JsonProperty(value = "lastHeartbeat") HeartbeatReport lastHeartbeat, @JsonProperty(value = "requestedGateCode") boolean requestedGateCode,
+      @JsonProperty(value = "requestedDockingSequence") boolean requestedDockingSequence, @JsonProperty(value = "reportedPinger") BeaconReport reportedPinger,
+      @JsonProperty(value = "uploadedImage") String uploadedImage, @JsonProperty(value = "reportedInterop") InteropReport reportedInterop) {
+    this(runSetup, events, startTime, endTime, lastHeartbeat, requestedGateCode, requestedDockingSequence, reportedPinger, uploadedImage, reportedInterop,
+        new File("tmp/competition-log." + Math.random()), new EventBus());
   }
 
   @SuppressFBWarnings(value = "EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS", justification = "Crashing the server with an unchecked exception is the right thing to do here")
-  public RunArchiver(RunSetup runSetup, @Nullable List<Event> events, LocalDateTime startTime, File f) {
+  public RunArchiver(RunSetup runSetup, @Nullable List<Event> events, LocalDateTime startTime, @Nullable LocalDateTime endTime,
+      @Nullable HeartbeatReport lastHeartbeat, boolean requestedGateCode, boolean requestedDockingSequence, @Nullable BeaconReport reportedPinger,
+      @Nullable String uploadedImage, @Nullable InteropReport reportedInterop, File f, EventBus bus) {
     this.runSetup = Preconditions.checkNotNull(runSetup);
     this.startTime = Preconditions.checkNotNull(startTime);
+    this.endTime = endTime;
+    this.lastHeartbeat = lastHeartbeat;
+    this.requestedGateCode = requestedGateCode;
+    this.requestedDockingSequence = requestedDockingSequence;
+    this.reportedPinger = reportedPinger;
+    this.uploadedImage = uploadedImage;
+    this.reportedInterop = reportedInterop;
+    this.bus = Preconditions.checkNotNull(bus, "bus cannot be null");
     if (events != null && !events.isEmpty()) {
-      addEvent(events);
+      this.events.addAll(events);
     }
     this.f = Preconditions.checkNotNull(f);
     if (!f.exists()) {
       try {
-        if (!f.createNewFile()) {
+        if (!f.getParentFile().mkdirs() && !f.createNewFile()) {
           throw new RuntimeException(String.format("Unable to create run log file at (%s). Restart server", f.getAbsolutePath()));
         }
       } catch (IOException e) {
@@ -115,8 +131,11 @@ public final class RunArchiver {
     } finally {
       lock.writeLock().unlock();
     }
-    try (BufferedWriter bf = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f), App.APP_CHARSET))) {
+
+    try (BufferedWriter bf = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(f, true), App.APP_CHARSET))) {
       events.stream().forEach(rethrow(event -> bf.append(event.toString()).append("\n")));
+      events.stream().forEach(e -> bus.post(e));
+      bf.flush();
     } catch (FileNotFoundException e) {
       LOG.error("Can't find log file", e);
     } catch (IOException e) {

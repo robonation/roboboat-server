@@ -46,7 +46,7 @@ public class JSONServerTest {
 
   @BeforeClass
   public static void setUp() throws Exception {
-    CompetitionResourceConfig config = new Mission2015ResourceConfig();
+    CompetitionResourceConfig config = new MissionResourceConfig();
     server = JettyHttpContainerFactory.createServer(URI.create(basePath), config, true);
   }
 

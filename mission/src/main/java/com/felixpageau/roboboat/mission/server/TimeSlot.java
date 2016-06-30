@@ -2,13 +2,23 @@ package com.felixpageau.roboboat.mission.server;
 
 import java.time.LocalDateTime;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.felixpageau.roboboat.mission.structures.Course;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
+@ThreadSafe
+@Immutable
+@ParametersAreNonnullByDefault
+@ReturnValuesAreNonNullByDefault
 public class TimeSlot {
   public static final TimeSlot DEFAULT_TIMESLOT = new TimeSlot(Course.openTest, LocalDateTime.now(), LocalDateTime.now().plusMinutes(20));
   private final Course course;
@@ -16,7 +26,8 @@ public class TimeSlot {
   private final LocalDateTime endTime;
 
   @JsonCreator
-  public TimeSlot(Course course, LocalDateTime startTime, LocalDateTime endTime) {
+  public TimeSlot(@JsonProperty(value = "course") Course course, @JsonProperty(value = "startTime") LocalDateTime startTime,
+      @JsonProperty(value = "endTime") LocalDateTime endTime) {
     this.course = Preconditions.checkNotNull(course);
     this.startTime = Preconditions.checkNotNull(startTime);
     this.endTime = Preconditions.checkNotNull(endTime);

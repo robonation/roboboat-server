@@ -140,7 +140,6 @@ public class WebApplicationExceptionWithContext extends WebApplicationException 
    */
   public WebApplicationExceptionWithContext(String message, Throwable cause, Status status) throws IllegalArgumentException {
     super(message, cause, status);
-    // TODO Auto-generated constructor stub
   }
 
   private static String computeExceptionMessage(Response response) {

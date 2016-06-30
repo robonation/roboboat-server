@@ -12,7 +12,7 @@ import com.felixpageau.roboboat.mission.nmea.NMEASentence;
 import com.felixpageau.roboboat.mission.nmea.SentenceRegistry;
 
 public class TestNMEASentence {
-  SentenceRegistry registry = SentenceRegistryFactory.create2015NMEASentenceRegistry();
+  SentenceRegistry registry = SentenceRegistryFactory.createNMEASentenceRegistry();
   String obstacleReq = "$SVOBS,courseA,AUVSI*5F";
   String obstacleResp = "$TDOBS,20150306061030,2,X*0F";
   String dockingReq = "$SVDOC,courseA,AUVSI*49";

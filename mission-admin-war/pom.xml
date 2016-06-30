@@ -11,7 +11,7 @@
   <artifactId>mission-admin-war</artifactId>
   <packaging>war</packaging>
   <version>2016.0</version>
-  <name>Admin war for the competition server for RoboBoat 2015</name>
+  <name>Admin war for the competition server for RoboBoat</name>
 
   <build>
     <finalName>mission-admin-war</finalName>

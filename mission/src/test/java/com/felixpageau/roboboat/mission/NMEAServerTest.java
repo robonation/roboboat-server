@@ -16,15 +16,15 @@ import java.net.URISyntaxException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.felixpageau.roboboat.mission.Mission2015ResourceConfig;
+import com.felixpageau.roboboat.mission.MissionResourceConfig;
 
 public class NMEAServerTest {
   private static final int port = 6666;
 
   @BeforeClass
   public static void setUp() throws MalformedURLException, URISyntaxException {
-    Mission2015ResourceConfig.port.set(port);
-    new Mission2015ResourceConfig();
+    MissionResourceConfig.port.set(port);
+    new MissionResourceConfig();
   }
 
   public void otherTest() {

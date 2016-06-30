@@ -4,6 +4,7 @@ import jersey.repackaged.com.google.common.base.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 
 public class UploadStatus {
   private final String imageID;
@@ -35,7 +36,6 @@ public class UploadStatus {
   @JsonIgnore
   @Override
   public String toString() {
-    // TODO Auto-generated method stub
-    return Objects.toStringHelper(this).add("imageID", imageID).toString();
+    return MoreObjects.toStringHelper(this).add("imageID", imageID).toString();
   }
 }

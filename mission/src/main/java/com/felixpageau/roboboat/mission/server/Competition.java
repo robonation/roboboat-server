@@ -25,6 +25,8 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felixpageau.roboboat.mission.App;
 import com.felixpageau.roboboat.mission.structures.Challenge;
 import com.felixpageau.roboboat.mission.structures.Course;
@@ -36,7 +38,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -44,7 +49,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 public class Competition {
   private static final Logger LOG = LoggerFactory.getLogger(Competition.class);
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd-hh");
-  private final DateTimeFormatter dateRunIdFormat = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+  private static final DateTimeFormatter DATE_RUN_ID_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+  private final String name;
   private final Map<Course, CourseLayout> layoutMap;
   private final Map<Course, TeamCode> teamInWater = new ConcurrentHashMap<>();
   private final List<CompetitionDay> competitionDays;
@@ -54,12 +60,20 @@ public class Competition {
   private final List<TeamCode> teams;
   private final boolean activatePinger;
   private final Executor exec = Executors.newCachedThreadPool();
+  private final EventBus bus = new EventBus();
+  private final File f;
+  protected final ObjectMapper om;
 
-  public Competition(List<CompetitionDay> competitionDays, List<TeamCode> teams, Map<Course, CourseLayout> layoutMap, boolean activatePinger) {
-    this.competitionDays = Preconditions.checkNotNull(competitionDays);
-    this.layoutMap = Preconditions.checkNotNull(layoutMap);
+  @SuppressFBWarnings(value = { "EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS", "SIC_INNER_SHOULD_BE_STATIC_ANON" })
+  public Competition(String name, List<CompetitionDay> competitionDays, List<TeamCode> teams, Map<Course, CourseLayout> layoutMap, boolean activatePinger,
+      ObjectMapper om) {
+    this.name = Preconditions.checkNotNull(name, "name cannot be null");
+    this.competitionDays = Preconditions.checkNotNull(competitionDays, "competitionDays cannot be null");
+    this.layoutMap = Preconditions.checkNotNull(layoutMap, "layoutMap cannot be null");
     this.teams = ImmutableList.copyOf(Preconditions.checkNotNull(teams, "The provided team list cannot be null"));
     this.activatePinger = activatePinger;
+    this.om = Preconditions.checkNotNull(om);
+    this.bus.register(new EventBusChangeRecorder());
 
     // Generate timeslots
     for (CompetitionDay day : competitionDays) {
@@ -79,6 +93,23 @@ public class Competition {
 
     // Always have a default run in OpenTest
     // startNewRun(TimeSlot.DEFAULT_TIMESLOT, new TeamCode("AUVSI"));
+
+    this.f = new File(String.format("%s/competition-log.%s.json", name, LocalDateTime.now().format(DATE_FORMAT)));
+    if (!f.exists()) {
+      try {
+        if (!f.getParentFile().mkdirs() && !f.createNewFile()) {
+          throw new RuntimeException(String.format("Unable to create json file at (%s). Restart server", f.getAbsolutePath()));
+        }
+      } catch (IOException e) {
+        throw new RuntimeException(String.format("Unable to create json file at (%s). Restart server", f.getAbsolutePath()), e);
+      }
+    } else {
+      try {
+        results.putAll(om.readValue(f, new TypeReference<ArrayListMultimap<TimeSlot, RunArchiver>>() {}));
+      } catch (IOException e) {
+        LOG.warn("Unable to read the json file");
+      }
+    }
   }
 
   public List<TeamCode> getTeams() {
@@ -102,7 +133,7 @@ public class Competition {
   }
 
   public Multimap<TimeSlot, RunArchiver> getResults() {
-    return results;
+    return ImmutableMultimap.copyOf(results);
   }
 
   public synchronized void assignTeam(TimeSlot slot, TeamCode teamCode) {
@@ -163,11 +194,11 @@ public class Competition {
       endRun(slot.getCourse(), teamCode);
     }
     int runCount = (previousRuns != null) ? previousRuns.size() : 0;
-    String runId = String.format("%s-%s-%s", slot.getCourse(), slot.getStartTime().format(dateRunIdFormat), runCount);
+    String runId = String.format("%s-%s-%s", slot.getCourse(), slot.getStartTime().format(DATE_RUN_ID_FORMATTER), runCount);
     CourseLayout layout = layoutMap.get(slot.getCourse());
     RunSetup newSetup = RunSetup.generateRandomSetup(layoutMap.get(slot.getCourse()), teamCode, runId);
 
-    RunArchiver newRun = new RunArchiver(newSetup, new File("competition-log." + LocalDateTime.now().format(DATE_FORMAT)));
+    RunArchiver newRun = new RunArchiver(newSetup, new File(String.format("%s/competition-log.%s", name, LocalDateTime.now().format(DATE_FORMAT))), bus);
     newRun.addEvent(new StructuredEvent(newSetup.getCourse(), newSetup.getActiveTeam(), Challenge.none, String.format("Start run (config %s)", newSetup)));
     activeRuns.put(slot.getCourse(), newRun);
     results.put(slot, newRun);
@@ -239,5 +270,16 @@ public class Competition {
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this).add("competitionDays", competitionDays).add("teams", teams).toString();
+  }
+
+  class EventBusChangeRecorder {
+    @Subscribe
+    public void recordCustomerChange(Event e) {
+      try {
+        om.writeValue(f, results);
+      } catch (IOException e1) {
+        LOG.warn(e.getMessage(), e);
+      }
+    }
   }
 }
