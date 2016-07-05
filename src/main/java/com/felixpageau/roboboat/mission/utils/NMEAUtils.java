@@ -29,6 +29,6 @@ public class NMEAUtils {
     for (int i = 0; i < message.length(); i++) {
       checksum ^= message.charAt(i);
     }
-    return Integer.toHexString(checksum);
+    return Integer.toHexString(checksum).toUpperCase();
   }
 }
