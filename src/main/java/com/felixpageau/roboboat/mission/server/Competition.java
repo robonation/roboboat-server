@@ -241,24 +241,34 @@ public class Competition {
             Writer w = new OutputStreamWriter(s.getOutputStream(), App.APP_CHARSET);
             BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream(), App.APP_CHARSET))) {
           if (Pinger.NO_PINGER.equals(newSetup.getActivePingers())) {
-            String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), 0));
+            String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), ImmutableList.of(0, 0)));
             w.write(pingerActivationMessage);
             System.out.println("TURN OFF PINGER: " + pingerActivationMessage);
             w.flush();
             activated = true;
           } else {
             System.out.println(String.format("** Active pingers: %s **", newSetup.getActivePingers()));
-            for (int i = 0; i < layout.getPingers().size(); i++) {
+            List<Integer> pingerFieldValue = new ArrayList<>();
+            for (int i = 0; i + 1 < layout.getPingers().size(); i += 2) {
               System.out.println(String.format("** Maybe activate pinger: %s **", layout.getPingers().get(i)));
+              int value = 0;
               if (newSetup.getActivePingers().contains(layout.getPingers().get(i))) {
                 System.out.println(String.format("** Activating pinger: %s **", layout.getPingers().get(i)));
-                String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), i + 1));
-                w.write(pingerActivationMessage);
-                System.out.println(pingerActivationMessage);
-                w.flush();
-                activated = true;
-                break;
+                value = 1;
+              } else if (newSetup.getActivePingers().contains(layout.getPingers().get(i + 1))) {
+                System.out.println(String.format("** Activating pinger: %s **", layout.getPingers().get(i + 1)));
+                value = 2;
               }
+              pingerFieldValue.add(value);
+            }
+            if (pingerFieldValue.size() == 2) {
+              String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), pingerFieldValue));
+              w.write(pingerActivationMessage);
+              System.out.println(pingerActivationMessage);
+              w.flush();
+              activated = true;
+            } else {
+              LOG.error("This is so wrong to not have two pinger fields");
             }
           }
           System.out.println(r.readLine());

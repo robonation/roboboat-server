@@ -1,10 +1,12 @@
 package com.felixpageau.roboboat.mission.utils;
 
+import java.util.List;
+
 import com.felixpageau.roboboat.mission.structures.Course;
 
 public class NMEAUtils {
-  public static String formatPingerNMEAmessage(Course course, int pingerCode) {
-    return String.format("RXPNC,%s,%d", getCourseCode(course), pingerCode);
+  public static String formatPingerNMEAmessage(Course course, List<Integer> pingerCode) {
+    return String.format("RXPNC,%s,%d,%d", getCourseCode(course), pingerCode.get(0), pingerCode.get(1));
   }
 
   public static String getCourseCode(Course course) {
