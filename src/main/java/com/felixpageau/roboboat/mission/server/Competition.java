@@ -247,8 +247,11 @@ public class Competition {
             w.flush();
             activated = true;
           } else {
+            System.out.println(String.format("** Active pingers: %s **", newSetup.getActivePingers()));
             for (int i = 0; i < layout.getPingers().size(); i++) {
+              System.out.println(String.format("** Maybe activate pinger: %s **", layout.getPingers().get(i)));
               if (newSetup.getActivePingers().contains(layout.getPingers().get(i))) {
+                System.out.println(String.format("** Activating pinger: %s **", layout.getPingers().get(i)));
                 String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), i + 1));
                 w.write(pingerActivationMessage);
                 System.out.println(pingerActivationMessage);
