@@ -1,21 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="mission/src/main/java"/>
-	<classpathentry kind="src" path="mission-admin/src/main/java"/>
-	<classpathentry kind="src" path="mission-war/src/main/java"/>
-	<classpathentry kind="src" path="mission/src/test/java"/>
-	<classpathentry kind="src" path="mission-admin/src/test/java"/>
-	<classpathentry kind="src" path="mission-admin-war/src/main/java"/>
+	<classpathentry kind="src" path="src/test/java"/>
+	<classpathentry kind="src" path="src/main/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
-		<attributes>
-			<attribute name="maven.pomderived" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
-		<attributes>
-			<attribute name="maven.pomderived" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="output" path="target/classes"/>
+        <classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+                <attributes>
+                        <attribute name="maven.pomderived" value="true"/>
+                </attributes>
+        </classpathentry>
+        <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+                <attributes>
+                        <attribute name="maven.pomderived" value="true"/>
+                </attributes>
+        </classpathentry>
+        <classpathentry kind="output" path="target/classes"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>
