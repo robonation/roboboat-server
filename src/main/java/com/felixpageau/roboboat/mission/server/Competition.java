@@ -260,11 +260,15 @@ public class Competition {
                 value = 2;
               }
               pingerFieldValue.add(value);
+            }
+            if (pingerFieldValue.size() == 2) {
               String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), pingerFieldValue));
               w.write(pingerActivationMessage);
               System.out.println(pingerActivationMessage);
               w.flush();
               activated = true;
+            } else {
+              LOG.error("This is so wrong to not have two pinger fields");
             }
           }
           System.out.println(r.readLine());
