@@ -247,10 +247,11 @@ public class Competition {
             w.flush();
             activated = true;
           } else {
+            System.out.println(String.format("** Available pingers: %s **", layout.getPingers()));
             System.out.println(String.format("** Active pingers: %s **", newSetup.getActivePingers()));
             List<Integer> pingerFieldValue = new ArrayList<>();
             for (int i = 0; i + 1 < layout.getPingers().size(); i += 2) {
-              System.out.println(String.format("** Maybe activate pinger: %s **", layout.getPingers().get(i)));
+              System.out.println(String.format("** Checking pinger: %s **", layout.getPingers().get(i)));
               int value = 0;
               if (newSetup.getActivePingers().contains(layout.getPingers().get(i))) {
                 System.out.println(String.format("** Activating pinger: %s **", layout.getPingers().get(i)));
@@ -262,6 +263,7 @@ public class Competition {
               pingerFieldValue.add(value);
             }
             if (pingerFieldValue.size() == 2) {
+              System.out.println("**** Activation values: " + pingerFieldValue);
               String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), pingerFieldValue));
               w.write(pingerActivationMessage);
               System.out.println(pingerActivationMessage);
