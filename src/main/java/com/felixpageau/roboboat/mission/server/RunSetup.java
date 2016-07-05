@@ -62,8 +62,10 @@ public class RunSetup {
 
   public static RunSetup generateRandomSetup(CourseLayout courseLayout, TeamCode teamCode, String runId) {
     List<Pinger> availablePingers = new ArrayList<>(courseLayout.getPingers());
-    Set<Pinger> activePingers = ImmutableSet.of(availablePingers.remove(new SecureRandom().nextInt(availablePingers.size())),
-        availablePingers.remove(new SecureRandom().nextInt(availablePingers.size())));
+    int pinger1 = new SecureRandom().nextInt(2);
+    int pinger2 = new SecureRandom().nextInt(2) + 2;
+    Set<Pinger> activePingers = ImmutableSet.of(availablePingers.get(pinger1), availablePingers.get(pinger2));
+
     List<DockingBay> availableBays = new ArrayList<>(courseLayout.getDockingBays());
     List<DockingBay> bays = ImmutableList.of(availableBays.remove(new SecureRandom().nextInt(availableBays.size())),
         availableBays.remove(new SecureRandom().nextInt(availableBays.size())));
