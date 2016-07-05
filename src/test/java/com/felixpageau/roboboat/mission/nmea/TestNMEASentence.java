@@ -8,8 +8,6 @@ import java.util.Arrays;
 import org.junit.Test;
 
 import com.felixpageau.roboboat.mission.SentenceRegistryFactory;
-import com.felixpageau.roboboat.mission.nmea.NMEASentence;
-import com.felixpageau.roboboat.mission.nmea.SentenceRegistry;
 
 public class TestNMEASentence {
   SentenceRegistry registry = SentenceRegistryFactory.createNMEASentenceRegistry();
@@ -17,7 +15,7 @@ public class TestNMEASentence {
   String obstacleResp = "$TDOBS,20150306061030,2,X*0F";
   String dockingReq = "$SVDOC,courseA,AUVSI*49";
   String dockingResp = "$TDDOC,cruciform,red,triangle,blue*43";
-  String pingerReq = "$SVPIN,courseA,AUVSI,red*09";
+  String pingerReq = "$SVPIN,courseA,AUVSI,red,24,black,36*41";
   String pingerResp = "$TDPIN,20150306061030,true*56";
   String interopReq = "$SVUAV,courseA,AUVSI,8,a4aa8224-07f2-4b57-a03a-c8887c2505c7*7F";
   String interopResp = "$TDUAV,20150306061030,true*43";

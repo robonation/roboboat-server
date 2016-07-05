@@ -16,8 +16,6 @@ import java.net.URISyntaxException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.felixpageau.roboboat.mission.MissionResourceConfig;
-
 public class NMEAServerTest {
   private static final int port = 6666;
 
@@ -113,7 +111,7 @@ public class NMEAServerTest {
       assertTrue(line.contains("true"));
 
       // Pinger
-      w.write("$SVPIN,courseA,AUVSI,red*09\n");
+      w.write("$SVPIN,courseA,AUVSI,red,24,black,36*41\n");
       w.flush();
       line = readLine(r);
       assertTrue(line.contains("TDPIN"));

@@ -43,6 +43,14 @@ public class BeaconReport {
     return buoyColor2;
   }
 
+  public int getFrequency1() {
+    return frequency1;
+  }
+
+  public int getFrequency2() {
+    return frequency2;
+  }
+
   @JsonIgnore
   @Override
   public String toString() {
