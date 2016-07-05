@@ -44,6 +44,7 @@ import com.felixpageau.roboboat.mission.structures.TeamCode;
 import com.felixpageau.roboboat.mission.structures.Timestamp;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
+import com.google.common.primitives.Ints;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -175,7 +176,11 @@ public class NMEAServer implements Runnable {
                 w.write(createResponse("TD", sentence.getSentenceId(), args));
                 break;
               case "SVPIN":
-                status = competitionManager.reportPinger(course, team, new BeaconReport(course, team, BuoyColor.valueOf(sentence.getField(2))));
+                status = competitionManager.reportPinger(
+                    course,
+                    team,
+                    new BeaconReport(course, team, BuoyColor.valueOf(sentence.getField(2)), Ints.tryParse(sentence.getField(3)), BuoyColor.valueOf(sentence
+                        .getField(4)), Ints.tryParse(sentence.getField(5))));
                 w.write(createResponse("TD", sentence.getSentenceId(), Arrays.asList(timestamp(), Boolean.toString(status.isSuccess()))));
                 break;
               case "SVUAV":

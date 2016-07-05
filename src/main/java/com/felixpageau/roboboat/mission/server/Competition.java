@@ -240,7 +240,7 @@ public class Competition {
         try (Socket s = new Socket(layout.getPingerControlServer().getHost(), layout.getPingerControlServer().getPort());
             Writer w = new OutputStreamWriter(s.getOutputStream(), App.APP_CHARSET);
             BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream(), App.APP_CHARSET))) {
-          if (Pinger.NO_PINGER.equals(newSetup.getActivePinger())) {
+          if (Pinger.NO_PINGER.equals(newSetup.getActivePingers())) {
             String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), 0));
             w.write(pingerActivationMessage);
             System.out.println("TURN OFF PINGER: " + pingerActivationMessage);
@@ -248,7 +248,7 @@ public class Competition {
             activated = true;
           } else {
             for (int i = 0; i < layout.getPingers().size(); i++) {
-              if (newSetup.getActivePinger().equals(layout.getPingers().get(i))) {
+              if (newSetup.getActivePingers().contains(layout.getPingers().get(i))) {
                 String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), i + 1));
                 w.write(pingerActivationMessage);
                 System.out.println(pingerActivationMessage);

@@ -1,5 +1,8 @@
 package com.felixpageau.roboboat.mission.structures;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -14,6 +17,7 @@ import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.inject.internal.util.ImmutableSet;
 
 @ParametersAreNonnullByDefault
 @ThreadSafe
@@ -32,8 +36,8 @@ public class DisplayReport {
   private final boolean requestedGateCode;
   private final DockingSequence dockingSequence;
   private final boolean requestedDockingSequence;
-  private final BuoyColor activePinger;
-  private final BuoyColor reportedPinger;
+  private final Set<BuoyColor> activePingers;
+  private final Set<BuoyColor> reportedPingers;
   private final String uploadedImage;
   private final Shape activeShape;
   private final Shape reportedShape;
@@ -45,9 +49,9 @@ public class DisplayReport {
       @Nullable @JsonProperty(value = "assignedGateCode") GateCode assignedGateCode, @JsonProperty(value = "requestedGateCode") boolean requestedGateCode,
       @Nullable @JsonProperty(value = "dockingSequence") DockingSequence dockingSequence,
       @JsonProperty(value = "requestedDockingSequence") boolean requestedDockingSequence,
-      @Nullable @JsonProperty(value = "activePinger") BuoyColor activePinger, @Nullable @JsonProperty(value = "reportedPinger") BuoyColor reportedPinger,
-      @Nullable @JsonProperty(value = "uploadedImage") String uploadedImage, @Nullable @JsonProperty(value = "activeShape") Shape activeShape,
-      @Nullable @JsonProperty(value = "reportedShape") Shape reportedShape) {
+      @Nullable @JsonProperty(value = "activePingers") Set<BuoyColor> activePingers,
+      @Nullable @JsonProperty(value = "reportedPingers") Set<BuoyColor> reportedPingers, @Nullable @JsonProperty(value = "uploadedImage") String uploadedImage,
+      @Nullable @JsonProperty(value = "activeShape") Shape activeShape, @Nullable @JsonProperty(value = "reportedShape") Shape reportedShape) {
     this.course = Preconditions.checkNotNull(course, "course cannot be null");
     this.teamCode = teamCode;
     this.currentPosition = currentPosition;
@@ -57,8 +61,8 @@ public class DisplayReport {
     this.requestedGateCode = requestedGateCode;
     this.dockingSequence = dockingSequence;
     this.requestedDockingSequence = requestedDockingSequence;
-    this.activePinger = activePinger;
-    this.reportedPinger = reportedPinger;
+    this.activePingers = activePingers;
+    this.reportedPingers = reportedPingers;
     this.uploadedImage = uploadedImage;
     this.activeShape = activeShape;
     this.reportedShape = reportedShape;
@@ -91,8 +95,9 @@ public class DisplayReport {
     return new DisplayReport(archiver.getRunSetup().getCourse(), archiver.getRunSetup().getActiveTeam(), archiver.getLastHeartbeat()
         .map(HeartbeatReport::getPosition).orElse(null), archiver.getLastHeartbeat().map(hr -> hr.getTimestamp().getTimeAsLong()).orElse(0L), archiver
         .getLastHeartbeat().map(HeartbeatReport::getChallenge).orElse(null), archiver.getRunSetup().getActiveGateCode(), archiver.hasRequestedGateCode(),
-        archiver.getRunSetup().getActiveDockingSequence(), archiver.hasRequestedDockingSequence(), archiver.getRunSetup().getActivePinger().getBuoyColor(),
-        archiver.getReportedPinger().map(BeaconReport::getBuoyColor).orElse(null), archiver.getUploadedImage().orElse(null), archiver.getRunSetup()
+        archiver.getRunSetup().getActiveDockingSequence(), archiver.hasRequestedDockingSequence(), archiver.getRunSetup().getActivePingers().stream()
+            .map(r -> r.getBuoyColor()).collect(Collectors.toSet()), archiver.getReportedPinger()
+            .map(r -> ImmutableSet.of(r.getBuoyColor1(), r.getBuoyColor2())).orElse(null), archiver.getUploadedImage().orElse(null), archiver.getRunSetup()
             .getActiveInteropShape(), archiver.getReportedInterop().map(InteropReport::getShape).orElse(null));
   }
 
@@ -168,16 +173,16 @@ public class DisplayReport {
    * @return the activePinger
    */
   @CheckForNull
-  public BuoyColor getActivePinger() {
-    return activePinger;
+  public Set<BuoyColor> getActivePingers() {
+    return activePingers;
   }
 
   /**
    * @return the reportedPinger
    */
   @CheckForNull
-  public BuoyColor getReportedPinger() {
-    return reportedPinger;
+  public Set<BuoyColor> getReportedPingers() {
+    return reportedPingers;
   }
 
   /**
@@ -210,14 +215,15 @@ public class DisplayReport {
     return MoreObjects.toStringHelper(this).add("course", course).add("teamCode", teamCode).add("currentPosition", currentPosition)
         .add("lastHeartbeat", lastHeartbeat).add("currentChallenge", currentChallenge).add("assignedGateCode", assignedGateCode)
         .add("requestedGateCode", requestedGateCode).add("dockingSequence", dockingSequence).add("requestedDockingSequence", requestedDockingSequence)
-        .add("activePinger", activePinger).add("reportedPinger", reportedPinger).add("activeShape", activeShape).add("reportedShape", reportedShape).toString();
+        .add("activePingers", activePingers).add("reportedPingers", reportedPingers).add("activeShape", activeShape).add("reportedShape", reportedShape)
+        .toString();
   }
 
   @JsonIgnore
   @Override
   public int hashCode() {
     return Objects.hashCode(course, teamCode, currentPosition, lastHeartbeat, currentChallenge, assignedGateCode, requestedGateCode, dockingSequence,
-        requestedDockingSequence, activePinger, reportedPinger, activeShape, reportedShape);
+        requestedDockingSequence, activePingers, reportedPingers, activeShape, reportedShape);
   }
 
   @JsonIgnore
@@ -235,7 +241,7 @@ public class DisplayReport {
           && Objects.equal(lastHeartbeat, other.lastHeartbeat) && Objects.equal(currentChallenge, other.currentChallenge)
           && Objects.equal(assignedGateCode, other.assignedGateCode) && Objects.equal(requestedGateCode, other.requestedGateCode)
           && Objects.equal(dockingSequence, other.dockingSequence) && Objects.equal(requestedDockingSequence, other.requestedDockingSequence)
-          && Objects.equal(activePinger, other.activePinger) && Objects.equal(reportedPinger, other.reportedPinger)
+          && Objects.equal(activePingers, other.activePingers) && Objects.equal(reportedPingers, other.reportedPingers)
           && Objects.equal(activeShape, other.activeShape) && Objects.equal(reportedShape, other.reportedShape);
     }
     return false;

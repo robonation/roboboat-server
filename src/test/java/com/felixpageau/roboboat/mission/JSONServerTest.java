@@ -144,7 +144,8 @@ public class JSONServerTest {
 
       // Pinger
       post = new HttpPost(basePath + "/pinger/courseA/AUVSI");
-      post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new BeaconReport(Course.courseA, new TeamCode("AUVSI"), BuoyColor.black))));
+      post.setEntity(new ByteArrayEntity(mapper.writeValueAsBytes(new BeaconReport(Course.courseA, new TeamCode("AUVSI"), BuoyColor.black, 24, BuoyColor.red,
+          36))));
       post.setHeader("Content-Type", "application/json");
       resp = client.execute(post);
       assertEquals("Pinger", 200, resp.getStatusLine().getStatusCode());

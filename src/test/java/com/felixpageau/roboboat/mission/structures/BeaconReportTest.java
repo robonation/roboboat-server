@@ -21,7 +21,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class BeaconReportTest {
   Course course = Course.courseA;
   TeamCode team = new TeamCode("AUVSI");
-  BuoyColor buoyColor = BuoyColor.black;
+  BuoyColor buoyColor1 = BuoyColor.black;
+  int buoyFreq1 = 24;
+  BuoyColor buoyColor2 = BuoyColor.red;
+  int buoyFreq2 = 36;
   Position buoyPosition = new Position(Datum.WGS84, new Latitude(40.689247f), new Longitude(-74.044500f));
 
   /**
@@ -31,22 +34,22 @@ public class BeaconReportTest {
    */
   @Test(expected = NullPointerException.class)
   public void testBeaconReportBadCourse() {
-    new BeaconReport(null, team, buoyColor);
+    new BeaconReport(null, team, buoyColor1, buoyFreq1, buoyColor2, buoyFreq2);
   }
 
   @Test(expected = NullPointerException.class)
   public void testBeaconReportBadTeamCode() {
-    new BeaconReport(course, null, buoyColor);
+    new BeaconReport(course, null, buoyColor1, buoyFreq1, buoyColor2, buoyFreq2);
   }
 
   @Test(expected = NullPointerException.class)
   public void testBeaconReportBadBuoyColor() {
-    new BeaconReport(course, team, null);
+    new BeaconReport(course, team, null, 0, null, 0);
   }
 
   @Test
   public void testBeaconReport() {
-    assertNotNull(new BeaconReport(course, team, buoyColor));
+    assertNotNull(new BeaconReport(course, team, buoyColor1, buoyFreq1, buoyColor2, buoyFreq2));
   }
 
   /**

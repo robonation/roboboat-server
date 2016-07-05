@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -53,6 +54,7 @@ import com.felixpageau.roboboat.mission.structures.UploadStatus;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteStreams;
 
 /**
@@ -173,9 +175,13 @@ public class MockCompetitionManager implements CompetitionManager {
       throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode,
           course), 400);
     }
-    Pinger reportedPinger = new Pinger(payload.getBuoyColor());
-    boolean success = reportedPinger.getBuoyColor() == archive.getRunSetup().getActivePinger().getBuoyColor();
-    archive.addEvent(new StructuredEvent(course, teamCode, Challenge.pinger, String.format("reported pinger (%s) -> %s", payload, success ? "success"
+    Set<Pinger> reportedPinger = ImmutableSet.of(new Pinger(payload.getBuoyColor1()), new Pinger(payload.getBuoyColor2()));
+    Set<Pinger> activePingers = archive.getRunSetup().getActivePingers();
+    boolean success = true;
+    for (Pinger pinger : reportedPinger) {
+      success &= activePingers.contains(pinger);
+    }
+    archive.addEvent(new StructuredEvent(course, teamCode, Challenge.pinger, String.format("reported pingers (%s) -> %s", payload, success ? "success"
         : "incorrect")));
     archive.reportPinger(payload);
     return new ReportStatus(success);

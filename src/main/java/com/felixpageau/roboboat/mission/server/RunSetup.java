@@ -3,6 +3,7 @@ package com.felixpageau.roboboat.mission.server;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.Immutable;
@@ -24,6 +25,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Setup of a {@link Run}
@@ -35,36 +37,37 @@ import com.google.common.collect.ImmutableList;
 @ReturnValuesAreNonNullByDefault
 public class RunSetup {
   public static final RunSetup NO_RUN = new RunSetup("", Course.openTest, new TeamCode("NONE"), GateCode.generateRandomGateCode(),
-      DockingSequence.generateRandomDockingSequence(), Pinger.NO_PINGER, Shape.generateRandomInteropShape());
+      DockingSequence.generateRandomDockingSequence(), ImmutableSet.of(Pinger.NO_PINGER), Shape.generateRandomInteropShape());
   private final String runId;
   private final TeamCode activeTeam;
   private final Course course;
   private final GateCode activeGateCode;
   private final DockingSequence activeDockingSequence;
-  private final Pinger activePinger;
+  private final Set<Pinger> activePingers;
   private final Shape activeInteropShape;
 
   @JsonCreator
   public RunSetup(@JsonProperty(value = "runId") String runId, @JsonProperty(value = "course") Course course,
       @JsonProperty(value = "activeTeam") TeamCode activeTeam, @JsonProperty(value = "activeGateCode") GateCode activeGateCode,
-      @JsonProperty(value = "activeDockingSequence") DockingSequence activeDockingSequence, @JsonProperty(value = "activePinger") Pinger activePinger,
+      @JsonProperty(value = "activeDockingSequence") DockingSequence activeDockingSequence, @JsonProperty(value = "activePinger") Set<Pinger> activePingers,
       @JsonProperty(value = "activeInteropShape") Shape activeInteropShape) {
     this.runId = Preconditions.checkNotNull(runId);
     this.course = Preconditions.checkNotNull(course);
     this.activeTeam = Preconditions.checkNotNull(activeTeam);
     this.activeGateCode = Preconditions.checkNotNull(activeGateCode);
     this.activeDockingSequence = Preconditions.checkNotNull(activeDockingSequence);
-    this.activePinger = Preconditions.checkNotNull(activePinger);
+    this.activePingers = Preconditions.checkNotNull(activePingers);
     this.activeInteropShape = Preconditions.checkNotNull(activeInteropShape);
   }
 
   public static RunSetup generateRandomSetup(CourseLayout courseLayout, TeamCode teamCode, String runId) {
-    List<Pinger> pingers = courseLayout.getPingers();
-    Pinger activePinger = new ArrayList<Pinger>(pingers).get(new SecureRandom().nextInt(pingers.size()));
+    List<Pinger> availablePingers = new ArrayList<>(courseLayout.getPingers());
+    Set<Pinger> activePingers = ImmutableSet.of(availablePingers.remove(new SecureRandom().nextInt(availablePingers.size())),
+        availablePingers.remove(new SecureRandom().nextInt(availablePingers.size())));
     List<DockingBay> availableBays = new ArrayList<>(courseLayout.getDockingBays());
     List<DockingBay> bays = ImmutableList.of(availableBays.remove(new SecureRandom().nextInt(availableBays.size())),
         availableBays.remove(new SecureRandom().nextInt(availableBays.size())));
-    return new RunSetup(runId, courseLayout.getCourse(), teamCode, GateCode.generateRandomGateCode(), new DockingSequence(bays), activePinger,
+    return new RunSetup(runId, courseLayout.getCourse(), teamCode, GateCode.generateRandomGateCode(), new DockingSequence(bays), activePingers,
         Shape.generateRandomInteropShape());
   }
 
@@ -99,8 +102,8 @@ public class RunSetup {
   /**
    * @return the activePinger
    */
-  public Pinger getActivePinger() {
-    return activePinger;
+  public Set<Pinger> getActivePingers() {
+    return activePingers;
   }
 
   /**
@@ -133,19 +136,19 @@ public class RunSetup {
 
     return Objects.equal(runId, other.runId) && Objects.equal(activeTeam, other.activeTeam) && Objects.equal(course, other.course)
         && Objects.equal(activeGateCode, other.activeGateCode) && Objects.equal(activeDockingSequence, other.activeDockingSequence)
-        && Objects.equal(activePinger, other.activePinger) && Objects.equal(activeInteropShape, other.activeInteropShape);
+        && Objects.equal(activePingers, other.activePingers) && Objects.equal(activeInteropShape, other.activeInteropShape);
   }
 
   @JsonIgnore
   @Override
   public int hashCode() {
-    return Objects.hashCode(runId, activeTeam, course, activeGateCode, activeDockingSequence, activePinger, activeInteropShape);
+    return Objects.hashCode(runId, activeTeam, course, activeGateCode, activeDockingSequence, activePingers, activeInteropShape);
   }
 
   @JsonIgnore
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this).add("runId", runId).add("course", course).add("activeTeam", activeTeam).add("activeGateCode", activeGateCode)
-        .add("activeDockingBay", activeDockingSequence).add("activePinger", activePinger).add("activeInteropShape", activeInteropShape).toString();
+        .add("activeDockingBay", activeDockingSequence).add("activePingers", activePingers).add("activeInteropShape", activeInteropShape).toString();
   }
 }
