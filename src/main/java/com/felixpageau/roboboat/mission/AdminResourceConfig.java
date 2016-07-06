@@ -20,6 +20,7 @@ import com.felixpageau.roboboat.mission.resources.AdminResource;
 import com.felixpageau.roboboat.mission.resources.AutomatedDockingResource;
 import com.felixpageau.roboboat.mission.resources.HeartbeatResource;
 import com.felixpageau.roboboat.mission.resources.InteropResource;
+import com.felixpageau.roboboat.mission.resources.MyResource;
 import com.felixpageau.roboboat.mission.resources.ObstacleAvoidanceResource;
 import com.felixpageau.roboboat.mission.resources.PingerResource;
 import com.felixpageau.roboboat.mission.resources.RunResource;
@@ -104,6 +105,8 @@ public class AdminResourceConfig extends CompetitionResourceConfig {
     this.register(new HeartbeatResource(competitionManager));
     this.register(new PingerResource(competitionManager));
     this.register(new AdminResource(competitionManager));
+    this.register(MyResource.class);
+    this.register(CORSResponseFilter.class);
 
     this.nmeaServer = new NMEAServer(competitionManager, port.get(), createNMEASentenceRegistry(), true);
     this.nmeaServer.start();

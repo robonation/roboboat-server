@@ -101,6 +101,7 @@ public class MissionResourceConfig extends CompetitionResourceConfig {
     this.register(new ObstacleAvoidanceResource(competitionManager));
     this.register(new HeartbeatResource(competitionManager));
     this.register(new PingerResource(competitionManager));
+    this.register(CORSResponseFilter.class);
     // this.register(JacksonFeatures.class);
     // this.register(MultiPartFeature.class);
 
