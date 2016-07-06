@@ -65,9 +65,12 @@ public class MissionResourceConfig extends CompetitionResourceConfig {
       SymbolColor.blue), new DockingBay(Symbol.cruciform, SymbolColor.green));
   private static final List<DockingBay> dockingBaysOpenTest = ImmutableList.of(new DockingBay(Symbol.triangle, SymbolColor.red), new DockingBay(
       Symbol.cruciform, SymbolColor.black), new DockingBay(Symbol.cruciform, SymbolColor.blue));
-  private static final List<Pinger> courseAPingers = ImmutableList.of(new Pinger(BuoyColor.blue), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.red));
-  private static final List<Pinger> courseBPingers = ImmutableList.of(new Pinger(BuoyColor.blue), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.black));
-  private static final List<Pinger> openTestPingers = ImmutableList.of(new Pinger(BuoyColor.green));
+  private static final List<Pinger> courseAPingers = ImmutableList.of(new Pinger(BuoyColor.blue), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.red),
+      new Pinger(BuoyColor.black));
+  private static final List<Pinger> courseBPingers = ImmutableList.of(new Pinger(BuoyColor.blue), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.black),
+      new Pinger(BuoyColor.red));
+  private static final List<Pinger> openTestPingers = ImmutableList.of(new Pinger(BuoyColor.blue), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.black),
+      new Pinger(BuoyColor.red));
   private static final Map<Course, CourseLayout> COURSE_LAYOUT_MAP;
   @SuppressFBWarnings(value = "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD", justification = "NMEAServerTest uses this field")
   public static final AtomicInteger port = new AtomicInteger(9999);
@@ -75,9 +78,10 @@ public class MissionResourceConfig extends CompetitionResourceConfig {
 
   static {
     try {
-      COURSE_LAYOUT_MAP = ImmutableMap.of(Course.courseA, new CourseLayout(Course.courseA, courseAPingers, dockingBaysA, new URL("http://192.168.1.5:5000"), new URL("http://192.168.1.7:5000")),
-          Course.courseB, new CourseLayout(Course.courseB, courseBPingers, dockingBaysB, new URL("http://192.168.1.6:5000"), new URL("http://192.168.1.8:5000")), Course.openTest,
-          new CourseLayout(Course.openTest, openTestPingers, dockingBaysOpenTest, new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:5000")));
+      COURSE_LAYOUT_MAP = ImmutableMap.of(Course.courseA, new CourseLayout(Course.courseA, courseAPingers, dockingBaysA, new URL("http://192.168.1.5:5000"),
+          new URL("http://192.168.1.7:5000")), Course.courseB, new CourseLayout(Course.courseB, courseBPingers, dockingBaysB,
+          new URL("http://192.168.1.6:5000"), new URL("http://192.168.1.8:5000")), Course.openTest, new CourseLayout(Course.openTest, openTestPingers,
+          dockingBaysOpenTest, new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:5000")));
     } catch (MalformedURLException e) {
       throw new RuntimeException(e);
     }

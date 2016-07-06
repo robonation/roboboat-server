@@ -65,10 +65,12 @@ public class AdminResourceConfig extends CompetitionResourceConfig {
       SymbolColor.red), new DockingBay(Symbol.cruciform, SymbolColor.blue));
   private static final List<DockingBay> dockingBaysOpenTest = ImmutableList.of(new DockingBay(Symbol.triangle, SymbolColor.red), new DockingBay(
       Symbol.cruciform, SymbolColor.black), new DockingBay(Symbol.cruciform, SymbolColor.blue));
-  private static final List<Pinger> courseAPingers = ImmutableList.of(new Pinger(BuoyColor.green), new Pinger(BuoyColor.red), new Pinger(BuoyColor.black), new Pinger(BuoyColor.yellow));
-  private static final List<Pinger> courseBPingers = ImmutableList.of(new Pinger(BuoyColor.green), new Pinger(BuoyColor.red), new Pinger(BuoyColor.black), new Pinger(BuoyColor.yellow));
+  private static final List<Pinger> courseAPingers = ImmutableList.of(new Pinger(BuoyColor.green), new Pinger(BuoyColor.red), new Pinger(BuoyColor.black),
+      new Pinger(BuoyColor.yellow));
+  private static final List<Pinger> courseBPingers = ImmutableList.of(new Pinger(BuoyColor.green), new Pinger(BuoyColor.red), new Pinger(BuoyColor.black),
+      new Pinger(BuoyColor.yellow));
   private static final List<Pinger> openTestPingers = ImmutableList.of(new Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new Pinger(BuoyColor.red),
-      new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.green));
+      new Pinger(BuoyColor.yellow));
   public static final Map<Course, CourseLayout> COURSE_LAYOUT_MAP;
   public static final AtomicInteger port = new AtomicInteger(9999);
   private final NMEAServer nmeaServer;
