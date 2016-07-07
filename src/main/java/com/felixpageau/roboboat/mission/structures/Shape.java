@@ -13,10 +13,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 public enum Shape {
-  NONE(' '), ZERO('0'), ONE('1'), TWO('2'), THREE('3'), FOUR('4'), FIVE('5'), SIX('6'), SEVEN('7'), EIGHT('8'), NINE('9'), A('A'), B('B'), C('C'), D('D'), E('E'), F('F');
+  NONE(" "), ZERO("zero"), ONE("one"), TWO("two"), THREE("three"), FOUR("four"), FIVE("five"), SIX("six"), SEVEN("seven"), EIGHT("eight"), NINE("nine"), A("A"), B(
+      "B"), C("C"), D("D"), E("E"), F("F");
 
-  private static final Map<Character, Shape> lookup = new HashMap<>();
-  private final char value;
+  private static final Map<String, Shape> lookup = new HashMap<>();
+  private final String value;
 
   static {
     for (Shape s : EnumSet.allOf(Shape.class)) {
@@ -26,7 +27,7 @@ public enum Shape {
     }
   }
 
-  private Shape(char value) {
+  private Shape(String value) {
     this.value = Preconditions.checkNotNull(value, "value cannot be null");
   }
 
@@ -43,14 +44,11 @@ public enum Shape {
 
   @JsonCreator
   public static Shape fromString(String code) {
-    if (code.length() == 1) {
-      return lookup.get(Character.toUpperCase(code.charAt(0)));
-    }
-    throw new IllegalArgumentException("The provided shape string (" + code + ") has more than 1 character");
+    return lookup.get(code);
   }
 
   @JsonValue
-  public char getValue() {
+  public String getValue() {
     return value;
   }
 }

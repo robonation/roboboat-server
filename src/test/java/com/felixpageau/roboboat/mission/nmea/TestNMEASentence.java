@@ -17,7 +17,7 @@ public class TestNMEASentence {
   String dockingResp = "$TDDOC,cruciform,red,triangle,blue*43";
   String pingerReq = "$SVPIN,courseA,AUVSI,red,24,black,36*41";
   String pingerResp = "$TDPIN,20150306061030,true*56";
-  String interopReq = "$SVUAV,courseA,AUVSI,8,a4aa8224-07f2-4b57-a03a-c8887c2505c7*7F";
+  String interopReq = "$SVUAV,courseA,AUVSI,eight,a4aa8224-07f2-4b57-a03a-c8887c2505c7*30";
   String interopResp = "$TDUAV,20150306061030,true*43";
   String heartbeatReq = "$SVHRT,courseA,AUVSI,20150306061030,gates,40.689249,-74.044500*0B";
   String heartbeatResp = "$TDHRT,20150306061030,true*4F";

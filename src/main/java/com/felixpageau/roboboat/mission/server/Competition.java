@@ -306,10 +306,10 @@ public class Competition {
                 CharStreams.toString(new InputStreamReader(resp.getEntity().getContent(), Charsets.UTF_8))));
             activated = true;
           } else {
-            char c = newSetup.getActiveInteropShape().getValue();
+            String value = newSetup.getActiveInteropShape().getValue();
             CloseableHttpResponse resp = client.execute(new HttpHost(layout.getLcdControlServer().getHost(), layout.getLcdControlServer().getPort()),
-                new HttpGet("http://127.0.0.1:5000/activate/" + c));
-            System.out.println(String.format("Enabled shape: %d %c", resp.getStatusLine().getStatusCode(), c));
+                new HttpGet("http://127.0.0.1:5000/activate/" + value));
+            System.out.println(String.format("Enabled shape: %d %s", resp.getStatusLine().getStatusCode(), value));
             activated = true;
           }
         } catch (UnknownHostException e) {

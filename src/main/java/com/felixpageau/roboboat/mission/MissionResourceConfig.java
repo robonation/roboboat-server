@@ -1,8 +1,5 @@
 package com.felixpageau.roboboat.mission;
 
-//import org.glassfish.jersey.jackson.JacksonFeature;
-import io.swagger.jaxrs.config.BeanConfig;
-
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -10,6 +7,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.internal.scanning.PackageNamesScanner;
@@ -94,6 +93,9 @@ public class MissionResourceConfig extends CompetitionResourceConfig {
 
   public MissionResourceConfig(CompetitionManager competitionManager) throws URISyntaxException {
     super(competitionManager, ImmutableSet.of(OM_PROVIDER), JacksonFeatures.class, JacksonObjectMapperProvider.class, MultiPartFeature.class);
+    this.register(MultiPartFeature.class);
+    this.register(JacksonFeatures.class);
+    this.register(JacksonObjectMapperProvider.class);
     this.registerFinder(new PackageNamesScanner(new String[] { "com.felixpageau.roboboat.mission2015.resources", "com.fasterxml.jackson.jaxrs.base" }, false));
     this.register(new AutomatedDockingResource(competitionManager));
     this.register(new InteropResource(competitionManager));
@@ -102,16 +104,14 @@ public class MissionResourceConfig extends CompetitionResourceConfig {
     this.register(new HeartbeatResource(competitionManager));
     this.register(new PingerResource(competitionManager));
     this.register(CORSResponseFilter.class);
-    // this.register(JacksonFeatures.class);
-    // this.register(MultiPartFeature.class);
-
-    BeanConfig beanConfig = new BeanConfig();
-    beanConfig.setVersion("1.0.2");
-    beanConfig.setSchemes(new String[] { "http" });
-    beanConfig.setHost("localhost:8002");
-    beanConfig.setBasePath("/api");
-    beanConfig.setResourcePackage("io.swagger.resources");
-    beanConfig.setScan(true);
+    //
+    // BeanConfig beanConfig = new BeanConfig();
+    // beanConfig.setVersion("1.0.2");
+    // beanConfig.setSchemes(new String[] { "http" });
+    // beanConfig.setHost("localhost:8002");
+    // beanConfig.setBasePath("/api");
+    // beanConfig.setResourcePackage("io.swagger.resources");
+    // beanConfig.setScan(true);
 
     this.nmeaServer = new NMEAServer(competitionManager, port.get(), createNMEASentenceRegistry(), true);
     this.nmeaServer.start();

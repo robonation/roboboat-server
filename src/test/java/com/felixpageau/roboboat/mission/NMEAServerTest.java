@@ -125,7 +125,7 @@ public class NMEAServerTest {
       assertTrue(line.contains("true"));
 
       // Dock
-      w.write("$SVUAV,courseA,AUVSI,8,a4aa8224-07f2-4b57-a03a-c8887c2505c7*7F\n");
+      w.write("$SVUAV,courseA,AUVSI,eight,a4aa8224-07f2-4b57-a03a-c8887c2505c7*30\n");
       w.flush();
       line = readLine(r);
       assertTrue(line.contains("TDUAV"));

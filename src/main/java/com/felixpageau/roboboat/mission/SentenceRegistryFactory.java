@@ -29,7 +29,7 @@ public class SentenceRegistryFactory {
     Field symbolColor = new EnumField("Color", Arrays.stream(SymbolColor.values()).map(s -> s.name()).collect(Collectors.toSet()));
     Field buoyColor = new EnumField("BuoyColor", Arrays.stream(BuoyColor.values()).map(s -> s.name()).collect(Collectors.toSet()));
     Field buoyFrequency = new RegexField("Frequency", "[0-9]{2}");
-    Field shape = new RegexField("Shape", "[0-9a-fA-F]");
+    Field shape = new RegexField("Shape", "[a-z]{1,5}");
     Field imageId = new RegexField("ImageID", "[a-zA-Z0-9\\-]+");
     Field challenge = new EnumField("Challenge", Arrays.stream(Challenge.values()).map(c -> c.toString()).collect(Collectors.toSet()));
     Field latitude = new RegexField("Latitude", "\\-?[0-9]{1,2}\\.[0-9]{6,10}");
@@ -43,10 +43,10 @@ public class SentenceRegistryFactory {
         SentenceDefinition.create("SV", "PIN", "Report active pinger", ImmutableList.of(course, teamCode, buoyColor, buoyFrequency, buoyColor, buoyFrequency),
             "$SVPIN,courseA,AUVSI,red,24,black,36*41"), SentenceDefinition.create("TD", "PIN", "Response of active pinger report",
             ImmutableList.of(timestamp, status), "$TDPIN,20150306061030,true*56"), SentenceDefinition.create("SV", "UAV", "Report shape for interop challenge",
-            ImmutableList.of(course, teamCode, shape, imageId), "$SVUAV,courseA,AUVSI,8,a4aa8224-07f2-4b57-a03a-c8887c2505c7*7F"), SentenceDefinition.create(
-            "TD", "UAV", "Response of interop shape report", ImmutableList.of(timestamp, status), "$TDUAV,20150306061030,true*43"), SentenceDefinition.create(
-            "SV", "HRT", "Report heartbeat", ImmutableList.of(course, teamCode, timestamp, challenge, latitude, longitude),
-            "$SVHRT,courseA,AUVSI,20150306061030,gates,40.689249,-74.044500*0B"), SentenceDefinition.create("TD", "HRT", "Response to heartbeat",
+            ImmutableList.of(course, teamCode, shape, imageId), "$SVUAV,courseA,AUVSI,eight,a4aa8224-07f2-4b57-a03a-c8887c2505c7*30"), SentenceDefinition
+            .create("TD", "UAV", "Response of interop shape report", ImmutableList.of(timestamp, status), "$TDUAV,20150306061030,true*43"), SentenceDefinition
+            .create("SV", "HRT", "Report heartbeat", ImmutableList.of(course, teamCode, timestamp, challenge, latitude, longitude),
+                "$SVHRT,courseA,AUVSI,20150306061030,gates,40.689249,-74.044500*0B"), SentenceDefinition.create("TD", "HRT", "Response to heartbeat",
             ImmutableList.of(timestamp, status), "$TDHRT,20150306061030,true*4F"), SentenceDefinition.create("SV", "STR", "Request start of run",
             ImmutableList.of(course, teamCode), "$SVSTR,courseA,AUVSI*54"), SentenceDefinition.create("TD", "STR", "Response of start of run",
             ImmutableList.of(status), "$TDSTR,true*7F"), SentenceDefinition.create("SV", "END", "Request of end of run", ImmutableList.of(course, teamCode),
