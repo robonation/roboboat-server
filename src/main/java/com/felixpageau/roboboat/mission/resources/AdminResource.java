@@ -66,10 +66,15 @@ public final class AdminResource {
   public List<Run> getEvents(final @PathParam("course") Course course) {
     List<Map.Entry<TimeSlot, RunArchiver>> entries = new ArrayList<>(competitionManager.getCompetition().getResults().entries());
     Collections.sort(entries, new TimeSlotComparatorEntry<RunArchiver>(true));
-    return entries.stream().filter(e -> e.getValue().getRunSetup().getCourse() == course).map(c -> {
-      RunArchiver archiver = c.getValue();
-      return new Run(archiver.getStartTime(), archiver.getRunSetup().getActiveTeam(), archiver.getEvents());
-    }).collect(GuavaCollectors.immutableList());
+    return entries
+        .stream()
+        .filter(e -> e.getValue().getRunSetup().getCourse() == course)
+        .map(
+            c -> {
+              RunArchiver archiver = c.getValue();
+              return new Run(archiver.getStartTime(), archiver.getRunSetup().getActiveTeam(), archiver.getRunSetup().getRunId().replaceFirst(".*-", ""),
+                  archiver.getEvents());
+            }).collect(GuavaCollectors.immutableList());
   }
 
   @Path("/timeSlots")

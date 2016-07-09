@@ -4,6 +4,7 @@
 package com.felixpageau.roboboat.mission.structures;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 import javax.annotation.Nonnull;
@@ -27,11 +28,15 @@ public class Run {
   private final LocalDateTime start;
   private final TeamCode team;
   private final List<Event> events;
+  private final long timestamp;
+  private final String runId;
 
-  public Run(LocalDateTime start, TeamCode team, List<Event> events) {
+  public Run(LocalDateTime start, TeamCode team, String runId, List<Event> events) {
     this.start = Preconditions.checkNotNull(start);
     this.team = Preconditions.checkNotNull(team);
     this.events = ImmutableList.copyOf(Preconditions.checkNotNull(events));
+    this.timestamp = start.toEpochSecond(ZoneOffset.UTC);
+    this.runId = runId;
   }
 
   @Nonnull
@@ -47,6 +52,15 @@ public class Run {
   @Nonnull
   public TeamCode getTeam() {
     return team;
+  }
+
+  public long getTimestamp() {
+    return timestamp;
+  }
+
+  @Nonnull
+  public String getRunId() {
+    return runId;
   }
 
   @Override

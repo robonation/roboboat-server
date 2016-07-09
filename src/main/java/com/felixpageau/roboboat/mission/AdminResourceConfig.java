@@ -60,10 +60,10 @@ public class AdminResourceConfig extends CompetitionResourceConfig {
       );
   private static final List<TeamCode> TEAMS = TeamCode.of("AUVSI", "DBH", "ERAU", "FAU", "GIT", "ITSN", "ODUSM", "ODUBF", "SRM", "USNA", "AMVUI", "UOFM",
       "ULSAN", "UWF");
-  private static final List<DockingBay> dockingBaysA = ImmutableList.of(new DockingBay(Symbol.triangle, SymbolColor.red), new DockingBay(Symbol.triangle,
-      SymbolColor.black), new DockingBay(Symbol.cruciform, SymbolColor.black));
-  private static final List<DockingBay> dockingBaysB = ImmutableList.of(new DockingBay(Symbol.circle, SymbolColor.blue), new DockingBay(Symbol.cruciform,
-      SymbolColor.red), new DockingBay(Symbol.cruciform, SymbolColor.blue));
+  private static final List<DockingBay> dockingBaysA = ImmutableList.of(new DockingBay(Symbol.triangle, SymbolColor.red), new DockingBay(Symbol.cruciform,
+      SymbolColor.black), new DockingBay(Symbol.triangle, SymbolColor.black));
+  private static final List<DockingBay> dockingBaysB = ImmutableList.of(new DockingBay(Symbol.cruciform, SymbolColor.black), new DockingBay(Symbol.circle,
+      SymbolColor.black), new DockingBay(Symbol.cruciform, SymbolColor.blue));
   private static final List<DockingBay> dockingBaysOpenTest = ImmutableList.of(new DockingBay(Symbol.triangle, SymbolColor.red), new DockingBay(
       Symbol.cruciform, SymbolColor.black), new DockingBay(Symbol.cruciform, SymbolColor.blue));
   private static final List<Pinger> courseAPingers = ImmutableList.of(new Pinger(BuoyColor.green), new Pinger(BuoyColor.red), new Pinger(BuoyColor.black),
