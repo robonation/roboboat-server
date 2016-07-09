@@ -65,7 +65,7 @@ public class Competition {
   private final List<CompetitionDay> competitionDays;
   private final Multimap<TimeSlot, RunArchiver> results = ArrayListMultimap.create();
   private final Map<Course, RunArchiver> activeRuns = new HashMap<>();
-  private final Map<TimeSlot, TeamCode> schedule = new HashMap<>();
+  protected final Map<TimeSlot, TeamCode> schedule = new HashMap<>();
   private final List<TeamCode> teams;
   private final boolean activatePinger;
   private final boolean activateLCD;

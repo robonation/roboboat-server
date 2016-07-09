@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.ws.rs.ApplicationPath;
-
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.internal.scanning.PackageNamesScanner;
 
@@ -45,9 +43,9 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  */
 @SuppressFBWarnings(value = "UUF_UNUSED_FIELD")
 public class MissionResourceConfig extends CompetitionResourceConfig {
-  private static final JacksonObjectMapperProvider OM_PROVIDER = new JacksonObjectMapperProvider();
-  private static final String COMPETITION_NAME = "RoboBoat 2016";
-  private static final List<CompetitionDay> COMPETITION_DAYS = ImmutableList.<CompetitionDay> of(new CompetitionDay(LocalDateTime.of(2016, 7, 5, 8, 0),
+  public static final JacksonObjectMapperProvider OM_PROVIDER = new JacksonObjectMapperProvider();
+  public static final String COMPETITION_NAME = "RoboBoat 2016";
+  public static final List<CompetitionDay> COMPETITION_DAYS = ImmutableList.<CompetitionDay> of(new CompetitionDay(LocalDateTime.of(2016, 7, 5, 8, 0),
       LocalDateTime.of(2016, 7, 5, 18, 0)), // Tu
       new CompetitionDay(LocalDateTime.of(2016, 7, 6, 8, 0), LocalDateTime.of(2016, 7, 6, 18, 0)), // We
       new CompetitionDay(LocalDateTime.of(2016, 7, 7, 8, 0), LocalDateTime.of(2016, 7, 7, 18, 0)), // Th
@@ -55,7 +53,7 @@ public class MissionResourceConfig extends CompetitionResourceConfig {
       new CompetitionDay(LocalDateTime.of(2016, 7, 9, 8, 0), LocalDateTime.of(2016, 7, 9, 18, 0)), // Sa
       new CompetitionDay(LocalDateTime.of(2016, 7, 10, 8, 0), LocalDateTime.of(2016, 7, 10, 18, 0)) // Su
       );
-  private static final List<TeamCode> TEAMS = ImmutableList.of(new TeamCode("AUVSI"), new TeamCode("DBH"), new TeamCode("EEPIS"), new TeamCode("ERAU"),
+  public static final List<TeamCode> TEAMS = ImmutableList.of(new TeamCode("AUVSI"), new TeamCode("DBH"), new TeamCode("EEPIS"), new TeamCode("ERAU"),
       new TeamCode("FAU"), new TeamCode("GIT"), new TeamCode("NCKU"), new TeamCode("ODUSM"), new TeamCode("ODUBB"), new TeamCode("TUCE"), new TeamCode("CUA"),
       new TeamCode("UCF"), new TeamCode("UF"), new TeamCode("UOFM"), new TeamCode("ULSAN"), new TeamCode("UWF"), new TeamCode("VU"));
   private static final List<DockingBay> dockingBaysA = ImmutableList.of(new DockingBay(Symbol.triangle, SymbolColor.red), new DockingBay(Symbol.cruciform,
@@ -70,7 +68,7 @@ public class MissionResourceConfig extends CompetitionResourceConfig {
       new Pinger(BuoyColor.red));
   private static final List<Pinger> openTestPingers = ImmutableList.of(new Pinger(BuoyColor.blue), new Pinger(BuoyColor.yellow), new Pinger(BuoyColor.black),
       new Pinger(BuoyColor.red));
-  private static final Map<Course, CourseLayout> COURSE_LAYOUT_MAP;
+  public static final Map<Course, CourseLayout> COURSE_LAYOUT_MAP;
   @SuppressFBWarnings(value = "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD", justification = "NMEAServerTest uses this field")
   public static final AtomicInteger port = new AtomicInteger(9999);
   private final NMEAServer nmeaServer;
