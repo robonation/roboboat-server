@@ -218,6 +218,9 @@ public class Competition {
     }
     if (activateLCD && slot.getCourse() != Course.openTest) {
       exec.execute(new ActivateLCD(layout, newSetup));
+      LOG.error("Activated pingers");
+    } else {
+      LOG.error("Don't activate pingers");
     }
 
     return newSetup;
@@ -309,6 +312,7 @@ public class Competition {
             String value = newSetup.getActiveInteropShape().getValue();
             CloseableHttpResponse resp = client.execute(new HttpHost(layout.getLcdControlServer().getHost(), layout.getLcdControlServer().getPort()),
                 new HttpGet(layout.getLcdControlServer().toString() + "/activate/" + value));
+            LOG.error("Activation URL: " + layout.getLcdControlServer().toString() + "/activate/" + value);
             System.out.println(String.format("Enabled shape: %d %s", resp.getStatusLine().getStatusCode(), value));
             activated = true;
           }
