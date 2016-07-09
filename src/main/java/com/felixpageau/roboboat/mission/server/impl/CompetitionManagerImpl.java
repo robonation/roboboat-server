@@ -67,7 +67,7 @@ public class CompetitionManagerImpl extends MockCompetitionManager {
     }
     ReportStatus status = super.startRun(course, teamCode);
     archive = competition.getActiveRuns().get(course);
-    if (archive != null) {
+    if (archive != null && course != Course.openTest) {
       // publish to an SNS topic
       String topicArn = "arn:aws:sns:us-east-1:976841718827:roboboat-server-new-run";
       String msg = String.format("Team '%s' starting run %s on %s at: %s", teamCode, archive.getRunSetup().getRunId().replaceFirst(".*-", ""), course,
