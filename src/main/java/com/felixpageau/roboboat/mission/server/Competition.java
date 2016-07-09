@@ -305,15 +305,14 @@ public class Competition {
           if (Shape.NONE == newSetup.getActiveInteropShape()) {
             CloseableHttpResponse resp = client.execute(new HttpHost(layout.getLcdControlServer().getHost(), layout.getLcdControlServer().getPort()),
                 new HttpGet(layout.getLcdControlServer().toString() + "/reset"));
-            System.out.println(String.format("TURN OFF LCD: %d %s", resp.getStatusLine().getStatusCode(),
+            LOG.info(String.format("TURN OFF LCD: %d %s", resp.getStatusLine().getStatusCode(),
                 CharStreams.toString(new InputStreamReader(resp.getEntity().getContent(), Charsets.UTF_8))));
             activated = true;
           } else {
             String value = newSetup.getActiveInteropShape().getValue();
             CloseableHttpResponse resp = client.execute(new HttpHost(layout.getLcdControlServer().getHost(), layout.getLcdControlServer().getPort()),
-                new HttpGet(layout.getLcdControlServer().toString() + "/activate/" + value));
-            LOG.error("Activation URL: " + layout.getLcdControlServer().toString() + "/activate/" + value);
-            System.out.println(String.format("Enabled shape: %d %s", resp.getStatusLine().getStatusCode(), value));
+                new HttpGet(layout.getLcdControlServer().toString() + "/activate/" + value.toLowerCase()));
+            LOG.error("Activation URL: " + layout.getLcdControlServer().toString() + "/activate/" + value.toLowerCase());
             activated = true;
           }
         } catch (UnknownHostException e) {
