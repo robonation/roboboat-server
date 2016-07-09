@@ -19,6 +19,12 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.regions.Region;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.sns.AmazonSNSClient;
+import com.amazonaws.services.sns.model.PublishRequest;
+import com.amazonaws.services.sns.model.PublishResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felixpageau.roboboat.mission.WebApplicationExceptionWithContext;
 import com.felixpageau.roboboat.mission.server.Competition;
@@ -41,9 +47,15 @@ import com.felixpageau.roboboat.mission.structures.UploadStatus;
 @ParametersAreNonnullByDefault
 public class CompetitionManagerImpl extends MockCompetitionManager {
   private static final Logger LOG = LoggerFactory.getLogger(CompetitionManagerImpl.class);
+  private static final DateTimeFormatter SMS_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+  private final AmazonSNSClient snsClient;
 
   public CompetitionManagerImpl(Competition competition, ObjectMapper om) {
     super(competition, om, new File("/etc/roboboat2015-images/uploads/" + DateTimeFormatter.ofPattern("YYYYMMdd/").format(LocalDateTime.now())));
+
+    // create a new SNS client and set endpoint
+    snsClient = new AmazonSNSClient(new BasicAWSCredentials("AKIAJ5HBSR3KIJUT32YQ", "4wxHI+VjbhsjVnsDQ3/2YsDKXf2OdxTo6BWXDosQ"));
+    snsClient.setRegion(Region.getRegion(Regions.US_EAST_1));
   }
 
   @Override
@@ -53,7 +65,20 @@ public class CompetitionManagerImpl extends MockCompetitionManager {
       throw new WebApplicationExceptionWithContext(String.format("There is already a run active on course %s! You can't go until team %s get out of %s",
           course, archive.getRunSetup().getActiveTeam(), course), 400);
     }
-    return super.startRun(course, teamCode);
+    ReportStatus status = super.startRun(course, teamCode);
+    archive = competition.getActiveRuns().get(course);
+    if (archive != null) {
+      // publish to an SNS topic
+      String topicArn = "arn:aws:sns:us-east-1:976841718827:roboboat-server-new-run";
+      String msg = String.format("Team: %s starting run: %s on course: %s at: %s", teamCode, archive.getRunSetup().getRunId(), course, LocalDateTime.now()
+          .format(SMS_DATE_FORMAT));
+      PublishRequest publishRequest = new PublishRequest(topicArn, msg);
+      PublishResult publishResult = snsClient.publish(publishRequest);
+      // print MessageId of message published to SNS topic
+      System.out.println("MessageId - " + publishResult.getMessageId());
+    }
+
+    return status;
   }
 
   @Override

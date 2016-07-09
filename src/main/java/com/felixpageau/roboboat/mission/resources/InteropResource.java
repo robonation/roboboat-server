@@ -40,7 +40,7 @@ public class InteropResource {
   @Path("/image/{course}/{teamCode}")
   @POST
   @Produces({ MediaType.APPLICATION_JSON })
-  @Consumes({ MediaType.MULTIPART_FORM_DATA, "multipart/mixed" })
+  @Consumes({ MediaType.MULTIPART_FORM_DATA })
   public UploadStatus uploadImage(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode,
       @FormDataParam("file") InputStream fileInputStream, @FormDataParam("file") FormDataContentDisposition fileDetail) throws IOException {
     return manager.uploadInteropImage(course, teamCode, ByteStreams.toByteArray(fileInputStream));

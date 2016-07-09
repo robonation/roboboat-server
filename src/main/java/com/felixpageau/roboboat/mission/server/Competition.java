@@ -217,7 +217,7 @@ public class Competition {
       exec.execute(new ActivatePinger(layout, newSetup));
     }
     if (activateLCD && slot.getCourse() != Course.openTest) {
-      exec.execute(new ActivatePinger(layout, newSetup));
+      exec.execute(new ActivateLCD(layout, newSetup));
     }
 
     return newSetup;
@@ -301,21 +301,21 @@ public class Competition {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
           if (Shape.NONE == newSetup.getActiveInteropShape()) {
             CloseableHttpResponse resp = client.execute(new HttpHost(layout.getLcdControlServer().getHost(), layout.getLcdControlServer().getPort()),
-                new HttpGet("http://127.0.0.1:5000/reset"));
+                new HttpGet(layout.getLcdControlServer().toString() + "/reset"));
             System.out.println(String.format("TURN OFF LCD: %d %s", resp.getStatusLine().getStatusCode(),
                 CharStreams.toString(new InputStreamReader(resp.getEntity().getContent(), Charsets.UTF_8))));
             activated = true;
           } else {
             String value = newSetup.getActiveInteropShape().getValue();
             CloseableHttpResponse resp = client.execute(new HttpHost(layout.getLcdControlServer().getHost(), layout.getLcdControlServer().getPort()),
-                new HttpGet("http://127.0.0.1:5000/activate/" + value));
+                new HttpGet(layout.getLcdControlServer().toString() + "/activate/" + value));
             System.out.println(String.format("Enabled shape: %d %s", resp.getStatusLine().getStatusCode(), value));
             activated = true;
           }
         } catch (UnknownHostException e) {
-          LOG.error(String.format("Failed to find lcd server (%s)", layout.getPingerControlServer().toString()), e);
+          LOG.error(String.format("Failed to find lcd server (%s)", layout.getLcdControlServer().toString()), e);
         } catch (IOException e) {
-          LOG.error(String.format("Comm failed with lcd server (%s)", layout.getPingerControlServer().toString()), e);
+          LOG.error(String.format("Comm failed with lcd server (%s)", layout.getLcdControlServer().toString()), e);
         }
       }
     }
