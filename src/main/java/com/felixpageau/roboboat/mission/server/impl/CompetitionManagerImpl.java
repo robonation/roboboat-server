@@ -47,7 +47,7 @@ import com.felixpageau.roboboat.mission.structures.UploadStatus;
 @ParametersAreNonnullByDefault
 public class CompetitionManagerImpl extends MockCompetitionManager {
   private static final Logger LOG = LoggerFactory.getLogger(CompetitionManagerImpl.class);
-  private static final DateTimeFormatter SMS_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+  private static final DateTimeFormatter SMS_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private final AmazonSNSClient snsClient;
 
   public CompetitionManagerImpl(Competition competition, ObjectMapper om) {
