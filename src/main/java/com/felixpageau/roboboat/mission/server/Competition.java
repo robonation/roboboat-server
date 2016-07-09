@@ -203,7 +203,7 @@ public class Competition {
     if (lastRun != null) {
       endRun(slot.getCourse(), teamCode);
     }
-    int runCount = (previousRuns != null) ? previousRuns.size() : 1;
+    int runCount = (previousRuns != null) ? previousRuns.size() + 1 : 1;
     String runId = String.format("%s-%s-%s", slot.getCourse(), slot.getStartTime().format(DATE_RUN_ID_FORMATTER), runCount);
     CourseLayout layout = layoutMap.get(slot.getCourse());
     RunSetup newSetup = RunSetup.generateRandomSetup(layoutMap.get(slot.getCourse()), teamCode, runId);
