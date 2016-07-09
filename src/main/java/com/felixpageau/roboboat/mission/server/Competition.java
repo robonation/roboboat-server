@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +46,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
@@ -180,6 +181,22 @@ public class Competition {
     teamInWater.put(course, team);
   }
 
+  public TimeSlot findPreviousTimeSlot(Course course) {
+    TimeSlot current = findCurrentTimeSlot(course);
+    List<TimeSlot> slots = new ArrayList<>(schedule.keySet());
+    Collections.sort(slots, new TimeSlotComparator());
+    slots.remove(current);
+    for (TimeSlot timeSlot : slots) {
+      if (timeSlot.getCourse() == course && timeSlot.getStartTime().isBefore(LocalDateTime.now()) && timeSlot.getEndTime().isAfter(LocalDateTime.now())) {
+        return timeSlot;
+      }
+    }
+    // TODO remove this
+    TimeSlot newSlot = new TimeSlot(course, LocalDateTime.now(), LocalDateTime.now().plusMinutes(20));
+    schedule.put(newSlot, null);
+    return newSlot;
+  }
+
   public TimeSlot findCurrentTimeSlot(Course course) {
     List<TimeSlot> slots = new ArrayList<>(schedule.keySet());
     Collections.sort(slots, new TimeSlotComparator());
@@ -198,12 +215,31 @@ public class Competition {
     Preconditions.checkNotNull(slot);
     Preconditions.checkNotNull(teamCode);
 
-    Collection<RunArchiver> previousRuns = results.get(slot);
     RunArchiver lastRun = activeRuns.get(slot.getCourse());
     if (lastRun != null) {
       endRun(slot.getCourse(), teamCode);
     }
-    int runCount = (previousRuns != null) ? previousRuns.size() + 1 : 1;
+    List<RunArchiver> previousRuns = new ArrayList<>(results.get(findPreviousTimeSlot(slot.getCourse())));
+    previousRuns.addAll(results.get(slot));
+    Collections.sort(previousRuns, new Comparator<RunArchiver>() {
+      @Override
+      public int compare(RunArchiver o1, RunArchiver o2) {
+        if (o1 == null) {
+          return -1;
+        }
+        if (o2 == null) {
+          return 1;
+        }
+        return o1.getStartTime().compareTo(o2.getStartTime());
+      }
+    });
+    if (previousRuns != null && previousRuns.size() > 0) {
+      lastRun = Iterables.getLast(previousRuns);
+    }
+    if (lastRun == null || !lastRun.getRunSetup().getActiveTeam().equals(teamCode)) {
+      lastRun = null;
+    }
+    int runCount = (lastRun != null) ? Integer.parseInt(lastRun.getRunSetup().getRunId().replaceFirst(".*-", "")) + 1 : 1;
     String runId = String.format("%s-%s-%s", slot.getCourse(), slot.getStartTime().format(DATE_RUN_ID_FORMATTER), runCount);
     CourseLayout layout = layoutMap.get(slot.getCourse());
     RunSetup newSetup = RunSetup.generateRandomSetup(layoutMap.get(slot.getCourse()), teamCode, runId);
