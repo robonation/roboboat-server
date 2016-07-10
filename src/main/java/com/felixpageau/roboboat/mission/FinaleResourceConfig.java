@@ -60,8 +60,8 @@ public class FinaleResourceConfig extends CompetitionResourceConfig {
       );
   private static final List<TeamCode> TEAMS = TeamCode.of("AUVSI", "DBH", "ERAU", "FAU", "GIT", "ITSN", "ODUSM", "ODUBF", "SRM", "USNA", "AMVUI", "UOFM",
       "ULSAN", "UWF");
-  private static final List<DockingBay> dockingBaysA = ImmutableList.of(new DockingBay(Symbol.triangle, SymbolColor.red), new DockingBay(Symbol.cruciform,
-      SymbolColor.black), new DockingBay(Symbol.triangle, SymbolColor.black));
+  private static final List<DockingBay> dockingBaysA = ImmutableList.of(new DockingBay(Symbol.triangle, SymbolColor.red), new DockingBay(Symbol.triangle,
+      SymbolColor.green), new DockingBay(Symbol.cruciform, SymbolColor.black));
   // private static final List<DockingBay> dockingBaysB = ImmutableList.of(new
   // DockingBay(Symbol.cruciform, SymbolColor.black), new
   // DockingBay(Symbol.circle,
