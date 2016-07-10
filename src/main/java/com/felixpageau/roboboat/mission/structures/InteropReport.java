@@ -16,10 +16,10 @@ public class InteropReport {
   @JsonCreator
   public InteropReport(@JsonProperty(value = "course") Course course, @JsonProperty(value = "team") TeamCode team, @JsonProperty(value = "shape") Shape shape,
       @JsonProperty(value = "imageId") String imageId) {
-    this.course = Preconditions.checkNotNull(course);
-    this.team = Preconditions.checkNotNull(team);
-    this.shape = Preconditions.checkNotNull(shape);
-    this.imageId = Preconditions.checkNotNull(imageId);
+    this.course = Preconditions.checkNotNull(course, "the course cannot be null");
+    this.team = Preconditions.checkNotNull(team, "the team cannot be null");
+    this.shape = Preconditions.checkNotNull(shape, "the shape cannot be null");
+    this.imageId = Preconditions.checkNotNull(imageId, "the imageId cannot be null");
   }
 
   public Course getCourse() {

@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import javax.ws.rs.ApplicationPath;
+
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.internal.scanning.PackageNamesScanner;
 
@@ -44,8 +46,8 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  * marshalling/unmarshalling
  */
 @SuppressFBWarnings(value = "UUF_UNUSED_FIELD")
-// @ApplicationPath("/")
-public class AdminResourceConfig extends CompetitionResourceConfig {
+@ApplicationPath("/")
+public class FinaleResourceConfig extends CompetitionResourceConfig {
   private static final JacksonObjectMapperProvider OM_PROVIDER = new JacksonObjectMapperProvider();
   private static final String COMPETITION_NAME = "RoboBoat 2016";
   private static final List<CompetitionDay> COMPETITION_DAYS = ImmutableList.<CompetitionDay> of(new CompetitionDay(LocalDateTime.of(2016, 7, 5, 8, 0),
@@ -60,16 +62,25 @@ public class AdminResourceConfig extends CompetitionResourceConfig {
       "ULSAN", "UWF");
   private static final List<DockingBay> dockingBaysA = ImmutableList.of(new DockingBay(Symbol.triangle, SymbolColor.red), new DockingBay(Symbol.cruciform,
       SymbolColor.black), new DockingBay(Symbol.triangle, SymbolColor.black));
-  private static final List<DockingBay> dockingBaysB = ImmutableList.of(new DockingBay(Symbol.cruciform, SymbolColor.black), new DockingBay(Symbol.circle,
-      SymbolColor.black), new DockingBay(Symbol.cruciform, SymbolColor.blue));
-  private static final List<DockingBay> dockingBaysOpenTest = ImmutableList.of(new DockingBay(Symbol.triangle, SymbolColor.red), new DockingBay(
-      Symbol.cruciform, SymbolColor.black), new DockingBay(Symbol.cruciform, SymbolColor.blue));
+  // private static final List<DockingBay> dockingBaysB = ImmutableList.of(new
+  // DockingBay(Symbol.cruciform, SymbolColor.black), new
+  // DockingBay(Symbol.circle,
+  // SymbolColor.black), new DockingBay(Symbol.cruciform, SymbolColor.blue));
+  // private static final List<DockingBay> dockingBaysOpenTest =
+  // ImmutableList.of(new DockingBay(Symbol.triangle, SymbolColor.red), new
+  // DockingBay(
+  // Symbol.cruciform, SymbolColor.black), new DockingBay(Symbol.cruciform,
+  // SymbolColor.blue));
   private static final List<Pinger> courseAPingers = ImmutableList.of(new Pinger(BuoyColor.green), new Pinger(BuoyColor.red), new Pinger(BuoyColor.black),
       new Pinger(BuoyColor.yellow));
-  private static final List<Pinger> courseBPingers = ImmutableList.of(new Pinger(BuoyColor.green), new Pinger(BuoyColor.red), new Pinger(BuoyColor.black),
-      new Pinger(BuoyColor.yellow));
-  private static final List<Pinger> openTestPingers = ImmutableList.of(new Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new Pinger(BuoyColor.red),
-      new Pinger(BuoyColor.yellow));
+  // private static final List<Pinger> courseBPingers = ImmutableList.of(new
+  // Pinger(BuoyColor.green), new Pinger(BuoyColor.red), new
+  // Pinger(BuoyColor.black),
+  // new Pinger(BuoyColor.yellow));
+  // private static final List<Pinger> openTestPingers = ImmutableList.of(new
+  // Pinger(BuoyColor.black), new Pinger(BuoyColor.blue), new
+  // Pinger(BuoyColor.red),
+  // new Pinger(BuoyColor.yellow));
   public static final Map<Course, CourseLayout> COURSE_LAYOUT_MAP;
   public static final AtomicInteger port = new AtomicInteger(9999);
   private final NMEAServer nmeaServer;
@@ -77,20 +88,26 @@ public class AdminResourceConfig extends CompetitionResourceConfig {
   static {
     try {
       COURSE_LAYOUT_MAP = ImmutableMap.of(Course.courseA, new CourseLayout(Course.courseA, courseAPingers, dockingBaysA, new URL("http://192.168.1.5:4000"),
-          new URL("http://192.168.1.7:5000")), Course.courseB, new CourseLayout(Course.courseB, courseBPingers, dockingBaysB,
-          new URL("http://192.168.1.6:4000"), new URL("http://192.168.1.8:5000")), Course.openTest, new CourseLayout(Course.openTest, openTestPingers,
-          dockingBaysOpenTest, new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:5000")));
+          new URL("http://192.168.1.7:5000"))
+      // , Course.courseB, new CourseLayout(Course.courseB, courseBPingers,
+      // dockingBaysB,
+      // new URL("http://192.168.1.6:4000"), new
+      // URL("http://192.168.1.8:5000")), Course.openTest, new
+      // CourseLayout(Course.openTest, openTestPingers,
+      // dockingBaysOpenTest, new URL("http://127.0.0.1:5000"), new
+      // URL("http://127.0.0.1:5000"))
+          );
     } catch (MalformedURLException e) {
       throw new RuntimeException(e);
     }
   }
 
-  public AdminResourceConfig() throws URISyntaxException {
+  public FinaleResourceConfig() throws URISyntaxException {
     this(new CompetitionManagerImpl(new Competition(COMPETITION_NAME, COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, true, true, OM_PROVIDER.getObjectMapper()),
         OM_PROVIDER.getObjectMapper()));
   }
 
-  public AdminResourceConfig(CompetitionManager competitionManager) throws URISyntaxException {
+  public FinaleResourceConfig(CompetitionManager competitionManager) throws URISyntaxException {
     super(competitionManager, JacksonFeatures.class, JacksonObjectMapperProvider.class, MultiPartFeature.class);
     this.register(MultiPartFeature.class);
     this.register(JacksonFeatures.class);
