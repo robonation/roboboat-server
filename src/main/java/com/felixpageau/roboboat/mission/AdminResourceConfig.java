@@ -12,7 +12,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.server.internal.scanning.PackageNamesScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 import com.felixpageau.roboboat.mission.nmea.SentenceRegistry;
@@ -43,6 +44,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @SuppressFBWarnings(value = "UUF_UNUSED_FIELD")
 // @ApplicationPath("/")
 public class AdminResourceConfig extends CompetitionResourceConfig {
+  private static final Logger LOG = LoggerFactory.getLogger(AdminResourceConfig.class);
   private static final JacksonObjectMapperProvider OM_PROVIDER = new JacksonObjectMapperProvider();
   private static final String COMPETITION_NAME = "RoboBoat 2016";
   private static final List<CompetitionDay> COMPETITION_DAYS = ImmutableList.<CompetitionDay> of(new CompetitionDay(LocalDateTime.of(2016, 7, 5, 8, 0),
@@ -81,7 +83,7 @@ public class AdminResourceConfig extends CompetitionResourceConfig {
     this.register(MultiPartFeature.class);
     this.register(JacksonFeatures.class);
     this.register(JacksonObjectMapperProvider.class);
-    this.registerFinder(new PackageNamesScanner(new String[] { "com.felixpageau.roboboat.mission2015.resources", "com.fasterxml.jackson.jaxrs.base" }, false));
+    //this.registerFinder(new PackageNamesScanner(new String[] { "com.felixpageau.roboboat.mission.resources", "com.fasterxml.jackson.jaxrs.base" }, false));
     this.register(new AutomatedDockingResource(competitionManager));
     this.register(new RunResource(competitionManager));
     this.register(new HeartbeatResource(competitionManager));
@@ -92,6 +94,8 @@ public class AdminResourceConfig extends CompetitionResourceConfig {
 
     this.nmeaServer = new NMEAServer(competitionManager, port.get(), createNMEASentenceRegistry(), true);
     this.nmeaServer.start();
+    
+    LOG.error("*** Using the AdminResourceConfig ***");
   }
 
   @Override

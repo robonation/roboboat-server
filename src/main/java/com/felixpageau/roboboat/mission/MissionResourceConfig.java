@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.internal.scanning.PackageNamesScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 import com.felixpageau.roboboat.mission.nmea.SentenceRegistry;
@@ -40,6 +42,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
  */
 @SuppressFBWarnings(value = "UUF_UNUSED_FIELD")
 public class MissionResourceConfig extends CompetitionResourceConfig {
+  private static final Logger LOG = LoggerFactory.getLogger(AdminResourceConfig.class);
   public static final JacksonObjectMapperProvider OM_PROVIDER = new JacksonObjectMapperProvider();
   public static final String COMPETITION_NAME = "RoboBoat 2016";
   public static final List<CompetitionDay> COMPETITION_DAYS = ImmutableList.<CompetitionDay> of(new CompetitionDay(LocalDateTime.of(2016, 7, 5, 8, 0),
@@ -88,6 +91,8 @@ public class MissionResourceConfig extends CompetitionResourceConfig {
 
     this.nmeaServer = new NMEAServer(competitionManager, port.get(), createNMEASentenceRegistry(), true);
     this.nmeaServer.start();
+    
+    throw new RuntimeException("not supposed to be used");
   }
 
   @Override

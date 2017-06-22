@@ -18,7 +18,7 @@ public class AdminApp extends App {
   }
 
   public static void main(String[] args) {
-    App app = new AdminApp(9000, 9443, "mission2016-admin-war/src/", null);
+    App app = new AdminApp(9000, 9443, "src/", null);
     app.run();
   }
 

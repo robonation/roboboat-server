@@ -66,7 +66,7 @@ public class MockCompetitionManager implements CompetitionManager {
   protected final File basePath;
 
   public MockCompetitionManager(Competition competition, ObjectMapper om) {
-    this(competition, om, new File("/etc/roboboat/roboboat2016-images/uploads/" + DateTimeFormatter.ofPattern("YYYYMMdd/").format(LocalDateTime.now())));
+    this(competition, om, new File("/etc/roboboat/roboboat2017-images/uploads/" + DateTimeFormatter.ofPattern("YYYYMMdd/").format(LocalDateTime.now())));
   }
 
   protected MockCompetitionManager(Competition competition, ObjectMapper om, final File basePath) {

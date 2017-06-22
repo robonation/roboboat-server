@@ -32,6 +32,7 @@ import com.felixpageau.roboboat.mission.server.RunArchiver;
 import com.felixpageau.roboboat.mission.server.StructuredEvent;
 import com.felixpageau.roboboat.mission.structures.Challenge;
 import com.felixpageau.roboboat.mission.structures.Course;
+import com.felixpageau.roboboat.mission.structures.HeartbeatReport;
 import com.felixpageau.roboboat.mission.structures.ImageUploadDescriptor;
 import com.felixpageau.roboboat.mission.structures.ReportStatus;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
@@ -124,5 +125,11 @@ public class CompetitionManagerImpl extends MockCompetitionManager {
     archive.addEvent(new StructuredEvent(course, teamCode, Challenge.docking, String.format("uploaded image (%s)", imageId)));
     archive.uploadedImage(imageId.toString());
     return new UploadStatus(imageId.toString());
+  }
+  
+  @Override
+  public ReportStatus reportHeartbeat(Course course, TeamCode teamCode, HeartbeatReport report) {
+    
+    return super.reportHeartbeat(course, teamCode, report);
   }
 }

@@ -176,6 +176,7 @@
                     <webApp>
                         <contextPath>/</contextPath>
                         <webInfIncludeJarPattern>.*/.*jersey-[^/]\.jar$</webInfIncludeJarPattern>
+                        <descriptor>${project.basedir}/src/main/webapp/web.xml</descriptor>  
                     </webApp>
                     <loginServices>
                       <loginService implementation="org.eclipse.jetty.security.HashLoginService">
