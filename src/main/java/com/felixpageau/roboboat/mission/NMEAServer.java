@@ -29,22 +29,17 @@ import com.felixpageau.roboboat.mission.nmea.SentenceDefinition;
 import com.felixpageau.roboboat.mission.nmea.SentenceRegistry;
 import com.felixpageau.roboboat.mission.server.CompetitionManager;
 import com.felixpageau.roboboat.mission.server.Config;
-import com.felixpageau.roboboat.mission.structures.BeaconReport;
-import com.felixpageau.roboboat.mission.structures.BuoyColor;
 import com.felixpageau.roboboat.mission.structures.Challenge;
 import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.DockingSequence;
-import com.felixpageau.roboboat.mission.structures.GateCode;
 import com.felixpageau.roboboat.mission.structures.HeartbeatReport;
-import com.felixpageau.roboboat.mission.structures.InteropReport;
+import com.felixpageau.roboboat.mission.structures.LeaderSequence;
 import com.felixpageau.roboboat.mission.structures.Position;
 import com.felixpageau.roboboat.mission.structures.ReportStatus;
-import com.felixpageau.roboboat.mission.structures.Shape;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
 import com.felixpageau.roboboat.mission.structures.Timestamp;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
-import com.google.common.primitives.Ints;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -112,11 +107,10 @@ public class NMEAServer implements Runnable {
 
     public String timestamp() {
       return LocalDateTime.now().format(Config.NMEA_DATE_FORMATTER.get());
-    }
+    } 
 
     public List<String> baySequence(DockingSequence seq) {
-      return seq.getDockingBaySequence().stream().flatMap(b -> Arrays.asList(b.getSymbol().toString(), b.getColor().toString()).stream())
-          .collect(Collectors.toList());
+      return seq.getDockingBaySequence().stream().map(b -> b.getCode().getValue()).collect(Collectors.toList());
     }
 
     public String createResponse(String talkerId, String sentenceId, List<String> fields) {
@@ -164,10 +158,6 @@ public class NMEAServer implements Runnable {
                 status = competitionManager.reportHeartbeat(course, team, new HeartbeatReport(new Timestamp(), c, p));
                 w.write(createResponse("TD", sentence.getSentenceId(), Arrays.asList(timestamp(), Boolean.toString(status.isSuccess()))));
                 break;
-              case "SVOBS":
-                GateCode code = competitionManager.getObstacleCourseCode(course, team);
-                w.write(createResponse("TD", sentence.getSentenceId(), Arrays.asList(timestamp(), Integer.toString(code.getEntrance()), code.getExit())));
-                break;
               case "SVDOC":
                 DockingSequence seq = competitionManager.getDockingSequence(course, team);
                 List<String> args = new ArrayList<>();
@@ -175,18 +165,11 @@ public class NMEAServer implements Runnable {
                 args.addAll(baySequence(seq));
                 w.write(createResponse("TD", sentence.getSentenceId(), args));
                 break;
-              case "SVPIN":
-                status = competitionManager.reportPinger(
+              case "SVFOL":
+                LeaderSequence ls = competitionManager.getLeaderSequence(
                     course,
-                    team,
-                    new BeaconReport(course, team, BuoyColor.valueOf(sentence.getField(2)), Ints.tryParse(sentence.getField(3)), BuoyColor.valueOf(sentence
-                        .getField(4)), Ints.tryParse(sentence.getField(5))));
-                w.write(createResponse("TD", sentence.getSentenceId(), Arrays.asList(timestamp(), Boolean.toString(status.isSuccess()))));
-                break;
-              case "SVUAV":
-                InteropReport ir = new InteropReport(course, team, Shape.fromString(sentence.getField(2)), sentence.getField(3));
-                status = competitionManager.reportInterop(course, team, ir);
-                w.write(createResponse("TD", sentence.getSentenceId(), Arrays.asList(timestamp(), Boolean.toString(status.isSuccess()))));
+                    team);
+                w.write(createResponse("TD", sentence.getSentenceId(), Arrays.asList(timestamp(), ls.getValue())));
                 break;
               case "TDSTR":
               case "TDEND":

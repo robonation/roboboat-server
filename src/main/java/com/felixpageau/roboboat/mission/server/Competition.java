@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -34,9 +36,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.felixpageau.roboboat.mission.App;
 import com.felixpageau.roboboat.mission.structures.Challenge;
+import com.felixpageau.roboboat.mission.structures.Code;
 import com.felixpageau.roboboat.mission.structures.Course;
-import com.felixpageau.roboboat.mission.structures.Pinger;
-import com.felixpageau.roboboat.mission.structures.Shape;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
 import com.felixpageau.roboboat.mission.utils.NMEAUtils;
 import com.google.common.base.Charsets;
@@ -249,9 +250,6 @@ public class Competition {
     activeRuns.put(slot.getCourse(), newRun);
     results.put(slot, newRun);
 
-    if (activatePinger && slot.getCourse() != Course.openTest) {
-      exec.execute(new ActivatePinger(layout, newSetup));
-    }
     if (activateLCD && slot.getCourse() != Course.openTest) {
       exec.execute(new ActivateLCD(layout, newSetup));
       LOG.error("Activated pingers");
@@ -262,6 +260,45 @@ public class Competition {
     return newSetup;
   }
 
+  public static class ActivateCarousel implements Runnable {
+    private final CourseLayout layout;
+    private final boolean enabled;
+
+    public ActivateCarousel(CourseLayout layout, boolean enabled) {
+      this.layout = Preconditions.checkNotNull(layout, "layout cannot be null");
+      this.enabled = enabled;
+    }
+
+    @SuppressFBWarnings(value = "CC_CYCLOMATIC_COMPLEXITY")
+    @Override
+    public void run() {
+      boolean activated = false;
+      for (int j = 0; j < 10 && !activated; j++) {
+        try (CloseableHttpClient client = HttpClients.createDefault()) {
+          if (!enabled) {
+            CloseableHttpResponse resp = client.execute(new HttpHost(layout.getSevenSegControlServer().getHost(), layout.getSevenSegControlServer().getPort()),
+                new HttpGet(layout.getSevenSegControlServer().toString() + "/clear"));
+            LOG.info(String.format("TURN OFF LCD: %d %s", resp.getStatusLine().getStatusCode(),
+                CharStreams.toString(new InputStreamReader(resp.getEntity().getContent(), Charsets.UTF_8))));
+            activated = true;
+          } else {
+            String value = "1";
+            CloseableHttpResponse resp = client.execute(new HttpHost(layout.getSevenSegControlServer().getHost(), layout.getSevenSegControlServer().getPort()),
+                new HttpGet(layout.getSevenSegControlServer().toString() + "/activate/" + value.toLowerCase()));
+            LOG.error("Activation URL: " + layout.getSevenSegControlServer().toString() + "/activate/" + value.toLowerCase());
+            if (resp.getStatusLine().getStatusCode() == 200) {
+              activated = true;
+            }
+          }
+        } catch (UnknownHostException e) {
+          LOG.error(String.format("Failed to find lcd server (%s)", layout.getSevenSegControlServer().toString()), e);
+        } catch (IOException e) {
+          LOG.error(String.format("Comm failed with lcd server (%s)", layout.getSevenSegControlServer().toString()), e);
+        }
+      }
+    }
+  }
+  
   public static class ActivatePinger implements Runnable {
     private final CourseLayout layout;
     private final RunSetup newSetup;
@@ -279,27 +316,23 @@ public class Competition {
         try (Socket s = new Socket(layout.getPingerControlServer().getHost(), layout.getPingerControlServer().getPort());
             Writer w = new OutputStreamWriter(s.getOutputStream(), App.APP_CHARSET);
             BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream(), App.APP_CHARSET))) {
-          if (Pinger.NO_PINGER.equals(newSetup.getActivePingers())) {
+          if (com.felixpageau.roboboat.mission.structures.Code.none.equals(newSetup.getActiveDockingSequence().getActivePinger())) {
             String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), ImmutableList.of(0, 0)));
             w.write(pingerActivationMessage);
             System.out.println("TURN OFF PINGER: " + pingerActivationMessage);
             w.flush();
             activated = true;
           } else {
-            System.out.println(String.format("** Available pingers: %s **", layout.getPingers()));
-            System.out.println(String.format("** Active pingers: %s **", newSetup.getActivePingers()));
-            List<Integer> pingerFieldValue = new ArrayList<>();
-            for (int i = 0; i + 1 < layout.getPingers().size(); i += 2) {
-              System.out.println(String.format("** Checking pinger: %s **", layout.getPingers().get(i)));
-              int value = 0;
-              if (newSetup.getActivePingers().contains(layout.getPingers().get(i))) {
-                System.out.println(String.format("** Activating pinger: %s **", layout.getPingers().get(i)));
-                value = 1;
-              } else if (newSetup.getActivePingers().contains(layout.getPingers().get(i + 1))) {
-                System.out.println(String.format("** Activating pinger: %s **", layout.getPingers().get(i + 1)));
-                value = 2;
-              }
-              pingerFieldValue.add(value);
+            System.out.println(String.format("** Available pingers: %s **", Arrays.stream(Code.values()).map(x -> x.getValue()).collect(Collectors.joining())));
+            System.out.println(String.format("** Active pingers: %s **", newSetup.getActiveDockingSequence().getActivePinger().getValue()));
+            int activate = Integer.parseInt(newSetup.getActiveDockingSequence().getActivePinger().getValue());
+            List<Integer> pingerFieldValue;
+            switch (activate) {
+              case 0: pingerFieldValue = ImmutableList.of(0, 0); break;
+              case 1: pingerFieldValue = ImmutableList.of(1, 0); break;
+              case 2: pingerFieldValue = ImmutableList.of(2, 0); break;
+              case 3: pingerFieldValue = ImmutableList.of(0, 1); break;
+              default: pingerFieldValue = ImmutableList.of(0, 0); break;
             }
             if (pingerFieldValue.size() == 2) {
               System.out.println("**** Activation values: " + pingerFieldValue);
@@ -338,23 +371,25 @@ public class Competition {
       boolean activated = false;
       for (int j = 0; j < 10 && !activated; j++) {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
-          if (Shape.NONE == newSetup.getActiveInteropShape()) {
-            CloseableHttpResponse resp = client.execute(new HttpHost(layout.getLcdControlServer().getHost(), layout.getLcdControlServer().getPort()),
-                new HttpGet(layout.getLcdControlServer().toString() + "/reset"));
+          if (com.felixpageau.roboboat.mission.structures.Code.none == newSetup.getActiveDockingSequence().get7Seg()) {
+            CloseableHttpResponse resp = client.execute(new HttpHost(layout.getSevenSegControlServer().getHost(), layout.getSevenSegControlServer().getPort()),
+                new HttpGet(layout.getSevenSegControlServer().toString() + "/clear"));
             LOG.info(String.format("TURN OFF LCD: %d %s", resp.getStatusLine().getStatusCode(),
                 CharStreams.toString(new InputStreamReader(resp.getEntity().getContent(), Charsets.UTF_8))));
             activated = true;
           } else {
-            String value = newSetup.getActiveInteropShape().getValue();
-            CloseableHttpResponse resp = client.execute(new HttpHost(layout.getLcdControlServer().getHost(), layout.getLcdControlServer().getPort()),
-                new HttpGet(layout.getLcdControlServer().toString() + "/activate/" + value.toLowerCase()));
-            LOG.error("Activation URL: " + layout.getLcdControlServer().toString() + "/activate/" + value.toLowerCase());
-            activated = true;
+            String value = newSetup.getActiveDockingSequence().get7Seg().getValue();
+            CloseableHttpResponse resp = client.execute(new HttpHost(layout.getSevenSegControlServer().getHost(), layout.getSevenSegControlServer().getPort()),
+                new HttpGet(layout.getSevenSegControlServer().toString() + "/activate/" + value.toLowerCase()));
+            LOG.error("Activation URL: " + layout.getSevenSegControlServer().toString() + "/activate/" + value.toLowerCase());
+            if (resp.getStatusLine().getStatusCode() == 200) {
+              activated = true;
+            }
           }
         } catch (UnknownHostException e) {
-          LOG.error(String.format("Failed to find lcd server (%s)", layout.getLcdControlServer().toString()), e);
+          LOG.error(String.format("Failed to find lcd server (%s)", layout.getSevenSegControlServer().toString()), e);
         } catch (IOException e) {
-          LOG.error(String.format("Comm failed with lcd server (%s)", layout.getLcdControlServer().toString()), e);
+          LOG.error(String.format("Comm failed with lcd server (%s)", layout.getSevenSegControlServer().toString()), e);
         }
       }
     }

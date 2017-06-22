@@ -27,9 +27,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.felixpageau.roboboat.mission.App;
-import com.felixpageau.roboboat.mission.structures.BeaconReport;
 import com.felixpageau.roboboat.mission.structures.HeartbeatReport;
-import com.felixpageau.roboboat.mission.structures.InteropReport;
 import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -57,43 +55,33 @@ public final class RunArchiver {
   @GuardedBy(value = "lock")
   private HeartbeatReport lastHeartbeat;
   @GuardedBy(value = "lock")
-  private boolean requestedGateCode = false;
-  @GuardedBy(value = "lock")
-  private boolean requestedDockingSequence = false;
-  @GuardedBy(value = "lock")
-  private BeaconReport reportedPinger;
+  private boolean requestedCarouselCode = false;
   @GuardedBy(value = "lock")
   private String uploadedImage;
-  @GuardedBy(value = "lock")
-  private InteropReport reportedInterop;
 
   public RunArchiver(RunSetup runSetup, File f, EventBus bus) {
-    this(runSetup, null, LocalDateTime.now(), null, null, false, false, null, null, null, f, bus);
+    this(runSetup, null, LocalDateTime.now(), null, null, false, null, f, bus);
   }
 
   @JsonCreator
   public RunArchiver(@JsonProperty(value = "runSetup") RunSetup runSetup, @JsonProperty(value = "events") @Nullable List<Event> events,
       @JsonProperty(value = "startTime") LocalDateTime startTime, @JsonProperty(value = "endTime") LocalDateTime endTime,
-      @JsonProperty(value = "lastHeartbeat") HeartbeatReport lastHeartbeat, @JsonProperty(value = "requestedGateCode") boolean requestedGateCode,
-      @JsonProperty(value = "requestedDockingSequence") boolean requestedDockingSequence, @JsonProperty(value = "reportedPinger") BeaconReport reportedPinger,
-      @JsonProperty(value = "uploadedImage") String uploadedImage, @JsonProperty(value = "reportedInterop") InteropReport reportedInterop) {
-    this(runSetup, events, startTime, endTime, lastHeartbeat, requestedGateCode, requestedDockingSequence, reportedPinger, uploadedImage, reportedInterop,
+      @JsonProperty(value = "lastHeartbeat") HeartbeatReport lastHeartbeat, @JsonProperty(value = "requestedCarouselCode") boolean requestedCarouselCode,
+      @JsonProperty(value = "uploadedImage") String uploadedImage) {
+    this(runSetup, events, startTime, endTime, lastHeartbeat, requestedCarouselCode, uploadedImage,
         new File("tmp/competition-log." + Math.random()), new EventBus());
   }
 
   @SuppressFBWarnings(value = "EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS", justification = "Crashing the server with an unchecked exception is the right thing to do here")
   public RunArchiver(RunSetup runSetup, @Nullable List<Event> events, LocalDateTime startTime, @Nullable LocalDateTime endTime,
-      @Nullable HeartbeatReport lastHeartbeat, boolean requestedGateCode, boolean requestedDockingSequence, @Nullable BeaconReport reportedPinger,
-      @Nullable String uploadedImage, @Nullable InteropReport reportedInterop, File f, EventBus bus) {
+      @Nullable HeartbeatReport lastHeartbeat, boolean requestedCarouselCode,
+      @Nullable String uploadedImage, File f, EventBus bus) {
     this.runSetup = Preconditions.checkNotNull(runSetup);
     this.startTime = Preconditions.checkNotNull(startTime);
     this.endTime = endTime;
     this.lastHeartbeat = lastHeartbeat;
-    this.requestedGateCode = requestedGateCode;
-    this.requestedDockingSequence = requestedDockingSequence;
-    this.reportedPinger = reportedPinger;
+    this.requestedCarouselCode = requestedCarouselCode;
     this.uploadedImage = uploadedImage;
-    this.reportedInterop = reportedInterop;
     this.bus = Preconditions.checkNotNull(bus, "bus cannot be null");
     if (events != null && !events.isEmpty()) {
       this.events.addAll(events);
@@ -174,56 +162,19 @@ public final class RunArchiver {
     }
   }
 
-  public boolean hasRequestedGateCode() {
-    lock.readLock().lock();
-    try {
-      return requestedGateCode;
-    } finally {
-      lock.readLock().unlock();
-    }
-  }
-
-  public void requestedGateCode() {
+  public void requestedCarouselCode() {
     lock.writeLock().lock();
     try {
-      this.requestedGateCode = true;
+      this.requestedCarouselCode = true;
     } finally {
       lock.writeLock().unlock();
     }
   }
-
-  public boolean hasRequestedDockingSequence() {
-    lock.readLock().lock();
-    try {
-      return requestedDockingSequence;
-    } finally {
-      lock.readLock().unlock();
-    }
-  }
-
-  public void requestedDockingSequence() {
+  
+  public boolean hasRequestedCarouselCode() {
     lock.writeLock().lock();
     try {
-      this.requestedDockingSequence = true;
-    } finally {
-      lock.writeLock().unlock();
-    }
-  }
-
-  public Optional<BeaconReport> getReportedPinger() {
-    lock.readLock().lock();
-    try {
-      return Optional.ofNullable(reportedPinger);
-    } finally {
-      lock.readLock().unlock();
-    }
-  }
-
-  public void reportPinger(BeaconReport report) {
-    Preconditions.checkNotNull(report, "The report cannot be null");
-    lock.writeLock().lock();
-    try {
-      this.reportedPinger = report;
+      return requestedCarouselCode;
     } finally {
       lock.writeLock().unlock();
     }
@@ -243,25 +194,6 @@ public final class RunArchiver {
     lock.writeLock().lock();
     try {
       this.uploadedImage = path;
-    } finally {
-      lock.writeLock().unlock();
-    }
-  }
-
-  public Optional<InteropReport> getReportedInterop() {
-    lock.readLock().lock();
-    try {
-      return Optional.ofNullable(reportedInterop);
-    } finally {
-      lock.readLock().unlock();
-    }
-  }
-
-  public void reportInterop(InteropReport report) {
-    Preconditions.checkNotNull(report, "The report cannot be null");
-    lock.writeLock().lock();
-    try {
-      this.reportedInterop = report;
     } finally {
       lock.writeLock().unlock();
     }

@@ -34,6 +34,7 @@ public class SentenceRegistryFactory {
     Field challenge = new EnumField("Challenge", Arrays.stream(Challenge.values()).map(c -> c.toString()).collect(Collectors.toSet()));
     Field latitude = new RegexField("Latitude", "\\-?[0-9]{1,2}\\.[0-9]{6,10}");
     Field longitude = new RegexField("Longitude", "\\-?[0-9]{1,3}\\.[0-9]{6,10}");
+    Field code = new EnumField("Code", ImmutableSet.of("12", "23", "34", "41"));
 
     List<SentenceDefinition> sentences = ImmutableList.of(SentenceDefinition.create("SV", "OBS", "Request Obstacle Avoidance code",
         ImmutableList.of(course, teamCode), "$SVOBS,courseA,AUVSI*5F"), SentenceDefinition.create("TD", "OBS", "Provide Obstacle Avoidance code",
@@ -50,7 +51,9 @@ public class SentenceRegistryFactory {
             ImmutableList.of(timestamp, status), "$TDHRT,20150306061030,true*4F"), SentenceDefinition.create("SV", "STR", "Request start of run",
             ImmutableList.of(course, teamCode), "$SVSTR,courseA,AUVSI*54"), SentenceDefinition.create("TD", "STR", "Response of start of run",
             ImmutableList.of(status), "$TDSTR,true*7F"), SentenceDefinition.create("SV", "END", "Request of end of run", ImmutableList.of(course, teamCode),
-            "$SVEND,courseA,AUVSI*4E"), SentenceDefinition.create("TD", "END", "Response of start of run", ImmutableList.of(status), "$TDEND,true*65"));
+            "$SVEND,courseA,AUVSI*4E"), SentenceDefinition.create("TD", "END", "Response of start of run", ImmutableList.of(status), "$TDEND,true*65"), SentenceDefinition.create("SV", "FOL",
+                "Request Follow the leader sequence", ImmutableList.of(course, teamCode), "$SVFOL,courseA,AUVSI*44"), SentenceDefinition.create("TD", "FOL",
+                    "Provide Automated Docking sequence", ImmutableList.of(timestamp, code), "$TDFOL,20170306061030,23*51"));
     return new SentenceRegistry(sentences);
   }
 }

@@ -121,7 +121,7 @@ public class App implements Runnable {
   }
 
   public static void main(String[] args) {
-    String srcPath = "mission2015-war/src/";
+    String srcPath = "src/";
     HashLoginService login = new HashLoginService("RoboBoat");
     login.setConfig(srcPath + "main/resources/realm.properties");
     App app = new App(9000, 9443, srcPath, login);

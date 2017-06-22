@@ -51,7 +51,7 @@ public class CompetitionManagerImpl extends MockCompetitionManager {
   private final AmazonSNSClient snsClient;
 
   public CompetitionManagerImpl(Competition competition, ObjectMapper om) {
-    super(competition, om, new File("/etc/roboboat2015-images/uploads/" + DateTimeFormatter.ofPattern("YYYYMMdd/").format(LocalDateTime.now())));
+    super(competition, om, new File("/etc/roboboat/roboboat2017-images/uploads/" + DateTimeFormatter.ofPattern("YYYYMMdd/").format(LocalDateTime.now())));
 
     // create a new SNS client and set endpoint
     snsClient = new AmazonSNSClient(new BasicAWSCredentials("AKIAJ5HBSR3KIJUT32YQ", "4wxHI+VjbhsjVnsDQ3/2YsDKXf2OdxTo6BWXDosQ"));
@@ -92,7 +92,7 @@ public class CompetitionManagerImpl extends MockCompetitionManager {
   }
 
   @Override
-  public UploadStatus uploadInteropImage(Course course, TeamCode teamCode, byte[] content) {
+  public UploadStatus uploadDockingImage(Course course, TeamCode teamCode, byte[] content) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
       throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode),
@@ -121,7 +121,7 @@ public class CompetitionManagerImpl extends MockCompetitionManager {
       LOG.warn("IOExcepton while uploading an image for team {} on course {}", teamCode, course, e);
     }
 
-    archive.addEvent(new StructuredEvent(course, teamCode, Challenge.interop, String.format("uploaded image (%s)", imageId)));
+    archive.addEvent(new StructuredEvent(course, teamCode, Challenge.docking, String.format("uploaded image (%s)", imageId)));
     archive.uploadedImage(imageId.toString());
     return new UploadStatus(imageId.toString());
   }

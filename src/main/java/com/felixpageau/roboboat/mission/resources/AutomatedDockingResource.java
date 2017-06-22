@@ -1,34 +1,47 @@
 package com.felixpageau.roboboat.mission.resources;
 
-import javax.ws.rs.GET;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+
 import com.felixpageau.roboboat.mission.server.CompetitionManager;
 import com.felixpageau.roboboat.mission.structures.Course;
-import com.felixpageau.roboboat.mission.structures.DockingSequence;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
+import com.felixpageau.roboboat.mission.structures.UploadStatus;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
+import com.google.common.io.ByteStreams;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
- * Obstacle Avoidance challenge
+ * Automated Docking challenge
  */
-@Path("/automatedDocking/{course}/{teamCode}")
+@Path("/docking")
 public class AutomatedDockingResource {
   private final CompetitionManager manager;
 
   public AutomatedDockingResource(CompetitionManager manager) {
     this.manager = Preconditions.checkNotNull(manager);
   }
-
-  @GET
+  
+  @SuppressFBWarnings(value = "JXI_UNDEFINED_PARAMETER_SOURCE_IN_ENDPOINT", justification = "fb-contribs lacks support for @FormDataParam")
+  @Path("/image/{course}/{teamCode}")
+  @POST
   @Produces({ MediaType.APPLICATION_JSON })
-  public DockingSequence getGateCode(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode) throws JsonProcessingException {
-    return manager.getDockingSequence(course, teamCode);
+  @Consumes({ MediaType.MULTIPART_FORM_DATA })
+  public UploadStatus uploadImage(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode,
+      @FormDataParam("file") InputStream fileInputStream, @FormDataParam("file") FormDataContentDisposition fileDetail) throws IOException {
+    return manager.uploadDockingImage(course, teamCode, ByteStreams.toByteArray(fileInputStream));
   }
 
   @Override

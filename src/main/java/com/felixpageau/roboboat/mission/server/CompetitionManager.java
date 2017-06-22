@@ -10,13 +10,11 @@ import javax.annotation.concurrent.ThreadSafe;
 import javax.ws.rs.core.Response;
 
 import com.felixpageau.roboboat.mission.WebApplicationExceptionWithContext;
-import com.felixpageau.roboboat.mission.structures.BeaconReport;
 import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.DisplayStatus;
 import com.felixpageau.roboboat.mission.structures.DockingSequence;
-import com.felixpageau.roboboat.mission.structures.GateCode;
 import com.felixpageau.roboboat.mission.structures.HeartbeatReport;
-import com.felixpageau.roboboat.mission.structures.InteropReport;
+import com.felixpageau.roboboat.mission.structures.LeaderSequence;
 import com.felixpageau.roboboat.mission.structures.ReportStatus;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
 import com.felixpageau.roboboat.mission.structures.UploadStatus;
@@ -35,22 +33,16 @@ public interface CompetitionManager {
   ReportStatus endRun(Course course, TeamCode teamCode);
 
   @Nonnull
-  GateCode getObstacleCourseCode(Course course, TeamCode teamCode);
-
-  @Nonnull
   DockingSequence getDockingSequence(Course course, TeamCode teamCode);
 
   @Nonnull
-  ReportStatus reportPinger(Course course, TeamCode teamCode, BeaconReport payload);
-
-  @Nonnull
-  ReportStatus reportInterop(Course course, TeamCode teamCode, InteropReport report);
+  LeaderSequence getLeaderSequence(Course course, TeamCode teamCode);
 
   @Nonnull
   Optional<byte[]> getUploadedImage(String imageId);
 
   @Nonnull
-  UploadStatus uploadInteropImage(Course course, TeamCode teamCode, byte[] content);
+  UploadStatus uploadDockingImage(Course course, TeamCode teamCode, byte[] content);
 
   @Nonnull
   ReportStatus reportHeartbeat(Course course, TeamCode teamCode, HeartbeatReport report);

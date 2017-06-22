@@ -10,38 +10,31 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 public class DockingBay {
-  private final Symbol symbol;
-  private final SymbolColor color;
+  private final Code code;
 
   @JsonCreator
-  public DockingBay(@JsonProperty(value = "symbol") Symbol symbol, @JsonProperty(value = "color") SymbolColor color) {
-    this.symbol = Preconditions.checkNotNull(symbol, "symbol cannot be null");
-    this.color = Preconditions.checkNotNull(color, "color cannot be null");
+  public DockingBay(@JsonProperty(value = "code") Code code) {
+    this.code = Preconditions.checkNotNull(code, "code cannot be null");
   }
 
   public static DockingBay generateRandomDockingBay() {
-    return new DockingBay(Symbol.values()[new SecureRandom().nextInt(Symbol.values().length)], SymbolColor.values()[new SecureRandom().nextInt(SymbolColor
-        .values().length)]);
+    return new DockingBay(Code.values()[new SecureRandom().nextInt(Code.values().length)]);
   }
 
-  public Symbol getSymbol() {
-    return symbol;
-  }
-
-  public SymbolColor getColor() {
-    return color;
+  public Code getCode() {
+    return code;
   }
 
   @JsonIgnore
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add("symbol", symbol).add("color", color).toString();
+    return MoreObjects.toStringHelper(this).add("code", code).toString();
   }
 
   @JsonIgnore
   @Override
   public int hashCode() {
-    return Objects.hashCode(symbol, color);
+    return Objects.hashCode(code);
   }
 
   @JsonIgnore
@@ -55,7 +48,7 @@ public class DockingBay {
     }
     if (obj instanceof DockingBay) {
       DockingBay other = (DockingBay) obj;
-      return Objects.equal(symbol, other.symbol) && Objects.equal(color, other.color);
+      return Objects.equal(code, other.code);
     }
     return false;
   }

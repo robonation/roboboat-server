@@ -1,34 +1,35 @@
 package com.felixpageau.roboboat.mission.resources;
 
+import java.io.IOException;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.felixpageau.roboboat.mission.server.CompetitionManager;
 import com.felixpageau.roboboat.mission.structures.Course;
-import com.felixpageau.roboboat.mission.structures.GateCode;
+import com.felixpageau.roboboat.mission.structures.LeaderSequence;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
 /**
- * Obstacle Avoidance challenge
+ * FollowLeader challenge
  */
-@Path("/obstacleAvoidance/{course}/{teamCode}")
-public class ObstacleAvoidanceResource {
+@Path("/followLeader/{course}/{teamCode}")
+public class FollowTheLeaderResource {
   private final CompetitionManager manager;
 
-  public ObstacleAvoidanceResource(CompetitionManager manager) {
+  public FollowTheLeaderResource(CompetitionManager manager) {
     this.manager = Preconditions.checkNotNull(manager);
   }
 
   @GET
   @Produces({ MediaType.APPLICATION_JSON })
-  public GateCode getGateCode(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode) throws JsonProcessingException {
-    return manager.getObstacleCourseCode(course, teamCode);
+  public LeaderSequence getLeaderCode(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode) throws IOException {
+    return manager.getLeaderSequence(course, teamCode);
   }
 
   @Override

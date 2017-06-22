@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -36,17 +35,14 @@ import com.felixpageau.roboboat.mission.server.RunArchiver;
 import com.felixpageau.roboboat.mission.server.RunSetup;
 import com.felixpageau.roboboat.mission.server.StructuredEvent;
 import com.felixpageau.roboboat.mission.server.TimeSlot;
-import com.felixpageau.roboboat.mission.structures.BeaconReport;
 import com.felixpageau.roboboat.mission.structures.Challenge;
 import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.DisplayReport;
 import com.felixpageau.roboboat.mission.structures.DisplayStatus;
 import com.felixpageau.roboboat.mission.structures.DockingSequence;
-import com.felixpageau.roboboat.mission.structures.GateCode;
 import com.felixpageau.roboboat.mission.structures.HeartbeatReport;
 import com.felixpageau.roboboat.mission.structures.ImageUploadDescriptor;
-import com.felixpageau.roboboat.mission.structures.InteropReport;
-import com.felixpageau.roboboat.mission.structures.Pinger;
+import com.felixpageau.roboboat.mission.structures.LeaderSequence;
 import com.felixpageau.roboboat.mission.structures.ReportStatus;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
 import com.felixpageau.roboboat.mission.structures.Timestamp;
@@ -54,7 +50,6 @@ import com.felixpageau.roboboat.mission.structures.UploadStatus;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.io.ByteStreams;
 
 /**
@@ -71,7 +66,7 @@ public class MockCompetitionManager implements CompetitionManager {
   protected final File basePath;
 
   public MockCompetitionManager(Competition competition, ObjectMapper om) {
-    this(competition, om, new File("/etc/roboboat2016-images/uploads/" + DateTimeFormatter.ofPattern("YYYYMMdd/").format(LocalDateTime.now())));
+    this(competition, om, new File("/etc/roboboat/roboboat2016-images/uploads/" + DateTimeFormatter.ofPattern("YYYYMMdd/").format(LocalDateTime.now())));
   }
 
   protected MockCompetitionManager(Competition competition, ObjectMapper om, final File basePath) {
@@ -131,23 +126,6 @@ public class MockCompetitionManager implements CompetitionManager {
   }
 
   @Override
-  public GateCode getObstacleCourseCode(Course course, TeamCode teamCode) {
-    RunArchiver archive = competition.getActiveRuns().get(course);
-    if (archive == null) {
-      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode),
-          400);
-    }
-    if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode,
-          course), 400);
-    }
-    GateCode code = archive.getRunSetup().getActiveGateCode();
-    archive.addEvent(new StructuredEvent(course, teamCode, Challenge.obstacles, String.format("request gatecode (%s)", code)));
-    archive.requestedGateCode();
-    return code;
-  }
-
-  @Override
   public DockingSequence getDockingSequence(Course course, TeamCode teamCode) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
@@ -160,12 +138,12 @@ public class MockCompetitionManager implements CompetitionManager {
     }
     DockingSequence sequence = archive.getRunSetup().getActiveDockingSequence();
     archive.addEvent(new StructuredEvent(course, teamCode, Challenge.docking, String.format("request bay (%s)", sequence)));
-    archive.requestedDockingSequence();
+    archive.requestedCarouselCode();
     return sequence;
   }
 
   @Override
-  public ReportStatus reportPinger(Course course, TeamCode teamCode, BeaconReport payload) {
+  public LeaderSequence getLeaderSequence(Course course, TeamCode teamCode) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
       throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode),
@@ -175,38 +153,15 @@ public class MockCompetitionManager implements CompetitionManager {
       throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode,
           course), 400);
     }
-    Set<Pinger> reportedPinger = ImmutableSet.of(new Pinger(payload.getBuoyColor1()), new Pinger(payload.getBuoyColor2()));
-    Set<Pinger> activePingers = archive.getRunSetup().getActivePingers();
-    boolean success = true;
-    for (Pinger pinger : reportedPinger) {
-      success &= activePingers.contains(pinger);
-    }
-    archive.addEvent(new StructuredEvent(course, teamCode, Challenge.pinger, String.format("reported pingers (%s) -> %s", payload, success ? "success"
-        : "incorrect")));
-    archive.reportPinger(payload);
-    return new ReportStatus(success);
+    
+    LeaderSequence sequence = archive.getRunSetup().getActiveLeaderSequence();
+    archive.addEvent(new StructuredEvent(course, teamCode, Challenge.docking, String.format("request bay (%s)", sequence)));
+    archive.requestedCarouselCode();
+    return sequence;
   }
 
   @Override
-  public ReportStatus reportInterop(Course course, TeamCode teamCode, InteropReport report) {
-    RunArchiver archive = competition.getActiveRuns().get(course);
-    if (archive == null) {
-      throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode),
-          400);
-    }
-    if (!archive.getRunSetup().getActiveTeam().equals(teamCode)) {
-      throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode,
-          course), 400);
-    }
-    boolean success = report.getShape() == archive.getRunSetup().getActiveInteropShape();
-    archive.addEvent(new StructuredEvent(course, teamCode, Challenge.interop, String.format("reported shape (%s) -> %s", report, success ? "success"
-        : "incorrect")));
-    archive.reportInterop(report);
-    return new ReportStatus(success);
-  }
-
-  @Override
-  public UploadStatus uploadInteropImage(Course course, TeamCode teamCode, byte[] content) {
+  public UploadStatus uploadDockingImage(Course course, TeamCode teamCode, byte[] content) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
       throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode),
@@ -234,7 +189,7 @@ public class MockCompetitionManager implements CompetitionManager {
       LOG.warn("IOExcepton while uploading an image for team {} on course {}", teamCode, course, e);
     }
 
-    archive.addEvent(new StructuredEvent(course, teamCode, Challenge.interop, String.format("uploaded image (%s)", imageId)));
+    archive.addEvent(new StructuredEvent(course, teamCode, Challenge.docking, String.format("uploaded image (%s)", imageId)));
     archive.uploadedImage(imageId.toString());
     return new UploadStatus(imageId.toString());
   }

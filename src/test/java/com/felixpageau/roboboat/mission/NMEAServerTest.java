@@ -76,18 +76,11 @@ public class NMEAServerTest {
       assertTrue(line.contains("ERROR"));
 
       // Heartbeat (obstacles)
-      w.write("$SVHRT,courseA,AUVSI,20150306061030,obstacles,40.689249,-74.044500*1D\n");
+      w.write("$SVHRT,courseA,AUVSI,20150306061030,follow,40.689249,-74.044500*7E\n");
       w.flush();
       line = readLine(r);
       assertTrue(line.contains("TDHRT"));
       assertTrue(line.contains("true"));
-
-      // Obstacle
-      w.write("$SVOBS,courseA,AUVSI*5F\n");
-      w.flush();
-      line = readLine(r);
-      assertTrue(line.contains("TDOBS"));
-      assertTrue(line.matches(".*[1-3]\\,[X-Z]\\*.*"));
 
       // Heartbeat (dock)
       w.write("$SVHRT,courseA,AUVSI,20150306061030,docking,40.689249,-74.044500*0C\n");
@@ -97,39 +90,18 @@ public class NMEAServerTest {
       assertTrue(line.contains("true"));
 
       // Dock
-      w.write("$SVDOC,courseA,AUVSI*49\n");
+      w.write("$SVFOL,courseA,AUVSI*44\n");
       w.flush();
       line = readLine(r);
-      assertTrue(line.contains("TDDOC"));
-      assertTrue(line.matches(".*(\\,(circle|triangle|cruciform)\\,(yellow|blue|black|green|red)){2}.*"));
+      assertTrue(line.contains("TDFOL"));
+      assertTrue(line.matches(".*[1-4]{2}.*"));
 
-      // Heartbeat (pinger)
-      w.write("$SVHRT,courseA,AUVSI,20150306061030,pinger,40.689249,-74.044500*68\n");
+      // Heartbeat (path)
+      w.write("$SVHRT,courseA,AUVSI,20150306061030,path,40.689249,-74.044500*62\n");
       w.flush();
       line = readLine(r);
       assertTrue(line.contains("TDHRT"));
       assertTrue(line.contains("true"));
-
-      // Pinger
-      w.write("$SVPIN,courseA,AUVSI,red,24,black,36*41\n");
-      w.flush();
-      line = readLine(r);
-      assertTrue(line.contains("TDPIN"));
-      assertTrue(line.matches(".*(true|false).*"));
-
-      // Heartbeat (interop)
-      w.write("$SVHRT,courseA,AUVSI,20150306061030,interop,40.689249,-74.044500*14\n");
-      w.flush();
-      line = readLine(r);
-      assertTrue(line.contains("TDHRT"));
-      assertTrue(line.contains("true"));
-
-      // Dock
-      w.write("$SVUAV,courseA,AUVSI,eight,a4aa8224-07f2-4b57-a03a-c8887c2505c7*30\n");
-      w.flush();
-      line = readLine(r);
-      assertTrue(line.contains("TDUAV"));
-      assertTrue(line.matches(".*(true|false).*"));
 
       // Heartbeat (return)
       w.write("$SVHRT,courseA,AUVSI,20150306061030,return,40.689249,-74.044500*65\n");
