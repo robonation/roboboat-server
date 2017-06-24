@@ -68,6 +68,7 @@ public class Competition {
   private final Map<Course, RunArchiver> activeRuns = new HashMap<>();
   protected final Map<TimeSlot, TeamCode> schedule = new HashMap<>();
   private final List<TeamCode> teams;
+  private final boolean activateCarousel;
   private final boolean activatePinger;
   private final boolean activateLCD;
   private final Executor exec = Executors.newCachedThreadPool();
@@ -77,13 +78,14 @@ public class Competition {
 
   @SuppressFBWarnings(value = { "EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS", "SIC_INNER_SHOULD_BE_STATIC_ANON" })
   public Competition(String name, List<CompetitionDay> competitionDays, List<TeamCode> teams, Map<Course, CourseLayout> layoutMap, boolean activatePinger,
-      boolean activateLCD, ObjectMapper om) {
+      boolean activateLCD, boolean activateCarousel, ObjectMapper om) {
     this.name = Preconditions.checkNotNull(name, "name cannot be null");
     this.competitionDays = Preconditions.checkNotNull(competitionDays, "competitionDays cannot be null");
     this.layoutMap = Preconditions.checkNotNull(layoutMap, "layoutMap cannot be null");
     this.teams = ImmutableList.copyOf(Preconditions.checkNotNull(teams, "The provided team list cannot be null"));
     this.activatePinger = activatePinger;
     this.activateLCD = activateLCD;
+    this.activateCarousel = activateCarousel;
     this.om = Preconditions.checkNotNull(om);
     this.bus.register(new EventBusChangeRecorder());
 
@@ -252,9 +254,23 @@ public class Competition {
 
     if (activateLCD && slot.getCourse() != Course.openTest) {
       exec.execute(new ActivateLCD(layout, newSetup));
-      LOG.error("Activated pingers");
+      LOG.info("Activated LCD");
     } else {
-      LOG.error("Don't activate pingers");
+      LOG.info("Don't activate LCD");
+    }
+    
+    if (activateCarousel && slot.getCourse() != Course.openTest) {
+      exec.execute(new ActivateCarousel(layout, true));
+      LOG.info("Activated Carousel");
+    } else {
+      LOG.info("Don't activate Carousel");
+    }
+
+    if (activatePinger && slot.getCourse() != Course.openTest) {
+      exec.execute(new ActivatePinger(layout, newSetup));
+      LOG.info("Activated Pinger");
+    } else {
+      LOG.info("Don't activate Pinger");
     }
 
     return newSetup;
@@ -276,24 +292,24 @@ public class Competition {
       for (int j = 0; j < 10 && !activated; j++) {
         try (CloseableHttpClient client = HttpClients.createDefault()) {
           if (!enabled) {
-            CloseableHttpResponse resp = client.execute(new HttpHost(layout.getSevenSegControlServer().getHost(), layout.getSevenSegControlServer().getPort()),
-                new HttpGet(layout.getSevenSegControlServer().toString() + "/clear"));
+            CloseableHttpResponse resp = client.execute(new HttpHost(layout.getCarouselControlServer().getHost(), layout.getCarouselControlServer().getPort()),
+                new HttpGet(layout.getCarouselControlServer().toString() + "/clear"));
             LOG.info(String.format("TURN OFF LCD: %d %s", resp.getStatusLine().getStatusCode(),
                 CharStreams.toString(new InputStreamReader(resp.getEntity().getContent(), Charsets.UTF_8))));
             activated = true;
           } else {
             String value = "1";
-            CloseableHttpResponse resp = client.execute(new HttpHost(layout.getSevenSegControlServer().getHost(), layout.getSevenSegControlServer().getPort()),
-                new HttpGet(layout.getSevenSegControlServer().toString() + "/activate/" + value.toLowerCase()));
-            LOG.error("Activation URL: " + layout.getSevenSegControlServer().toString() + "/activate/" + value.toLowerCase());
+            CloseableHttpResponse resp = client.execute(new HttpHost(layout.getCarouselControlServer().getHost(), layout.getCarouselControlServer().getPort()),
+                new HttpGet(layout.getCarouselControlServer().toString() + "/activate/" + value.toLowerCase()));
+            LOG.error("Activation URL: " + layout.getCarouselControlServer().toString() + "/activate/" + value.toLowerCase());
             if (resp.getStatusLine().getStatusCode() == 200) {
               activated = true;
             }
           }
         } catch (UnknownHostException e) {
-          LOG.error(String.format("Failed to find lcd server (%s)", layout.getSevenSegControlServer().toString()), e);
+          LOG.error(String.format("Failed to find carousel server (%s)", layout.getCarouselControlServer().toString()), e);
         } catch (IOException e) {
-          LOG.error(String.format("Comm failed with lcd server (%s)", layout.getSevenSegControlServer().toString()), e);
+          LOG.error(String.format("Comm failed with carousel server (%s)", layout.getCarouselControlServer().toString()), e);
         }
       }
     }
@@ -316,8 +332,13 @@ public class Competition {
         try (Socket s = new Socket(layout.getPingerControlServer().getHost(), layout.getPingerControlServer().getPort());
             Writer w = new OutputStreamWriter(s.getOutputStream(), App.APP_CHARSET);
             BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream(), App.APP_CHARSET))) {
+          
+          LOG.error("*** Pinger value in setup: " + newSetup);
+          LOG.error("*** Pinger value in docking sequence: " + newSetup.getActiveDockingSequence());
+          LOG.error("*** Pinger value in active pinger: " + newSetup.getActiveDockingSequence().getActivePinger());
+          
           if (com.felixpageau.roboboat.mission.structures.Code.none.equals(newSetup.getActiveDockingSequence().getActivePinger())) {
-            String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), ImmutableList.of(0, 0)));
+            String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), 0));
             w.write(pingerActivationMessage);
             System.out.println("TURN OFF PINGER: " + pingerActivationMessage);
             w.flush();
@@ -326,24 +347,13 @@ public class Competition {
             System.out.println(String.format("** Available pingers: %s **", Arrays.stream(Code.values()).map(x -> x.getValue()).collect(Collectors.joining())));
             System.out.println(String.format("** Active pingers: %s **", newSetup.getActiveDockingSequence().getActivePinger().getValue()));
             int activate = Integer.parseInt(newSetup.getActiveDockingSequence().getActivePinger().getValue());
-            List<Integer> pingerFieldValue;
-            switch (activate) {
-              case 0: pingerFieldValue = ImmutableList.of(0, 0); break;
-              case 1: pingerFieldValue = ImmutableList.of(1, 0); break;
-              case 2: pingerFieldValue = ImmutableList.of(2, 0); break;
-              case 3: pingerFieldValue = ImmutableList.of(0, 1); break;
-              default: pingerFieldValue = ImmutableList.of(0, 0); break;
-            }
-            if (pingerFieldValue.size() == 2) {
-              System.out.println("**** Activation values: " + pingerFieldValue);
-              String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), pingerFieldValue));
-              w.write(pingerActivationMessage);
-              System.out.println(pingerActivationMessage);
-              w.flush();
-              activated = true;
-            } else {
-              LOG.error("This is so wrong to not have two pinger fields");
-            }
+
+            System.out.println("**** Activation values: " + activate);
+            String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), activate));
+            w.write(pingerActivationMessage);
+            System.out.println(pingerActivationMessage);
+            w.flush();
+            activated = true;
           }
           System.out.println(r.readLine());
           System.out.println(r.readLine());
@@ -394,11 +404,17 @@ public class Competition {
       }
     }
   }
-
+ 
   public synchronized void endRun(Course course, TeamCode teamCode) {
     RunArchiver ra = activeRuns.get(course);
     if (ra != null) {
       ra.endRun(new StructuredEvent(course, teamCode, Challenge.none, "End run"));
+      if (activateCarousel && Course.openTest != course) {
+        exec.execute(new ActivateCarousel(layoutMap.get(course), false));
+      }
+      if (activatePinger && Course.openTest != course) {
+        exec.execute(new ActivateLCD(layoutMap.get(course), RunSetup.NO_RUN));
+      }
       if (activatePinger && Course.openTest != course) {
         exec.execute(new ActivatePinger(layoutMap.get(course), RunSetup.NO_RUN));
       }

@@ -44,7 +44,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 public class MissionResourceConfig extends CompetitionResourceConfig {
   private static final Logger LOG = LoggerFactory.getLogger(AdminResourceConfig.class);
   public static final JacksonObjectMapperProvider OM_PROVIDER = new JacksonObjectMapperProvider();
-  public static final String COMPETITION_NAME = "RoboBoat 2016";
+  public static final String COMPETITION_NAME = "RoboBoat 2017";
   public static final List<CompetitionDay> COMPETITION_DAYS = ImmutableList.<CompetitionDay> of(new CompetitionDay(LocalDateTime.of(2016, 7, 5, 8, 0),
       LocalDateTime.of(2016, 7, 5, 18, 0)), // Tu
       new CompetitionDay(LocalDateTime.of(2016, 7, 6, 8, 0), LocalDateTime.of(2016, 7, 6, 18, 0)), // We
@@ -73,7 +73,7 @@ public class MissionResourceConfig extends CompetitionResourceConfig {
   }
 
   public MissionResourceConfig() throws URISyntaxException {
-    this(new MockCompetitionManager(new Competition(COMPETITION_NAME, COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, false, false, OM_PROVIDER.getObjectMapper()),
+    this(new MockCompetitionManager(new Competition(COMPETITION_NAME, COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, false, false, false, OM_PROVIDER.getObjectMapper()),
         OM_PROVIDER.getObjectMapper()));
   }
 
@@ -91,8 +91,6 @@ public class MissionResourceConfig extends CompetitionResourceConfig {
 
     this.nmeaServer = new NMEAServer(competitionManager, port.get(), createNMEASentenceRegistry(), true);
     this.nmeaServer.start();
-    
-    throw new RuntimeException("not supposed to be used");
   }
 
   @Override

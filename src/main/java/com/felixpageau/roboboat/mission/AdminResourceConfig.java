@@ -46,7 +46,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 public class AdminResourceConfig extends CompetitionResourceConfig {
   private static final Logger LOG = LoggerFactory.getLogger(AdminResourceConfig.class);
   private static final JacksonObjectMapperProvider OM_PROVIDER = new JacksonObjectMapperProvider();
-  private static final String COMPETITION_NAME = "RoboBoat 2016";
+  private static final String COMPETITION_NAME = "RoboBoat 2017";
   private static final List<CompetitionDay> COMPETITION_DAYS = ImmutableList.<CompetitionDay> of(new CompetitionDay(LocalDateTime.of(2016, 7, 5, 8, 0),
       LocalDateTime.of(2016, 7, 5, 18, 0)), // Tu
       new CompetitionDay(LocalDateTime.of(2016, 7, 6, 8, 0), LocalDateTime.of(2016, 7, 6, 18, 0)), // We
@@ -74,7 +74,7 @@ public class AdminResourceConfig extends CompetitionResourceConfig {
   }
 
   public AdminResourceConfig() throws URISyntaxException {
-    this(new CompetitionManagerImpl(new Competition(COMPETITION_NAME, COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, true, true, OM_PROVIDER.getObjectMapper()),
+    this(new CompetitionManagerImpl(new Competition(COMPETITION_NAME, COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, true, true, true, OM_PROVIDER.getObjectMapper()),
         OM_PROVIDER.getObjectMapper()));
   }
 

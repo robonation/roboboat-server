@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -13,7 +14,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 public enum LeaderSequence {
-   v12("12"), v23("23"), v34("34"), v41("41");
+   none("00"), v12("12"), v23("23"), v34("34"), v41("41");
   private static final Map<String, LeaderSequence> lookup = new HashMap<>();
   private final String value;
 
@@ -29,7 +30,7 @@ public enum LeaderSequence {
 
   @JsonIgnore
   public static LeaderSequence generateRandomLeaderSequence() {
-    List<LeaderSequence> sequences = ImmutableList.copyOf(lookup.values());
+    List<LeaderSequence> sequences = ImmutableList.copyOf(lookup.values().stream().filter(x -> x != LeaderSequence.none).collect(Collectors.toList()));
     return sequences.get(new SecureRandom().nextInt(sequences.size()));
   }
 

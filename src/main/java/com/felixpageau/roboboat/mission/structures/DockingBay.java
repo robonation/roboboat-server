@@ -1,6 +1,9 @@
 package com.felixpageau.roboboat.mission.structures;
 
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -8,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 
 public class DockingBay {
   private final Code code;
@@ -18,7 +22,8 @@ public class DockingBay {
   }
 
   public static DockingBay generateRandomDockingBay() {
-    return new DockingBay(Code.values()[new SecureRandom().nextInt(Code.values().length)]);
+    List<Code> sequences = ImmutableList.copyOf(Arrays.stream(Code.values()).filter(x -> x != Code.none).collect(Collectors.toList()));
+    return new DockingBay(sequences.get(new SecureRandom().nextInt(sequences.size())));
   }
 
   public Code getCode() {

@@ -1,6 +1,7 @@
 package com.felixpageau.roboboat.mission;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -120,7 +121,7 @@ public class JSONServerTest {
       DockingSequence ds = mapper.readValue(value, DockingSequence.class);
       assertNotNull(ds);
       assertNotNull(ds.getDockingBaySequence());
-      assertEquals(2, ds.getDockingBaySequence().size());
+      assertFalse("Invalid dockingSequence with value: '"+ds.getValue()+"'", "00".equals(ds.getValue()));
       resp.close();
 
       // Heartbeat (find)

@@ -1,9 +1,5 @@
 package com.felixpageau.roboboat.mission.server;
 
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
@@ -12,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.felixpageau.roboboat.mission.structures.Course;
-import com.felixpageau.roboboat.mission.structures.DockingBay;
 import com.felixpageau.roboboat.mission.structures.DockingSequence;
 import com.felixpageau.roboboat.mission.structures.LeaderSequence;
 import com.felixpageau.roboboat.mission.structures.Run;
@@ -21,7 +16,6 @@ import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 
 /**
  * Setup of a {@link Run}
@@ -32,7 +26,7 @@ import com.google.common.collect.ImmutableList;
 @Immutable
 @ReturnValuesAreNonNullByDefault
 public class RunSetup {
-  public static final RunSetup NO_RUN = new RunSetup("", Course.openTest, new TeamCode("NONE"), LeaderSequence.generateRandomLeaderSequence(), DockingSequence.generateRandomDockingSequence());
+  public static final RunSetup NO_RUN = new RunSetup("", Course.openTest, new TeamCode("NONE"), LeaderSequence.none, DockingSequence.NONE);
   private final String runId;
   private final TeamCode activeTeam;
   private final Course course;
@@ -51,10 +45,7 @@ public class RunSetup {
   }
 
   public static RunSetup generateRandomSetup(CourseLayout courseLayout, TeamCode teamCode, String runId) {
-    List<DockingBay> availableBays = new ArrayList<>(courseLayout.getDockingBays());
-    List<DockingBay> bays = ImmutableList.of(availableBays.remove(new SecureRandom().nextInt(availableBays.size())),
-        availableBays.remove(new SecureRandom().nextInt(availableBays.size())));
-    return new RunSetup(runId, courseLayout.getCourse(), teamCode, LeaderSequence.generateRandomLeaderSequence(), new DockingSequence(bays));
+    return new RunSetup(runId, courseLayout.getCourse(), teamCode, LeaderSequence.generateRandomLeaderSequence(), DockingSequence.generateRandomDockingSequence());
   }
 
   /**

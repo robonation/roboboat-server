@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
  *
  */
 public class DockingSequence {
+  public static DockingSequence NONE = new DockingSequence("00");
   private final List<DockingBay> dockingBaySequence;
 
   public DockingSequence(@JsonProperty(value = "dockingBaySequence") List<DockingBay> dockingBaySequence) {
@@ -30,6 +31,7 @@ public class DockingSequence {
   public DockingSequence(String sequence) {
     Preconditions.checkNotNull(sequence);
     switch (sequence) {
+    case "00": dockingBaySequence = ImmutableList.of(new DockingBay(Code.none), new DockingBay(Code.none)); break;
     case "11": dockingBaySequence = ImmutableList.of(new DockingBay(Code.v1), new DockingBay(Code.v1)); break;
     case "12": dockingBaySequence = ImmutableList.of(new DockingBay(Code.v1), new DockingBay(Code.v2)); break;
     case "13": dockingBaySequence = ImmutableList.of(new DockingBay(Code.v1), new DockingBay(Code.v3)); break;

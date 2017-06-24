@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,8 +29,8 @@ public enum Code {
   }
 
   @JsonIgnore
-  public static Code generateRandomLeaderSequence() {
-    List<Code> sequences = ImmutableList.copyOf(lookup.values());
+  public static Code generateCodeSequence() {
+    List<Code> sequences = ImmutableList.copyOf(lookup.values().stream().filter(x -> x != Code.none).collect(Collectors.toList()));
     return sequences.get(new SecureRandom().nextInt(sequences.size()));
   }
 

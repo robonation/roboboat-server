@@ -104,7 +104,7 @@ public final class AdminResource {
   @GET
   @Produces({ MediaType.APPLICATION_JSON })
   public DisplayStatus display() {
-    return competitionManager.getDisplayStatus(Arrays.asList(Course.courseA, Course.courseB));
+    return competitionManager.getDisplayStatus(Arrays.asList(Course.courseA, Course.courseB, Course.courseC));
   }
 
   @Path("/display/image/{imageId}")

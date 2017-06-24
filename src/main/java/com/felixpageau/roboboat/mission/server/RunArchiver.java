@@ -87,7 +87,7 @@ public final class RunArchiver {
       this.events.addAll(events);
     }
     this.f = Preconditions.checkNotNull(f);
-    LOG.error("RunArchiver.f = {}", f.getPath());
+    LOG.info("RunArchiver.f = {}", f.getPath());
     if (!f.exists()) {
       try {
         if (!f.getParentFile().mkdirs() && !f.createNewFile()) {

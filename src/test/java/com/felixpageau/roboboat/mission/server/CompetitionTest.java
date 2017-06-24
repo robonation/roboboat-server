@@ -22,7 +22,7 @@ public class CompetitionTest {
   public void testStartNewRun_sequential() {
     TeamCode teamCode = new TeamCode("AUVSI");
     Course course = Course.courseA;
-    Competition competition = new Competition(COMPETITION_NAME, COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, false, false, OM_PROVIDER.getObjectMapper());
+    Competition competition = new Competition(COMPETITION_NAME, COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, false, false, false, OM_PROVIDER.getObjectMapper());
     RunSetup rs = competition.startNewRun(competition.findCurrentTimeSlot(course), teamCode);
     assertEquals("1", rs.getRunId().replaceFirst(".*-", ""));
     competition.endRun(course, teamCode);
@@ -40,7 +40,7 @@ public class CompetitionTest {
   public void testStartNewRun_newTeam() {
     TeamCode teamCode = new TeamCode("AUVSI");
     Course course = Course.courseA;
-    Competition competition = new Competition(COMPETITION_NAME, COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, false, false, OM_PROVIDER.getObjectMapper());
+    Competition competition = new Competition(COMPETITION_NAME, COMPETITION_DAYS, TEAMS, COURSE_LAYOUT_MAP, false, false, false, OM_PROVIDER.getObjectMapper());
     RunSetup rs = competition.startNewRun(competition.findCurrentTimeSlot(course), teamCode);
     assertEquals("1", rs.getRunId().replaceFirst(".*-", ""));
     competition.endRun(course, teamCode);
@@ -69,7 +69,7 @@ public class CompetitionTest {
     List<CompetitionDay> days = ImmutableList.<CompetitionDay> of(new CompetitionDay(LocalDateTime.now(), LocalDateTime.now().plusSeconds(2)));
     TeamCode teamCode = new TeamCode("AUVSI");
     Course course = Course.courseA;
-    Competition competition = new Competition(COMPETITION_NAME, days, TEAMS, COURSE_LAYOUT_MAP, false, false, OM_PROVIDER.getObjectMapper());
+    Competition competition = new Competition(COMPETITION_NAME, days, TEAMS, COURSE_LAYOUT_MAP, false, false, false, OM_PROVIDER.getObjectMapper());
     competition.schedule.clear();
     competition.schedule.put(new TimeSlot(Course.courseB, LocalDateTime.now().minusSeconds(1), LocalDateTime.now().plusSeconds(2)), null);
     assertEquals(1, competition.schedule.size());
