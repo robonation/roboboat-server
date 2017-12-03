@@ -2,26 +2,36 @@ package com.felixpageau.roboboat.mission.structures;
 
 import java.security.SecureRandom;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.felixpageau.roboboat.mission.utils.GuavaCollectors;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
+/**
+ * Defines the longitude of a GPS coordinate
+ */
+@ReturnValuesAreNonNullByDefault
+@ParametersAreNonnullByDefault
+@ThreadSafe
+@Immutable
 public enum LeaderSequence {
    none("00"), v12("12"), v23("23"), v34("34"), v41("41");
-  private static final Map<String, LeaderSequence> lookup = new HashMap<>();
+  private static final Map<String, LeaderSequence> lookup;
   private final String value;
 
   static {
-    for (LeaderSequence s : EnumSet.allOf(LeaderSequence.class)) {
-        lookup.put(s.getValue(), s);
-    }
+    lookup = EnumSet.allOf(LeaderSequence.class).stream().collect(GuavaCollectors.immutableMap(l -> l.getValue()));
   }
 
   private LeaderSequence(String value) {
@@ -51,5 +61,16 @@ public enum LeaderSequence {
   @JsonValue
   public String getValue() {
     return value;
+  }
+  
+  public static class Blah {
+    private final String b;
+    public Blah(String b) {
+      this.b = b;
+    }
+    
+    public String getB() {
+      return b;
+    }
   }
 }

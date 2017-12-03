@@ -1,17 +1,30 @@
 package com.felixpageau.roboboat.mission.structures;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Floats;
 
+/**
+ * Defines a position based on GPS coordinates
+ */
+@ReturnValuesAreNonNullByDefault
+@ParametersAreNonnullByDefault
+@ThreadSafe
+@Immutable
 public class Position {
   public static final Position FOUNDERS = new Position(Datum.WGS84, new Latitude(36.8020641F), new Longitude(-76.1912658F));
   public static final Position FOUNTAIN = new Position(Datum.WGS84, new Latitude(36.803219F), new Longitude(-76.1933718F));
   public static final Position DOCK = new Position(Datum.WGS84, new Latitude(36.8017522F), new Longitude(-76.1908076F));
+
   private final Datum datum;
   private final Longitude longitude;
   private final Latitude latitude;

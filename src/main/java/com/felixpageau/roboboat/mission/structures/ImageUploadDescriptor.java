@@ -8,9 +8,14 @@ import javax.annotation.concurrent.ThreadSafe;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
+/**
+ * Defines the format of an image upload
+ */
+@ReturnValuesAreNonNullByDefault
 @ThreadSafe
 @Immutable
 @ParametersAreNonnullByDefault

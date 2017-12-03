@@ -4,18 +4,7 @@ import com.felixpageau.roboboat.mission.structures.Course;
 
 public class NMEAUtils {
   public static String formatPingerNMEAmessage(Course course, int pingerCode) {
-    return String.format("RXPNC,%s,%d", getCourseCode(course), pingerCode);
-  }
-
-  public static String getCourseCode(Course course) {
-    switch (course) {
-    case courseA:
-      return "A";
-    case courseB:
-      return "B";
-    default:
-      return "C";
-    }
+    return String.format("RXPNC,%s,%d", course.name().replaceFirst("course", ""), pingerCode);
   }
 
   public static String formatNMEAmessage(String message) {

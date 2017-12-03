@@ -7,12 +7,12 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import javax.annotation.concurrent.Immutable;
 import javax.annotation.concurrent.ThreadSafe;
 
 import com.felixpageau.roboboat.mission.server.Event;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
  */
 @ThreadSafe
 @ParametersAreNonnullByDefault
+@ReturnValuesAreNonNullByDefault
 @Immutable
 public class Run {
   private final LocalDateTime start;
@@ -39,17 +40,14 @@ public class Run {
     this.runId = runId;
   }
 
-  @Nonnull
   public List<Event> getEvents() {
     return events;
   }
 
-  @Nonnull
   public LocalDateTime getStart() {
     return start;
   }
 
-  @Nonnull
   public TeamCode getTeam() {
     return team;
   }
@@ -58,7 +56,6 @@ public class Run {
     return timestamp;
   }
 
-  @Nonnull
   public String getRunId() {
     return runId;
   }
@@ -70,9 +67,12 @@ public class Run {
 
   @Override
   public boolean equals(Object obj) {
-    if (obj == this) return true;
-    if (obj == null) return false;
-    if (!(obj instanceof Run)) return false;
+    if (obj == this)
+      return true;
+    if (obj == null)
+      return false;
+    if (!(obj instanceof Run))
+      return false;
     Run other = (Run) obj;
     return Objects.equal(start, other.start) && Objects.equal(team, other.team) && Objects.equal(events, other.events);
   }

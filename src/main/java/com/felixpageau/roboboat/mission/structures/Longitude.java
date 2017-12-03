@@ -1,11 +1,23 @@
 package com.felixpageau.roboboat.mission.structures;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
+/**
+ * Defines the longitude of a GPS coordinate
+ */
+@ReturnValuesAreNonNullByDefault
+@ParametersAreNonnullByDefault
+@ThreadSafe
+@Immutable
 public class Longitude {
   private final float value;
 

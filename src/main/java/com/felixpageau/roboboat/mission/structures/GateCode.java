@@ -1,15 +1,28 @@
 package com.felixpageau.roboboat.mission.structures;
 
+import java.security.SecureRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
+/**
+ * Defines a GateCode to use in navigation tasks
+ */
+@ReturnValuesAreNonNullByDefault
+@ParametersAreNonnullByDefault
+@ThreadSafe
+@Immutable
 public class GateCode {
   private static final Pattern CODE_REGEX = Pattern.compile("^\\(([1-3]{1}),([X-Z]{1})\\)$");
   private final int entrance;
@@ -31,8 +44,9 @@ public class GateCode {
   }
 
   public static GateCode generateRandomGateCode() {
-    int entrance = (int) Math.round(Math.random() * 3f + 0.5f);
-    String exit = Character.toString((char) (Math.round(Math.random() * 3f + 0.5f) + 87));
+    
+    int entrance = new SecureRandom().nextInt(3)+1;
+    String exit = Character.toString((char) (new SecureRandom().nextInt(3)+1 + 87));
     return new GateCode(entrance, exit);
   }
 

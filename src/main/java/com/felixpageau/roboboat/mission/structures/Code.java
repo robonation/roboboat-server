@@ -2,26 +2,34 @@ package com.felixpageau.roboboat.mission.structures;
 
 import java.security.SecureRandom;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.felixpageau.roboboat.mission.utils.GuavaCollectors;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 
+/**
+ * Enum of valid code
+ */
+@ReturnValuesAreNonNullByDefault
+@ParametersAreNonnullByDefault
+@ThreadSafe
+@Immutable
 public enum Code {
   none("0"), v1("1"), v2("2"), v3("3");
-  private static final Map<String, Code> lookup = new HashMap<>();
+  private static final Map<String, Code> lookup;
   private final String value;
 
   static {
-    for (Code s : EnumSet.allOf(Code.class)) {
-        lookup.put(s.getValue(), s);
-    }
+    lookup = EnumSet.allOf(Code.class).stream().collect(GuavaCollectors.immutableMap(l -> l.getValue()));
   }
 
   private Code(String value) {
@@ -30,13 +38,13 @@ public enum Code {
 
   @JsonIgnore
   public static Code generateCodeSequence() {
-    List<Code> sequences = ImmutableList.copyOf(lookup.values().stream().filter(x -> x != Code.none).collect(Collectors.toList()));
+    List<Code> sequences = lookup.values().stream().filter(x -> x != Code.none).collect(GuavaCollectors.immutableList());
     return sequences.get(new SecureRandom().nextInt(sequences.size()));
   }
 
   @JsonIgnore
   public static Code get(char code) {
-    return lookup.get(Character.toUpperCase(code));
+    return lookup.get(Character.toString(Character.toUpperCase(code)));
   }
 
   @JsonCreator

@@ -2,10 +2,22 @@ package com.felixpageau.roboboat.mission.structures;
 
 import java.util.Locale;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.Preconditions;
 
+/**
+ * Enum of valid challenges
+ */
+@ReturnValuesAreNonNullByDefault
+@ParametersAreNonnullByDefault
+@ThreadSafe
+@Immutable
 public enum Challenge {
   none, gates, speed, docking, path, follow, return_to_dock;
 

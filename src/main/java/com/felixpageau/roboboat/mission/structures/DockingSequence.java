@@ -6,21 +6,29 @@ package com.felixpageau.roboboat.mission.structures;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 
 /**
- * @author felixpageau
- *
+ * Represent a docking sequence (either completed or to perform)
  */
+@ReturnValuesAreNonNullByDefault
+@ParametersAreNonnullByDefault
+@ThreadSafe
+@Immutable
 public class DockingSequence {
-  public static DockingSequence NONE = new DockingSequence("00");
+  public static final DockingSequence NONE = new DockingSequence("00");
   private final List<DockingBay> dockingBaySequence;
 
   public DockingSequence(@JsonProperty(value = "dockingBaySequence") List<DockingBay> dockingBaySequence) {

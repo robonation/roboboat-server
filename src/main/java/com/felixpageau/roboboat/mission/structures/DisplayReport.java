@@ -1,8 +1,5 @@
 package com.felixpageau.roboboat.mission.structures;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -17,8 +14,12 @@ import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import com.google.inject.internal.util.ImmutableSet;
 
+/**
+ * Represent information to show on the course display
+ * @author felixpageau
+ *
+ */
 @ParametersAreNonnullByDefault
 @ThreadSafe
 @Immutable
@@ -38,12 +39,15 @@ public class DisplayReport {
   private final String uploadedImage;
 
   @JsonCreator
-  public DisplayReport(@JsonProperty(value = "course") Course course, @Nullable @JsonProperty(value = "teamCode") TeamCode teamCode,
-      @Nullable @JsonProperty(value = "currentPosition") Position currentPosition, @JsonProperty(value = "lastHeartbeat") long lastHeartbeat,
-      @JsonProperty(value = "currentChallenge") @Nullable Challenge currentChallenge,
+  public DisplayReport(
+      @JsonProperty(value = "course") Course course, 
+      @Nullable @JsonProperty(value = "teamCode") TeamCode teamCode,
+      @Nullable @JsonProperty(value = "currentPosition") Position currentPosition, 
+      @JsonProperty(value = "lastHeartbeat") long lastHeartbeat,
+      @Nullable @JsonProperty(value = "currentChallenge") Challenge currentChallenge,
       @Nullable @JsonProperty(value = "assignedLeaderSequence") LeaderSequence assignedLeaderSequence, 
       @JsonProperty(value = "requestedCarouselCode") boolean requestedCarouselCode,
-      @JsonProperty(value = "dockingSequence") DockingSequence dockingSequence,
+      @Nullable @JsonProperty(value = "dockingSequence") DockingSequence dockingSequence,
       @Nullable @JsonProperty(value = "uploadedImage") String uploadedImage) {
     this.course = Preconditions.checkNotNull(course, "course cannot be null");
     this.teamCode = teamCode;

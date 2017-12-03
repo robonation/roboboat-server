@@ -4,12 +4,24 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
+/**
+ * Represents a timestamp in the server
+ */
+@ParametersAreNonnullByDefault
+@ReturnValuesAreNonNullByDefault
+@Immutable
+@ThreadSafe
 public class Timestamp {
   private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
   private final LocalDateTime timestamp;
