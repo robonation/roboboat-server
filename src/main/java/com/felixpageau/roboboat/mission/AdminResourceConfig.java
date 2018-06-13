@@ -67,7 +67,7 @@ public class AdminResourceConfig extends CompetitionResourceConfig {
       COURSE_LAYOUT_MAP = ImmutableMap.of(
           Course.courseA, new CourseLayout(Course.courseA, bays, new URL("http://192.168.1.5:4000"), new URL("http://192.168.1.12:5000"), new URL("http://192.168.1.11:5000")), 
           Course.courseB, new CourseLayout(Course.courseB, bays, new URL("http://192.168.1.6:4000"), new URL("http://192.168.1.22:5000"), new URL("http://192.168.1.21:5000")), 
-          Course.openTest, new CourseLayout(Course.courseC, bays, new URL("http://192.168.1.7:4000"), new URL("http://192.168.1.32:5000"), new URL("http://192.168.1.31:5000")));
+          Course.courseC, new CourseLayout(Course.courseC, bays, new URL("http://192.168.1.7:4000"), new URL("http://192.168.1.32:5000"), new URL("http://192.168.1.31:5000")));
     } catch (MalformedURLException e) {
       throw new RuntimeException(e);
     }

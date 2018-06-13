@@ -38,6 +38,7 @@ import com.felixpageau.roboboat.mission.structures.ReportStatus;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
 import com.felixpageau.roboboat.mission.structures.Timestamp;
 import com.felixpageau.roboboat.mission.structures.UploadStatus;
+import com.google.common.base.Objects;
 
 /**
  * @author felixpageau
@@ -69,14 +70,19 @@ public class CompetitionManagerImpl extends MockCompetitionManager {
     ReportStatus status = super.startRun(course, teamCode);
     archive = competition.getActiveRuns().get(course);
     if (archive != null && course != Course.openTest) {
-      // publish to an SNS topic
-      String topicArn = "arn:aws:sns:us-east-1:976841718827:roboboat-server-new-run-" + course;
-      String msg = String.format("Team '%s' starting run %s on %s at: %s", teamCode, archive.getRunSetup().getRunId().replaceFirst(".*-", ""), course,
-          LocalDateTime.now().format(SMS_DATE_FORMAT));
-      PublishRequest publishRequest = new PublishRequest(topicArn, msg);
-      PublishResult publishResult = snsClient.publish(publishRequest);
-      // print MessageId of message published to SNS topic
-      System.out.println("MessageId - " + publishResult.getMessageId());
+      try {
+        // publish to an SNS topic
+        String topicArn = "arn:aws:sns:us-east-1:976841718827:roboboat-server-new-run-" + course;
+        String msg = String.format("Team '%s' starting run %s on %s at: %s", teamCode, archive.getRunSetup().getRunId().replaceFirst(".*-", ""), course,
+            LocalDateTime.now().format(SMS_DATE_FORMAT));
+        PublishRequest publishRequest = new PublishRequest(topicArn, msg);
+        PublishResult publishResult = snsClient.publish(publishRequest);
+        
+        // print MessageId of message published to SNS topic
+        System.out.println("MessageId - " + publishResult.getMessageId());
+      } catch (Exception e) {
+        LOG.error("Unable to publish to SNS. Error: ", e);
+      }
     }
 
     return status;
@@ -129,7 +135,20 @@ public class CompetitionManagerImpl extends MockCompetitionManager {
   
   @Override
   public ReportStatus reportHeartbeat(Course course, TeamCode teamCode, HeartbeatReport report) {
-    
     return super.reportHeartbeat(course, teamCode, report);
+  }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) return true;
+    if (obj == null) return false;
+    if (!(obj instanceof CompetitionManagerImpl)) return false;
+    CompetitionManagerImpl other = (CompetitionManagerImpl) obj;
+    return super.equals(other) && Objects.equal(snsClient, other.snsClient);
+  }
+  
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(super.hashCode(), snsClient);
   }
 }

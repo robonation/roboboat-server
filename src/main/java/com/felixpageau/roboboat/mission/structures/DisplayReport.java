@@ -17,8 +17,6 @@ import com.google.common.base.Preconditions;
 
 /**
  * Represent information to show on the course display
- * @author felixpageau
- *
  */
 @ParametersAreNonnullByDefault
 @ThreadSafe

@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -34,6 +33,7 @@ import com.felixpageau.roboboat.mission.structures.Position;
 import com.felixpageau.roboboat.mission.structures.ReportStatus;
 import com.felixpageau.roboboat.mission.structures.Timestamp;
 import com.felixpageau.roboboat.mission.structures.UploadStatus;
+import com.google.common.io.ByteStreams;
 
 public class JSONServerTest {
   private static String basePath = "http://127.0.0.1:9000";
@@ -116,7 +116,7 @@ public class JSONServerTest {
       resp = client.execute(new HttpGet(basePath + "/followLeader/courseA/AUVSI"));
       assertEquals("Docking", 200, resp.getStatusLine().getStatusCode());
       byte[] bytes = new byte[4];
-      IOUtils.readFully(resp.getEntity().getContent(), bytes);
+      ByteStreams.readFully(resp.getEntity().getContent(), bytes);
       String value = new String(bytes);
       DockingSequence ds = mapper.readValue(value, DockingSequence.class);
       assertNotNull(ds);

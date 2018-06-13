@@ -31,6 +31,11 @@ public class GateCodeTest {
   public void testGateCodeBadExit() {
     new GateCode(1, "A");
   }
+  
+  @Test
+  public void testRandomGateCode() {
+    assertNotNull(GateCode.generateRandomGateCode());
+  }
 
   @Test
   public void testGateCode() {

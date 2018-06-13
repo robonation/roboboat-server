@@ -8,7 +8,7 @@
     <packaging>war</packaging>
     <version>1.0</version>
 
-    <description>Java 8 Types WebApp Example.</description>
+    <description>Competition server for RoboBoat</description>
     
     <dependencyManagement>
         <dependencies>
@@ -47,11 +47,18 @@
       <groupId>org.glassfish.jersey.media</groupId>
       <artifactId>jersey-media-multipart</artifactId>
     </dependency>
+    
     <dependency>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-resources-plugin</artifactId>
-      <version>3.0.1</version>
+      <version>3.0.2</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-project-info-reports-plugin</artifactId>
+      <version>2.9</version>
+    </dependency>
+    
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient</artifactId>
@@ -114,6 +121,11 @@
       <version>${findbugs.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>findbugs-maven-plugin</artifactId>
+      <version>${findbugs.plugin.version}</version>
+    </dependency>
+    <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>1.1.7</version>
@@ -135,14 +147,7 @@
       <groupId>org.glassfish.jersey.containers</groupId>
       <artifactId>jersey-container-jetty-servlet</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.glassfish.jersey.media</groupId>
-      <artifactId>jersey-media-json-jackson</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish.jersey.media</groupId>
-      <artifactId>jersey-media-multipart</artifactId>
-    </dependency>
+
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk</artifactId>
@@ -155,6 +160,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.7.0</version>
                 <inherited>true</inherited>
                 <configuration>
                     <source>${java.version}</source>
@@ -196,13 +202,46 @@
             <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-war-plugin</artifactId>
+              <version>3.1.0</version>
               <configuration>
                 <failOnMissingWebXml>false</failOnMissingWebXml>
                 <warSourceDirectory>src/main/webapp</warSourceDirectory>
               </configuration>
             </plugin>
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>findbugs-maven-plugin</artifactId>
+              <version>${findbugs.plugin.version}</version>
+              <configuration>
+                <effort>Max</effort>
+                <threshold>Low</threshold>
+                <xmlOutput>true</xmlOutput>
+              </configuration>
+              <executions>
+                <execution>
+                  <goals>
+                    <goal>check</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
         </plugins>
     </build>
+    
+    <reporting>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>findbugs-maven-plugin</artifactId>
+          <version>${findbugs.plugin.version}</version>
+          <configuration>
+              <xmlOutput>true</xmlOutput>
+              <!-- Optional directory to put findbugs xdoc xml report -->
+              <xmlOutputDirectory>target/site</xmlOutputDirectory>
+          </configuration>
+        </plugin>
+      </plugins>
+    </reporting>
 
     <profiles>
         <profile>
@@ -227,8 +266,10 @@
         <jackson.version>2.7.4</jackson.version>
         <jersey.version>2.23.1</jersey.version>
         <findbugs.version>3.0.1</findbugs.version>
+        <findbugs.plugin.version>3.0.4</findbugs.plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <jersey.config.test.container.port>8080</jersey.config.test.container.port>
+        <dependency.locations.enabled>false</dependency.locations.enabled>
     </properties>
 </project>

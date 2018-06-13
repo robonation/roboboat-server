@@ -1,12 +1,24 @@
 package com.felixpageau.roboboat.mission.structures;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+import javax.annotation.concurrent.Immutable;
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.felixpageau.roboboat.mission.utils.ReturnValuesAreNonNullByDefault;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
+/**
+ * Defines a pinger task message content
+ */
+@ParametersAreNonnullByDefault
+@ThreadSafe
+@Immutable
+@ReturnValuesAreNonNullByDefault
 public class BeaconReport {
   private final Course course;
   private final TeamCode team;
@@ -54,13 +66,14 @@ public class BeaconReport {
   @JsonIgnore
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add("course", course).add("team", team).add("buoyColor1", buoyColor1).add("buoyColor2", buoyColor2).toString();
+    return MoreObjects.toStringHelper(this).add("course", course).add("team", team).add("buoyColor1", buoyColor1)
+        .add("frequency1", frequency1).add("buoyColor2", buoyColor2).add("frequency2", frequency2).toString();
   }
 
   @JsonIgnore
   @Override
   public int hashCode() {
-    return Objects.hashCode(course, team, buoyColor1, buoyColor2);
+    return Objects.hashCode(course, team, buoyColor1, buoyColor2, frequency1, frequency2);
   }
 
   @JsonIgnore
@@ -74,13 +87,10 @@ public class BeaconReport {
     }
     if (obj instanceof BeaconReport) {
       BeaconReport other = (BeaconReport) obj;
-      return Objects.equal(course, other.course) && Objects.equal(team, other.team) && Objects.equal(buoyColor1, other.buoyColor1)
-          && Objects.equal(buoyColor2, other.buoyColor2);
+      return Objects.equal(course, other.course) && Objects.equal(team, other.team)
+          && Objects.equal(buoyColor1, other.buoyColor1) && Objects.equal(buoyColor2, other.buoyColor2)
+          && Objects.equal(frequency1, other.frequency1) && Objects.equal(frequency2, other.frequency2);
     }
     return false;
-  }
-
-  public static void main(String[] args) {
-    System.out.println(new BeaconReport(Course.courseA, new TeamCode("AUVSI"), BuoyColor.blue, 24, BuoyColor.red, 36));
   }
 }

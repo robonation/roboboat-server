@@ -31,7 +31,7 @@ public enum LeaderSequence {
   private final String value;
 
   static {
-    lookup = EnumSet.allOf(LeaderSequence.class).stream().collect(GuavaCollectors.immutableMap(l -> l.getValue()));
+    lookup = EnumSet.allOf(LeaderSequence.class).stream().collect(GuavaCollectors.immutableMap(ls -> ls.getValue()));
   }
 
   private LeaderSequence(String value) {
@@ -46,7 +46,7 @@ public enum LeaderSequence {
 
   @JsonIgnore
   public static LeaderSequence get(char code) {
-    return lookup.get(Character.toUpperCase(code));
+    return lookup.get(Character.toString(Character.toUpperCase(code)));
   }
 
   @JsonCreator
@@ -61,16 +61,5 @@ public enum LeaderSequence {
   @JsonValue
   public String getValue() {
     return value;
-  }
-  
-  public static class Blah {
-    private final String b;
-    public Blah(String b) {
-      this.b = b;
-    }
-    
-    public String getB() {
-      return b;
-    }
   }
 }

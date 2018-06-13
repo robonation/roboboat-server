@@ -1,18 +1,13 @@
 package com.felixpageau.roboboat.mission.server;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -20,9 +15,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import javax.annotation.concurrent.GuardedBy;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -34,12 +32,11 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.felixpageau.roboboat.mission.App;
+import com.felixpageau.roboboat.mission.obstacle.client.ObstacleClient;
+import com.felixpageau.roboboat.mission.obstacle.client.PingerClient;
 import com.felixpageau.roboboat.mission.structures.Challenge;
-import com.felixpageau.roboboat.mission.structures.Code;
 import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
-import com.felixpageau.roboboat.mission.utils.NMEAUtils;
 import com.google.common.base.Charsets;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
@@ -64,14 +61,17 @@ public class Competition {
   private final Map<Course, CourseLayout> layoutMap;
   private final Map<Course, TeamCode> teamInWater = new ConcurrentHashMap<>();
   private final List<CompetitionDay> competitionDays;
+  private final ReadWriteLock resultsLock = new ReentrantReadWriteLock(false);
+  @GuardedBy(value="resultsLock")
   private final Multimap<TimeSlot, RunArchiver> results = ArrayListMultimap.create();
-  private final Map<Course, RunArchiver> activeRuns = new HashMap<>();
+  private final Map<Course, RunArchiver> activeRuns = new ConcurrentHashMap<>();
   protected final Map<TimeSlot, TeamCode> schedule = new HashMap<>();
   private final List<TeamCode> teams;
   private final boolean activateCarousel;
   private final boolean activatePinger;
   private final boolean activateLCD;
-  private final Executor exec = Executors.newCachedThreadPool();
+  private final ObstacleClient pingerClient = new PingerClient();
+  private final ExecutorService exec = Executors.newCachedThreadPool();
   private final EventBus bus = new EventBus();
   private final File f;
   protected final ObjectMapper om;
@@ -80,8 +80,8 @@ public class Competition {
   public Competition(String name, List<CompetitionDay> competitionDays, List<TeamCode> teams, Map<Course, CourseLayout> layoutMap, boolean activatePinger,
       boolean activateLCD, boolean activateCarousel, ObjectMapper om) {
     this.name = Preconditions.checkNotNull(name, "name cannot be null");
-    this.competitionDays = Preconditions.checkNotNull(competitionDays, "competitionDays cannot be null");
-    this.layoutMap = Preconditions.checkNotNull(layoutMap, "layoutMap cannot be null");
+    this.competitionDays = ImmutableList.copyOf(Preconditions.checkNotNull(competitionDays, "competitionDays cannot be null"));
+    this.layoutMap = ImmutableMap.copyOf(Preconditions.checkNotNull(layoutMap, "layoutMap cannot be null"));
     this.teams = ImmutableList.copyOf(Preconditions.checkNotNull(teams, "The provided team list cannot be null"));
     this.activatePinger = activatePinger;
     this.activateLCD = activateLCD;
@@ -119,9 +119,12 @@ public class Competition {
       }
     } else {
       try {
+        resultsLock.writeLock().lock();
         results.putAll(om.readValue(f, new TypeReference<ArrayListMultimap<TimeSlot, RunArchiver>>() {}));
       } catch (IOException e) {
         LOG.warn("Unable to read the json file");
+      } finally {
+        resultsLock.writeLock().unlock();
       }
     }
   }
@@ -222,8 +225,15 @@ public class Competition {
     if (lastRun != null) {
       endRun(slot.getCourse(), teamCode);
     }
-    List<RunArchiver> previousRuns = new ArrayList<>(results.get(findPreviousTimeSlot(slot.getCourse())));
-    previousRuns.addAll(results.get(slot));
+    List<RunArchiver> previousRuns;
+    try {
+      resultsLock.readLock().lock();
+      previousRuns = new ArrayList<>(results.get(findPreviousTimeSlot(slot.getCourse())));
+      previousRuns.addAll(results.get(slot));
+    } finally {
+      resultsLock.readLock().unlock();
+    }
+   
     Collections.sort(previousRuns, new Comparator<RunArchiver>() {
       @Override
       public int compare(RunArchiver o1, RunArchiver o2) {
@@ -250,7 +260,13 @@ public class Competition {
     RunArchiver newRun = new RunArchiver(newSetup, new File(String.format("%s/competition-log.%s", name, LocalDateTime.now().format(DATE_FORMAT))), bus);
     newRun.addEvent(new StructuredEvent(newSetup.getCourse(), newSetup.getActiveTeam(), Challenge.none, String.format("Start run (config %s)", newSetup)));
     activeRuns.put(slot.getCourse(), newRun);
-    results.put(slot, newRun);
+    try {
+      resultsLock.writeLock().lock();
+      results.put(slot, newRun);
+    } finally {
+      resultsLock.writeLock().unlock();
+    }
+    
 
     if (activateLCD && slot.getCourse() != Course.openTest) {
       exec.execute(new ActivateLCD(layout, newSetup));
@@ -266,12 +282,7 @@ public class Competition {
       LOG.info("Don't activate Carousel");
     }
 
-    if (activatePinger && slot.getCourse() != Course.openTest) {
-      exec.execute(new ActivatePinger(layout, newSetup));
-      LOG.info("Activated Pinger");
-    } else {
-      LOG.info("Don't activate Pinger");
-    }
+    pingerClient.activate(exec, layout, newSetup);
 
     return newSetup;
   }
@@ -316,53 +327,14 @@ public class Competition {
   }
   
   public static class ActivatePinger implements Runnable {
-    private final CourseLayout layout;
-    private final RunSetup newSetup;
-
     public ActivatePinger(CourseLayout layout, RunSetup newSetup) {
-      this.layout = Preconditions.checkNotNull(layout, "layout cannot be null");
-      this.newSetup = Preconditions.checkNotNull(newSetup, "newSetup cannot be null");
+
     }
 
     @SuppressFBWarnings(value = "CC_CYCLOMATIC_COMPLEXITY")
     @Override
     public void run() {
-      boolean activated = false;
-      for (int j = 0; j < 10 && !activated; j++) {
-        try (Socket s = new Socket(layout.getPingerControlServer().getHost(), layout.getPingerControlServer().getPort());
-            Writer w = new OutputStreamWriter(s.getOutputStream(), App.APP_CHARSET);
-            BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream(), App.APP_CHARSET))) {
-          
-          LOG.error("*** Pinger value in setup: " + newSetup);
-          LOG.error("*** Pinger value in docking sequence: " + newSetup.getActiveDockingSequence());
-          LOG.error("*** Pinger value in active pinger: " + newSetup.getActiveDockingSequence().getActivePinger());
-          
-          if (com.felixpageau.roboboat.mission.structures.Code.none.equals(newSetup.getActiveDockingSequence().getActivePinger())) {
-            String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), 0));
-            w.write(pingerActivationMessage);
-            System.out.println("TURN OFF PINGER: " + pingerActivationMessage);
-            w.flush();
-            activated = true;
-          } else {
-            System.out.println(String.format("** Available pingers: %s **", Arrays.stream(Code.values()).map(x -> x.getValue()).collect(Collectors.joining())));
-            System.out.println(String.format("** Active pingers: %s **", newSetup.getActiveDockingSequence().getActivePinger().getValue()));
-            int activate = Integer.parseInt(newSetup.getActiveDockingSequence().getActivePinger().getValue());
-
-            System.out.println("**** Activation values: " + activate);
-            String pingerActivationMessage = NMEAUtils.formatNMEAmessage(NMEAUtils.formatPingerNMEAmessage(layout.getCourse(), activate));
-            w.write(pingerActivationMessage);
-            System.out.println(pingerActivationMessage);
-            w.flush();
-            activated = true;
-          }
-          System.out.println(r.readLine());
-          System.out.println(r.readLine());
-        } catch (UnknownHostException e) {
-          LOG.error(String.format("Failed to find pinger server (%s)", layout.getPingerControlServer().toString()), e);
-        } catch (IOException e) {
-          LOG.error(String.format("Comm failed with pinger server (%s)", layout.getPingerControlServer().toString()), e);
-        }
-      }
+      
     }
   }
 
@@ -413,6 +385,7 @@ public class Competition {
         exec.execute(new ActivateCarousel(layoutMap.get(course), false));
       }
       if (activatePinger && Course.openTest != course) {
+        
         exec.execute(new ActivateLCD(layoutMap.get(course), RunSetup.NO_RUN));
       }
       if (activatePinger && Course.openTest != course) {

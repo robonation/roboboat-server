@@ -29,7 +29,7 @@ public enum Shape {
   NONE(" "), ZERO("zero", "0"), ONE("one", "1"), TWO("two", "2"), THREE("three", "3"), FOUR("four", "4"), FIVE("five", "5"), 
   SIX("six", "6"), SEVEN("seven", "7"), EIGHT("eight", "8"), NINE("nine", "9"), A("a", "A"), B("b", "B"), C("c", "C"), 
   D("d", "D"), E("e", "E"), F("f", "F");
-  private static Map<String, String> altValues;
+  private static final Map<String, String> altValues;
   private static final Map<String, Shape> lookup;
   private final String value;
   private final String altValue;
