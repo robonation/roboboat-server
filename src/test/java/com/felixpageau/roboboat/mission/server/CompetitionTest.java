@@ -1,9 +1,9 @@
 package com.felixpageau.roboboat.mission.server;
 
-import static com.felixpageau.roboboat.mission.MissionResourceConfig.COMPETITION_NAME;
-import static com.felixpageau.roboboat.mission.MissionResourceConfig.COURSE_LAYOUT_MAP;
-import static com.felixpageau.roboboat.mission.MissionResourceConfig.OM_PROVIDER;
-import static com.felixpageau.roboboat.mission.MissionResourceConfig.TEAMS;
+import static com.felixpageau.roboboat.mission.CompetitionResourceConfig.COMPETITION_NAME;
+import static com.felixpageau.roboboat.mission.CompetitionResourceConfig.COURSE_LAYOUT_MAP;
+import static com.felixpageau.roboboat.mission.CompetitionResourceConfig.OM_PROVIDER;
+import static com.felixpageau.roboboat.mission.CompetitionResourceConfig.TEAMS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

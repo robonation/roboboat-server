@@ -53,7 +53,7 @@ public class CompetitionManagerImpl extends MockCompetitionManager {
   private final AmazonSNSClient snsClient;
 
   public CompetitionManagerImpl(Competition competition, ObjectMapper om) {
-    super(competition, om, new File("/etc/roboboat/roboboat2017-images/uploads/" + DateTimeFormatter.ofPattern("YYYYMMdd/").format(LocalDateTime.now())));
+    super(competition, om, new File("/etc/roboboat/roboboat2018-images/uploads/" + DateTimeFormatter.ofPattern("YYYYMMdd/").format(LocalDateTime.now())));
 
     // create a new SNS client and set endpoint
     snsClient = new AmazonSNSClient(new BasicAWSCredentials("AKIAJ5HBSR3KIJUT32YQ", "4wxHI+VjbhsjVnsDQ3/2YsDKXf2OdxTo6BWXDosQ"));
