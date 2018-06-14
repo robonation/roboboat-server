@@ -12,7 +12,8 @@ start() {
     generateResources
     touch $file
   fi
- 
+
+  git pull 
   mvn jetty:run
 }
 
