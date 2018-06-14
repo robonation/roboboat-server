@@ -4,6 +4,7 @@
 *.zip
 .DS_Store
 .cache-main
+.installed
 .metadata
 .settings/
 /output/
