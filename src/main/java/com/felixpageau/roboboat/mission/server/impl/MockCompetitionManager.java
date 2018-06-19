@@ -88,6 +88,11 @@ public class MockCompetitionManager implements CompetitionManager {
       throw new WebApplicationExceptionWithContext(String.format("There is already a run active on course %s! Try doing a POST against /run/endRun/%s/%s",
           course, course, teamCode), 400);
     }
+    if (competition.getCourseLayout(course) == null) {
+      //Talking to the wrong server!
+      return new ReportStatus(false, "You are talking to the wrong server. " + course.toString() + " is at IP: " + "");
+    }
+    
     TimeSlot slot = competition.findCurrentTimeSlot(course);
     RunSetup r = competition.startNewRun(slot, teamCode);
     competition.getActiveRuns().get(course).addEvent(new StructuredEvent(course, teamCode, Challenge.none, String.format("Run started - new setup (%s)", r)));
