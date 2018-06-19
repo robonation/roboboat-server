@@ -90,16 +90,16 @@ public abstract class CompetitionResourceConfig extends ResourceConfig {
       ImmutableMap.Builder<Course, CourseLayout> builder = ImmutableMap.builder();
       if (Course.courseA.equals(configuredCourse) || ipAddress.equals(PRIVATE_IP.get(Course.courseA))) {
         LOG.info("** Configuring as COURSE A. Because my IP is '" + ipAddress + "' or because configured as " + configuredCourse);
-        builder.put(Course.courseA, new CourseLayout(Course.courseA, bays, PUBLIC_IP.get(Course.courseA), new URL("http://192.168.1.5:4000"), new URL("http://192.168.1.12:5000"), new URL("http://192.168.1.10:6722")));
+        builder.put(Course.courseA, new CourseLayout(Course.courseA, bays, PUBLIC_IP.get(Course.courseA), new URL("http://192.168.1.5:4000"), new URL("http://192.168.1.12:5000"), new URL("http://192.168.1.13:6722")));
       } else if (Course.courseB.equals(configuredCourse) || ipAddress.equals(PRIVATE_IP.get(Course.courseB))) {
         LOG.info("** Configuring as COURSE B. Because my IP is '" + ipAddress + "' or because configured as " + configuredCourse);
-        builder.put(Course.courseB, new CourseLayout(Course.courseB, bays, PUBLIC_IP.get(Course.courseB), new URL("http://192.168.1.6:4000"), new URL("http://192.168.1.22:5000"), new URL("http://192.168.1.20:6722")));
+        builder.put(Course.courseB, new CourseLayout(Course.courseB, bays, PUBLIC_IP.get(Course.courseB), new URL("http://192.168.1.6:4000"), new URL("http://192.168.1.22:5000"), new URL("http://192.168.1.23:6722")));
       } else if (Course.courseC.equals(configuredCourse) || ipAddress.equals(PRIVATE_IP.get(Course.courseC))) {
         LOG.info("** Configuring as COURSE C. Because my IP is '" + ipAddress + "' or because configured as " + configuredCourse);
-        builder.put(Course.courseC, new CourseLayout(Course.courseC, bays, PUBLIC_IP.get(Course.courseC), new URL("http://192.168.1.7:4000"), new URL("http://192.168.1.32:5000"), new URL("http://192.168.1.30:6722")));
+        builder.put(Course.courseC, new CourseLayout(Course.courseC, bays, PUBLIC_IP.get(Course.courseC), new URL("http://192.168.1.7:4000"), new URL("http://192.168.1.32:5000"), new URL("http://192.168.1.33:6722")));
       } else if (Course.courseD.equals(configuredCourse) || ipAddress.equals(PRIVATE_IP.get(Course.courseD))) {
         LOG.info("** Configuring as COURSE D. Because my IP is '" + ipAddress + "' or because configured as " + configuredCourse);
-        builder.put(Course.courseD, new CourseLayout(Course.courseD, bays, PUBLIC_IP.get(Course.courseD), new URL("http://192.168.1.8:4000"), new URL("http://192.168.1.42:5000"), new URL("http://192.168.1.40:6722")));
+        builder.put(Course.courseD, new CourseLayout(Course.courseD, bays, PUBLIC_IP.get(Course.courseD), new URL("http://192.168.1.8:4000"), new URL("http://192.168.1.42:5000"), new URL("http://192.168.1.43:6722")));
       } else {
         LOG.info("** Configuring as TEST SERVER. Because my IP is '" + ipAddress + "'");
         builder.put(Course.testCourse1, new CourseLayout(Course.testCourse1, bays, "127.0.0.1", new URL("http://127.0.0.1:4000"), new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:6722")));
