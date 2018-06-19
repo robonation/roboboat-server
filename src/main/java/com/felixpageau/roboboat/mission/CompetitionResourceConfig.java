@@ -21,6 +21,8 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.internal.scanning.PackageNamesScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.jaxrs.annotation.JacksonFeatures;
 import com.felixpageau.roboboat.mission.nmea.SentenceRegistry;
@@ -46,6 +48,7 @@ import com.google.common.collect.ImmutableSet;
 @ParametersAreNonnullByDefault
 @ThreadSafe
 public abstract class CompetitionResourceConfig extends ResourceConfig {
+  private static final Logger LOG = LoggerFactory.getLogger(CompetitionResourceConfig.class);
   public static final JacksonObjectMapperProvider OM_PROVIDER = new JacksonObjectMapperProvider();
   public static final String COMPETITION_NAME = "RoboBoat 2018";
   public static final List<CompetitionDay> COMPETITION_DAYS = ImmutableList.<CompetitionDay> of(new CompetitionDay(LocalDateTime.of(2016, 7, 5, 8, 0),
@@ -72,14 +75,19 @@ public abstract class CompetitionResourceConfig extends ResourceConfig {
       List<DockingBay> bays = ImmutableList.copyOf(Arrays.stream(Code.values()).map(x -> new DockingBay(x)).collect(Collectors.toList()));
       ImmutableMap.Builder<Course, CourseLayout> builder = ImmutableMap.builder();
       if (ipAddress.equals(PRIVATE_IP.get(Course.courseA))) {
+        LOG.info("** Configuring as COURSE A **");
         builder.put(Course.courseA, new CourseLayout(Course.courseA, bays, PUBLIC_IP.get(Course.courseA), new URL("http://192.168.1.5:4000"), new URL("http://192.168.1.12:5000"), new URL("http://192.168.1.10:6722")));
       } else if (ipAddress.equals(PRIVATE_IP.get(Course.courseB))) {
+        LOG.info("** Configuring as COURSE B **");
         builder.put(Course.courseB, new CourseLayout(Course.courseB, bays, PUBLIC_IP.get(Course.courseB), new URL("http://192.168.1.6:4000"), new URL("http://192.168.1.22:5000"), new URL("http://192.168.1.20:6722")));
       } else if (ipAddress.equals(PRIVATE_IP.get(Course.courseC))) {
+        LOG.info("** Configuring as COURSE C **");
         builder.put(Course.courseC, new CourseLayout(Course.courseC, bays, PUBLIC_IP.get(Course.courseC), new URL("http://192.168.1.7:4000"), new URL("http://192.168.1.32:5000"), new URL("http://192.168.1.30:6722")));
       } else if (ipAddress.equals(PRIVATE_IP.get(Course.courseD))) {
+        LOG.info("** Configuring as COURSE D **");
         builder.put(Course.courseD, new CourseLayout(Course.courseD, bays, PUBLIC_IP.get(Course.courseD), new URL("http://192.168.1.8:4000"), new URL("http://192.168.1.42:5000"), new URL("http://192.168.1.40:6722")));
       } else {
+        LOG.info("** Configuring as TEST SERVER **");
         builder.put(Course.testCourse1, new CourseLayout(Course.testCourse1, bays, "127.0.0.1", new URL("http://127.0.0.1:4000"), new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:6722")));
       }
       COURSE_LAYOUT_MAP = builder.build();
