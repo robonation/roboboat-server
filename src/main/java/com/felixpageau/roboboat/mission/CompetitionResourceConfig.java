@@ -58,7 +58,7 @@ public abstract class CompetitionResourceConfig extends ResourceConfig {
       );
   public static final List<TeamCode> TEAMS = ImmutableList.of(new TeamCode("AUVSI"), new TeamCode("TUD"), new TeamCode("ERAU"), new TeamCode("FAU"), new TeamCode("GIT"), new TeamCode("HHS"), new TeamCode("ITSN"), new TeamCode("NHHS"), new TeamCode("SRM"), new TeamCode("VTEC"), new TeamCode("UNDIP"), new TeamCode("UCF"), new TeamCode("IOWA"), new TeamCode("UOFM"),new TeamCode("UOTTA"));
   protected static final List<DockingBay> bays = ImmutableList.copyOf(Arrays.stream(Code.values()).map(x -> new DockingBay(x)).collect(Collectors.toList()));
-  protected static final Map<Course, String> PRIVATE_IP = ImmutableMap.of(Course.courseA, "192.168.1.10", Course.courseB, "192.168.1.20", Course.courseC, "192.168.1.40", Course.courseD, "192.168.1.40");
+  protected static final Map<Course, String> PRIVATE_IP = ImmutableMap.of(Course.courseA, "192.168.1.10", Course.courseB, "192.168.1.20", Course.courseC, "192.168.1.30", Course.courseD, "192.168.1.40");
   protected static final Map<Course, String> PUBLIC_IP = ImmutableMap.of(Course.courseA, "10.0.2.2", Course.courseB, "10.0.2.3", Course.courseC, "10.0.2.4", Course.courseD, "10.0.2.5");
   public static final Map<Course, CourseLayout> COURSE_LAYOUT_MAP;
   
