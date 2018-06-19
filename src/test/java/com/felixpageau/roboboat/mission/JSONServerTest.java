@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -36,8 +37,8 @@ import com.felixpageau.roboboat.mission.structures.UploadStatus;
 import com.google.common.io.ByteStreams;
 
 public class JSONServerTest {
-  //private static String basePath = "http://127.0.0.1:9000";
-  private static String basePath = "http://192.168.0.187:8080";
+  private static String basePath = "http://127.0.0.1:9000";
+  //private static String basePath = "http://192.168.0.187:8080";
   private static Server server;
 
   @BeforeClass

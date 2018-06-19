@@ -29,11 +29,11 @@ import com.felixpageau.roboboat.mission.nmea.SentenceDefinition;
 import com.felixpageau.roboboat.mission.nmea.SentenceRegistry;
 import com.felixpageau.roboboat.mission.server.CompetitionManager;
 import com.felixpageau.roboboat.mission.server.Config;
+import com.felixpageau.roboboat.mission.structures.CarouselStatus;
 import com.felixpageau.roboboat.mission.structures.Challenge;
 import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.DockingSequence;
 import com.felixpageau.roboboat.mission.structures.HeartbeatReport;
-import com.felixpageau.roboboat.mission.structures.LeaderSequence;
 import com.felixpageau.roboboat.mission.structures.Position;
 import com.felixpageau.roboboat.mission.structures.ReportStatus;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
@@ -166,7 +166,7 @@ public class NMEAServer implements Runnable {
                 w.write(createResponse("TD", sentence.getSentenceId(), args));
                 break;
               case "SVFOL":
-                LeaderSequence ls = competitionManager.getLeaderSequence(
+                CarouselStatus ls = competitionManager.getLeaderSequence(
                     course,
                     team);
                 w.write(createResponse("TD", sentence.getSentenceId(), Arrays.asList(timestamp(), ls.getValue())));

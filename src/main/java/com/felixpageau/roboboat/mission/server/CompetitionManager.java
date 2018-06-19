@@ -10,11 +10,11 @@ import javax.annotation.concurrent.ThreadSafe;
 import javax.ws.rs.core.Response;
 
 import com.felixpageau.roboboat.mission.WebApplicationExceptionWithContext;
+import com.felixpageau.roboboat.mission.structures.CarouselStatus;
 import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.DisplayStatus;
 import com.felixpageau.roboboat.mission.structures.DockingSequence;
 import com.felixpageau.roboboat.mission.structures.HeartbeatReport;
-import com.felixpageau.roboboat.mission.structures.LeaderSequence;
 import com.felixpageau.roboboat.mission.structures.ReportStatus;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
 import com.felixpageau.roboboat.mission.structures.UploadStatus;
@@ -36,7 +36,7 @@ public interface CompetitionManager {
   DockingSequence getDockingSequence(Course course, TeamCode teamCode);
 
   @Nonnull
-  LeaderSequence getLeaderSequence(Course course, TeamCode teamCode);
+  CarouselStatus getLeaderSequence(Course course, TeamCode teamCode);
 
   @Nonnull
   Optional<byte[]> getUploadedImage(String imageId);

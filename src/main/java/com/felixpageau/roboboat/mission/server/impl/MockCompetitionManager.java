@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.felixpageau.roboboat.mission.CompetitionResourceConfig;
 import com.felixpageau.roboboat.mission.WebApplicationExceptionWithContext;
 import com.felixpageau.roboboat.mission.server.Competition;
 import com.felixpageau.roboboat.mission.server.CompetitionManager;
@@ -35,6 +36,7 @@ import com.felixpageau.roboboat.mission.server.RunArchiver;
 import com.felixpageau.roboboat.mission.server.RunSetup;
 import com.felixpageau.roboboat.mission.server.StructuredEvent;
 import com.felixpageau.roboboat.mission.server.TimeSlot;
+import com.felixpageau.roboboat.mission.structures.CarouselStatus;
 import com.felixpageau.roboboat.mission.structures.Challenge;
 import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.DisplayReport;
@@ -90,7 +92,7 @@ public class MockCompetitionManager implements CompetitionManager {
     }
     if (competition.getCourseLayout(course) == null) {
       //Talking to the wrong server!
-      return new ReportStatus(false, "You are talking to the wrong server. " + course.toString() + " is at IP: " + "");
+      return new ReportStatus(false, "You are talking to the wrong server. " + course.toString() + " is at IP: " + CompetitionResourceConfig.PUBLIC_IP.get(course));
     }
     
     TimeSlot slot = competition.findCurrentTimeSlot(course);
@@ -148,7 +150,7 @@ public class MockCompetitionManager implements CompetitionManager {
   }
 
   @Override
-  public LeaderSequence getLeaderSequence(Course course, TeamCode teamCode) {
+  public CarouselStatus getLeaderSequence(Course course, TeamCode teamCode) {
     RunArchiver archive = competition.getActiveRuns().get(course);
     if (archive == null) {
       throw new WebApplicationExceptionWithContext(String.format("You must first start a run! Try doing a POST against /run/start/%s/%s", course, teamCode),
@@ -162,7 +164,8 @@ public class MockCompetitionManager implements CompetitionManager {
     LeaderSequence sequence = archive.getRunSetup().getActiveLeaderSequence();
     archive.addEvent(new StructuredEvent(course, teamCode, Challenge.docking, String.format("request bay (%s)", sequence)));
     archive.requestedCarouselCode();
-    return sequence;
+    
+    return new CarouselStatus(true);
   }
 
   @Override
