@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
+import com.felixpageau.roboboat.mission.UploadFailureException;
 import com.felixpageau.roboboat.mission.server.CompetitionManager;
 import com.felixpageau.roboboat.mission.structures.Course;
 import com.felixpageau.roboboat.mission.structures.TeamCode;
@@ -41,6 +42,9 @@ public class AutomatedDockingResource {
   @Consumes({ MediaType.MULTIPART_FORM_DATA })
   public UploadStatus uploadImage(@PathParam("course") Course course, @PathParam("teamCode") TeamCode teamCode,
       @FormDataParam("file") InputStream fileInputStream, @FormDataParam("file") FormDataContentDisposition fileDetail) throws IOException {
+    if (fileInputStream == null || fileInputStream.available() <= 0) {
+      throw new UploadFailureException("The multi-part content for form='file' is empty.");
+    }
     return manager.uploadDockingImage(course, teamCode, ByteStreams.toByteArray(fileInputStream));
   }
 
