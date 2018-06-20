@@ -14,7 +14,7 @@ start() {
   fi
 
   git pull 
-  mvn jetty:run
+  mvn clean jetty:run
 }
 
 stop() {
