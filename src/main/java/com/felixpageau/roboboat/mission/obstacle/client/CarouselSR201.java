@@ -68,16 +68,20 @@ public class CarouselSR201 implements ObstacleClient {
     @Override
     public ReportStatus call() throws Exception {
       Socket s = new Socket(host, port);
-      boolean activated = false;
+      boolean actuated = false;
       String error = null;
 
       try (BufferedReader r = new BufferedReader(new InputStreamReader(s.getInputStream()));
           Writer w = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()))) {
         
+        //"11": Turn on channel 1
+        //"12": Turn on channel 2
+        //"21": Turn off channel 1
+        //"22": Turn off channel 2
+        
         if (LeaderSequence.none.equals(sequence)) {
           LOG.info("Deactivating carousel...");
-          w.write("11");
-          //w.write("00");
+          w.write("21");
         } else {
           LOG.info("Activating carousel...");
           w.write("11");
@@ -86,11 +90,12 @@ public class CarouselSR201 implements ObstacleClient {
         char[] chars = new char[8];
         r.read(chars);
 
-        LOG.info("Carousel response: " + new String(chars));
-        if (chars[0] == 0) {
+        LOG.debug("Carousel response: " + new String(chars));
+        if (chars[0] == '0' && LeaderSequence.none.equals(sequence)) {
+          actuated = true;
           LOG.info("Deactivated Carousel");
-        } else {
-          activated = true;
+        } else if (chars[0] == '1' && !LeaderSequence.none.equals(sequence)) {
+          actuated = true;
           LOG.info("Activated Carousel");
         }
       } catch (UnknownHostException e) {
@@ -102,7 +107,7 @@ public class CarouselSR201 implements ObstacleClient {
       } finally {
         s.close();
       }
-      return new ReportStatus(activated, error);
+      return new ReportStatus(actuated, error);
     }
   }
 
@@ -110,5 +115,6 @@ public class CarouselSR201 implements ObstacleClient {
     ExecutorService exec = Executors.newFixedThreadPool(1);
     Future<ReportStatus> f = exec.submit(new CarouselCall("192.168.1.23", 6722, LeaderSequence.none));
     System.out.println(f.get());
+    exec.shutdownNow();
   }
 }
