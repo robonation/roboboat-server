@@ -126,6 +126,10 @@ public class MockCompetitionManager implements CompetitionManager {
       throw new WebApplicationExceptionWithContext(String.format("Another team is already in the water! You can't go until team %s get out of %s", teamCode,
           course), 400);
     }
+    if (report == null) {
+      throw new WebApplicationExceptionWithContext(String.format("There is no heartbeat report attached to this request (null). Make sure you send the heartbeat payload", course, teamCode),
+          400);
+    }
     boolean success = true;// report.getShape().equals(archive.getRunSetup().getActiveInteropShape());
     archive.addHeartbeatEvent(new StructuredEvent(course, teamCode, report.getChallenge(), "Heartbeat report"));
     archive.setLastHeartbeat(report);
