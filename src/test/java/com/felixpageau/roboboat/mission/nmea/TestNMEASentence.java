@@ -110,7 +110,7 @@ public class TestNMEASentence {
 
   @Test(expected = IllegalArgumentException.class)
   public void testParseBadFieldCourse() {
-    NMEASentence.parse(registry, "$SVHRT,courseD,AUVSI,20150306061030,gates,40.689249,-74.044500*0E");
+    NMEASentence.parse(registry, "$SVHRT,courseZ,AUVSI,20150306061030,gates,40.689249,-74.044500*10");
   }
 
   @Test(expected = IllegalArgumentException.class)

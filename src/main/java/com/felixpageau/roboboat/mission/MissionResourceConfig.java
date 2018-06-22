@@ -28,7 +28,7 @@ public class MissionResourceConfig extends CompetitionResourceConfig {
   }
 
   public MissionResourceConfig(CompetitionManager competitionManager) throws URISyntaxException {
-    super(competitionManager, ImmutableSet.of(OM_PROVIDER), JacksonFeatures.class, JacksonObjectMapperProvider.class, MultiPartFeature.class);
+    super(competitionManager, JacksonFeatures.class, JacksonObjectMapperProvider.class, MultiPartFeature.class);
     
     LOG.error("*** Using the MissionResourceConfig ***");
   }

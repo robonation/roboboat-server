@@ -103,6 +103,14 @@ public abstract class CompetitionResourceConfig extends ResourceConfig {
       } else {
         LOG.info("** Configuring as TEST SERVER. Because my IP is '" + ipAddress + "'");
         builder.put(Course.testCourse1, new CourseLayout(Course.testCourse1, bays, "127.0.0.1", new URL("http://127.0.0.1:4000"), new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:6722")));
+        builder.put(Course.testCourse2, new CourseLayout(Course.testCourse2, bays, "127.0.0.1", new URL("http://127.0.0.1:4000"), new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:6722")));
+        builder.put(Course.testCourse3, new CourseLayout(Course.testCourse3, bays, "127.0.0.1", new URL("http://127.0.0.1:4000"), new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:6722")));
+        builder.put(Course.testCourse4, new CourseLayout(Course.testCourse4, bays, "127.0.0.1", new URL("http://127.0.0.1:4000"), new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:6722")));
+        builder.put(Course.testCourse5, new CourseLayout(Course.testCourse5, bays, "127.0.0.1", new URL("http://127.0.0.1:4000"), new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:6722")));
+        builder.put(Course.testCourse6, new CourseLayout(Course.testCourse6, bays, "127.0.0.1", new URL("http://127.0.0.1:4000"), new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:6722")));
+        builder.put(Course.testCourse7, new CourseLayout(Course.testCourse7, bays, "127.0.0.1", new URL("http://127.0.0.1:4000"), new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:6722")));
+        builder.put(Course.testCourse8, new CourseLayout(Course.testCourse8, bays, "127.0.0.1", new URL("http://127.0.0.1:4000"), new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:6722")));
+        builder.put(Course.testCourse9, new CourseLayout(Course.testCourse9, bays, "127.0.0.1", new URL("http://127.0.0.1:4000"), new URL("http://127.0.0.1:5000"), new URL("http://127.0.0.1:6722")));
       }
       COURSE_LAYOUT_MAP = builder.build();
     } catch (MalformedURLException | UnknownHostException e) {
@@ -135,7 +143,7 @@ public abstract class CompetitionResourceConfig extends ResourceConfig {
    * @param original
    *          the parent {@link ResourceConfig}
    */
-  public CompetitionResourceConfig(CompetitionManager competitionManager, Set<Object> components, Class<?>... classes) {
+  private CompetitionResourceConfig(CompetitionManager competitionManager, Set<Object> components, Class<?>... classes) {
     super(classes);
     this.registerInstances(ImmutableSet.copyOf(components));
     this.competitionManager = Preconditions.checkNotNull(competitionManager, "competitionManager cannot be null");

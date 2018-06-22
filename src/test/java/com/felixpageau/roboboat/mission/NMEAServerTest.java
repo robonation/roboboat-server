@@ -51,67 +51,67 @@ public class NMEAServerTest {
       String line;
 
       // End run
-      w.write("$SVEND,courseA,AUVSI*4E\n");
+      w.write("$SVEND,testCourse1,AUVSI*08\n");
       w.flush();
       line = readLine(r);
       assertEquals("$TDEND,true*65", line);
 
       // Start run
-      w.write("$SVSTR,courseA,AUVSI*54\n");
+      w.write("$SVSTR,testCourse1,AUVSI*12\n");
       w.flush();
       line = readLine(r);
       assertEquals("$TDSTR,true*7F", line);
 
       // Heartbeat (gates)
-      w.write("$SVHRT,courseA,AUVSI,20150306061030,gates,40.689249,-74.044500*0B\n");
+      w.write("$SVHRT,testCourse1,AUVSI,20150306061030,gates,40.689249,-74.044500*4D\n");
       w.flush();
       line = readLine(r);
       assertTrue(line.contains("TDHRT"));
       assertTrue(line.contains("true"));
 
       // Heartbeat (with invalid target)
-      w.write("$SVHRT,courseA,AUVSI,20150306061030,gates2,40.689249,-74.044500*39\n");
+      w.write("$SVHRT,testCourse1,AUVSI,20150306061030,gates2,40.689249,-74.044500*7F\n");
       w.flush();
       line = readLine(r);
       assertTrue(line.contains("ERROR"));
 
       // Heartbeat (obstacles)
-      w.write("$SVHRT,courseA,AUVSI,20150306061030,follow,40.689249,-74.044500*7E\n");
+      w.write("$SVHRT,testCourse1,AUVSI,20150306061030,follow,40.689249,-74.044500*38\n");
       w.flush();
       line = readLine(r);
       assertTrue(line.contains("TDHRT"));
       assertTrue(line.contains("true"));
 
       // Heartbeat (dock)
-      w.write("$SVHRT,courseA,AUVSI,20150306061030,docking,40.689249,-74.044500*0C\n");
+      w.write("$SVHRT,testCourse1,AUVSI,20150306061030,docking,40.689249,-74.044500*4A\n");
       w.flush();
       line = readLine(r);
       assertTrue(line.contains("TDHRT"));
       assertTrue(line.contains("true"));
 
       // Dock
-      w.write("$SVFOL,courseA,AUVSI*44\n");
+      w.write("$SVFOL,testCourse1,AUVSI*02\n");
       w.flush();
       line = readLine(r);
       assertTrue(line.contains("TDFOL"));
       assertTrue(line.matches(".*[1-4]{2}.*"));
 
       // Heartbeat (path)
-      w.write("$SVHRT,courseA,AUVSI,20150306061030,path,40.689249,-74.044500*62\n");
+      w.write("$SVHRT,testCourse1,AUVSI,20150306061030,path,40.689249,-74.044500*24\n");
       w.flush();
       line = readLine(r);
       assertTrue(line.contains("TDHRT"));
       assertTrue(line.contains("true"));
 
       // Heartbeat (return)
-      w.write("$SVHRT,courseA,AUVSI,20150306061030,return,40.689249,-74.044500*65\n");
+      w.write("$SVHRT,testCourse1,AUVSI,20150306061030,return,40.689249,-74.044500*23\n");
       w.flush();
       line = readLine(r);
       assertTrue(line.contains("TDHRT"));
       assertTrue(line.contains("true"));
 
       // End run
-      w.write("$SVEND,courseA,AUVSI*4E\n");
+      w.write("$SVEND,testCourse1,AUVSI*08\n");
       w.flush();
       line = readLine(r);
       assertEquals("$TDEND,true*65", line);

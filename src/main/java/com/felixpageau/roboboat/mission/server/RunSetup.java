@@ -45,6 +45,7 @@ public class RunSetup {
   }
 
   public static RunSetup generateRandomSetup(CourseLayout courseLayout, TeamCode teamCode, String runId) {
+    Preconditions.checkNotNull(courseLayout, "courseLayout cannot be null");
     return new RunSetup(runId, courseLayout.getCourse(), teamCode, LeaderSequence.generateRandomLeaderSequence(), DockingSequence.generateRandomDockingSequence());
   }
 
