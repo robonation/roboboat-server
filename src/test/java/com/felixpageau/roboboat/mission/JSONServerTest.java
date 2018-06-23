@@ -38,7 +38,7 @@ import com.google.common.io.ByteStreams;
 
 public class JSONServerTest {
   private static int nmea_port = 9999;
-  private static String basePath = "http://127.0.0.1:1234";
+  private static String basePath = "http://127.0.0.1:6666";
   //private static String basePath = "http://192.168.0.187:8080";
   private static Server server;
 
@@ -138,17 +138,14 @@ public class JSONServerTest {
       resp.close();
 
       // Interop - upload
-//      post = new HttpPost(basePath + "/docking/image/testCourse1/AUVSI");
-//      post.setHeader("Content-Type", "multipart/form-data");
-//      post.setEntity(MultipartEntityBuilder.create().addPart("file", new FileBody(new File("src/test/resources/test.jpg")))
-//          .setMode(HttpMultipartMode.BROWSER_COMPATIBLE).build());
-//      resp = client.execute(post);
-//      System.out.println("**** ERR:" + IOUtil.toString(resp.getEntity().getContent()));
-//      assertEquals("Interop upload", 200, resp.getStatusLine().getStatusCode());
-//      System.out.println(resp.toString());
-//      UploadStatus us = mapper.readValue(resp.getEntity().getContent(), UploadStatus.class);
-//      assertNotNull(us);
-//      resp.close();
+      post = new HttpPost(basePath + "/docking/image/testCourse1/AUVSI");
+      post.setEntity(MultipartEntityBuilder.create().addPart("file", new FileBody(new File("src/test/resources/test.jpg")))
+          .setMode(HttpMultipartMode.BROWSER_COMPATIBLE).build());
+      resp = client.execute(post);
+      assertEquals("Interop upload", 200, resp.getStatusLine().getStatusCode());
+      UploadStatus us = mapper.readValue(resp.getEntity().getContent(), UploadStatus.class);
+      assertNotNull(us);
+      resp.close();
 
       // Heartbeat (return)
       post = new HttpPost(basePath + "/heartbeat/testCourse1/AUVSI");
@@ -167,6 +164,7 @@ public class JSONServerTest {
     } catch (IOException e) {
       e.printStackTrace();
       fail(e.getMessage());
+      throw e;
     }
   }
 }
