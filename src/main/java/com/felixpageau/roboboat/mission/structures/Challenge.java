@@ -19,7 +19,7 @@ import com.google.common.base.Preconditions;
 @ThreadSafe
 @Immutable
 public enum Challenge {
-  none, gates, speed, docking, path, follow, return_to_dock;
+  none, auto, gates, speed, docking, path, follow, return_to_dock;
 
   @Override
   @JsonValue
