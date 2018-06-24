@@ -18,6 +18,7 @@ start() {
 }
 
 stop() {
+  sudo killall /usr/lib/jvm/java-8-oracle/bin/java
   return 0
 }
 

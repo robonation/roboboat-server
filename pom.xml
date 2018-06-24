@@ -177,7 +177,7 @@
                 <version>9.3.10.v20160621</version>
                 <configuration>
                     <scanIntervalSeconds>5</scanIntervalSeconds>
-                    <stopPort>9999</stopPort>
+                    <stopPort>9998</stopPort>
                     <stopKey>STOP</stopKey>
                     <webApp>
                         <contextPath>/</contextPath>
