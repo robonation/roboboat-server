@@ -1,3 +1,6 @@
+**Deprecated. This was the RoboBoat competition server used 2014-2018**
+It has been replaced by [https://github.com/robonation/roboserver](https://github.com/robonation/roboserver)
+
 RoboBoat Server
 =============================================
 
